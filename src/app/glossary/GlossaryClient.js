@@ -79,10 +79,24 @@ export default function GlossaryClient({ data }) {
             <div>
                 {filteredEntries.map((entry, i) => (
                     <div key={i} className="glossary-entry">
-                        <h3 className="glossary-entry__name">{entry.name}</h3>
+                        <h3 className="glossary-entry__name">
+                            {entry.name}
+                            {entry.importance && (
+                                <span style={{
+                                    marginLeft: '8px',
+                                    color: entry.importance === '★' ? 'var(--accent-gold)' : 'var(--accent-cyber)',
+                                    fontSize: '0.9em'
+                                }}>
+                                    {entry.importance}
+                                </span>
+                            )}
+                        </h3>
                         <div className="glossary-entry__meta">
                             {entry.category && (
                                 <span className="badge badge--kai">{entry.category}</span>
+                            )}
+                            {entry.date && (
+                                <span className="badge badge--cyber">{entry.date}</span>
                             )}
                             {entry.related.length > 0 && entry.related.map((rel, j) => (
                                 <span key={j} style={{ color: 'var(--accent-cyber)', cursor: 'pointer' }}
