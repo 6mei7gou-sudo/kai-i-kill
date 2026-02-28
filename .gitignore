@@ -1,0 +1,27 @@
+# 依存関係
+node_modules/
+.next/
+out/
+
+# GM専用資料（秘匿）
+docs/gm/
+
+# 環境変数
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+
+# ビルド一時ファイル
+*.tsbuildinfo
+next-env.d.ts
+
+# スクリプト出力一時ファイル
+scripts/extract_sources.js
