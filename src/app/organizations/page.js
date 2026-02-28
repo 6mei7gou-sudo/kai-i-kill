@@ -1,6 +1,7 @@
 // 組織ページ — HUD風デザイン v2
 import fs from 'fs';
 import path from 'path';
+import Link from 'next/link';
 
 function loadOrgData(key) {
     const filePath = path.join(process.cwd(), 'data', 'organizations', `${key}.json`);
@@ -42,7 +43,7 @@ export default function OrganizationsPage() {
 
             <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
                 {organizations.map((org) => (
-                    <a
+                    <Link
                         key={org.key}
                         href={`/organizations/${org.key}/`}
                         style={{ textDecoration: 'none', color: 'inherit' }}
@@ -53,7 +54,7 @@ export default function OrganizationsPage() {
                             <div className="card__title-en">{org.en}</div>
                             <p className="card__desc">{org.desc}</p>
                         </div>
-                    </a>
+                    </Link>
                 ))}
             </div>
 

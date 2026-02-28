@@ -1,6 +1,7 @@
 // トップページ — HUD風デザイン
 import fs from 'fs';
 import path from 'path';
+import Link from 'next/link';
 
 function loadData(filename) {
   const filePath = path.join(process.cwd(), 'data', filename);
@@ -90,7 +91,7 @@ export default function HomePage() {
       </section>
 
       <div className="card-grid">
-        <a href="/world/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/world/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">◉</div>
             <div className="card__title-en">WORLD BIBLE</div>
@@ -99,9 +100,9 @@ export default function HomePage() {
               怪異の定義、魔法と異能の体系、装備分類、討伐プロセスなど、この世界の根幹を解説する。
             </p>
           </div>
-        </a>
+        </Link>
 
-        <a href="/glossary/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/glossary/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">▤</div>
             <div className="card__title-en">GLOSSARY</div>
@@ -110,9 +111,9 @@ export default function HomePage() {
               52件の用語をカテゴリ別に検索・閲覧できる。怪異・能力・装備・組織の全てを網羅。
             </p>
           </div>
-        </a>
+        </Link>
 
-        <a href="/timeline/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/timeline/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">◈</div>
             <div className="card__title-en">TIMELINE</div>
@@ -121,9 +122,9 @@ export default function HomePage() {
               鵺ヶ原事変から御神楽事変まで、この世界で起きた事件の記録を時系列で辿る。
             </p>
           </div>
-        </a>
+        </Link>
 
-        <a href="/organizations/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/organizations/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">⛊</div>
             <div className="card__title-en">FACTIONS</div>
@@ -132,9 +133,9 @@ export default function HomePage() {
               祓部・傭兵集団・無所属。三つの勢力の詳細と権力構造を解説する。
             </p>
           </div>
-        </a>
+        </Link>
 
-        <a href="/anomalies/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/anomalies/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">△</div>
             <div className="card__title-en">ANOMALY DATABASE</div>
@@ -143,7 +144,7 @@ export default function HomePage() {
               等級体系・分類・無力化方法など、怪異に関する公開情報データベース。
             </p>
           </div>
-        </a>
+        </Link>
 
         <div className="card" style={{ opacity: 0.4, borderStyle: 'dashed' }}>
           <div className="card__icon">≡</div>

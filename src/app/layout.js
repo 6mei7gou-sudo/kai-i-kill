@@ -1,4 +1,5 @@
 import './globals.css';
+import Link from 'next/link';
 import MobileMenuButton from './MobileMenuButton';
 
 // メタデータ（SEO対応）
@@ -64,14 +65,14 @@ export default function RootLayout({ children }) {
                 <div key={gi} className="sidebar-nav__group">
                   <div className="sidebar-nav__group-label">{group.label}</div>
                   {group.items.map((item, ii) => (
-                    <a
+                    <Link
                       key={ii}
                       href={item.href}
                       className="sidebar-nav__link"
                     >
                       <span className="sidebar-nav__icon">{item.icon}</span>
                       {item.text}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               ))}

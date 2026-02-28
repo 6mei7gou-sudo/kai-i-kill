@@ -1,6 +1,7 @@
 // 組織詳細ページ — 参照サイト準拠デザイン v5
 import fs from 'fs';
 import path from 'path';
+import Link from 'next/link';
 
 const ORG_META = {
     haraebe: {
@@ -755,7 +756,7 @@ export default async function OrgDetailPage({ params }) {
                 <div style={S.sectionIndex}>OTHER FACTIONS</div>
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
                     {Object.entries(ORG_META).filter(([k]) => k !== slug).map(([k, v]) => (
-                        <a
+                        <Link
                             key={k}
                             href={`/organizations/${k}/`}
                             style={{
@@ -768,7 +769,7 @@ export default async function OrgDetailPage({ params }) {
                             }}
                         >
                             {v.name}
-                        </a>
+                        </Link>
                     ))}
                 </div>
             </div>
