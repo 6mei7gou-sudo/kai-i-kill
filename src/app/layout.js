@@ -49,6 +49,13 @@ const navGroups = [
       { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
     ],
   },
+  {
+    label: 'コミュニティDB',
+    items: [
+      { href: '/community/anomalies/', icon: '◇', text: '怪異調査書一覧' },
+      { href: '/community/gear/', icon: '⊕', text: '武器・装備一覧' },
+    ],
+  },
 ];
 
 export default function RootLayout({ children }) {
