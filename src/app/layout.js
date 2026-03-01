@@ -48,6 +48,7 @@ const navGroups = [
     items: [
       { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
       { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
+      { href: '/create/character/', icon: '☖', text: 'キャラシート作成' },
     ],
   },
   {
@@ -55,6 +56,7 @@ const navGroups = [
     items: [
       { href: '/community/anomalies/', icon: '◇', text: '怪異調査書一覧' },
       { href: '/community/gear/', icon: '⊕', text: '武器・装備一覧' },
+      { href: '/community/characters/', icon: '☖', text: 'キャラシート一覧' },
     ],
   },
 ];

@@ -21,7 +21,7 @@ export async function POST(request) {
         const { table, data } = body;
 
         // テーブル名の検証
-        if (!['anomaly_drafts', 'gear_posts'].includes(table)) {
+        if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
 
@@ -52,7 +52,7 @@ export async function PATCH(request) {
         const body = await request.json();
         const { table, id, data } = body;
 
-        if (!['anomaly_drafts', 'gear_posts'].includes(table)) {
+        if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
 
@@ -91,7 +91,7 @@ export async function DELETE(request) {
         const table = searchParams.get('table');
         const id = searchParams.get('id');
 
-        if (!['anomaly_drafts', 'gear_posts'].includes(table)) {
+        if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
 
