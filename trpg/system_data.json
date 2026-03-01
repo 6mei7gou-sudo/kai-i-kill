@@ -1,0 +1,478 @@
+{
+  "system_name": "怪異キル TRPG",
+  "version": "1.0",
+  "concept": "知識が命を救う。無知が人を殺す。調査なしの討伐は自殺行為。",
+
+  "core_mechanic": {
+    "dice": "2d6",
+    "formula": "2d6 + 属性値",
+    "thresholds": {
+      "failure": { "range": "2-8", "label": "失敗", "effect": "目標未達成。GMが代償を与える" },
+      "partial": { "range": "9-11", "label": "部分成功", "effect": "目標達成するがコストが伴う" },
+      "success": { "range": "12-13", "label": "成功", "effect": "目標達成" },
+      "critical": { "range": "14+", "label": "完全成功", "effect": "目標達成＋追加利得" }
+    }
+  },
+
+  "attributes": [
+    {
+      "id": "vision",
+      "name": "視野",
+      "reading": "しや",
+      "description": "観察・調査・怪異の気配察知",
+      "primary_uses": ["現場調査", "物証収集", "怪異の行動パターン読取", "核の位置特定"]
+    },
+    {
+      "id": "knowledge",
+      "name": "識",
+      "reading": "しき",
+      "description": "資料調査・データベース照会・民俗学的知識・怪異の識別",
+      "primary_uses": ["祓部DB照会", "文献調査", "怪異等級・種別の識別", "改造個体の見抜き"]
+    },
+    {
+      "id": "body",
+      "name": "体",
+      "reading": "たい",
+      "description": "身体能力・直接戦闘・耐久",
+      "primary_uses": ["近接戦闘", "逃走", "怪異の物理攻撃への耐久", "装備の物理操作"]
+    },
+    {
+      "id": "technique",
+      "name": "術",
+      "reading": "じゅつ",
+      "description": "魔法行使・魔導具運用・装備操作",
+      "primary_uses": ["魔法発動", "魔導具使用", "装備の高度な運用", "封印処理"]
+    },
+    {
+      "id": "soul",
+      "name": "魂",
+      "reading": "こん",
+      "description": "精神力・異能制御・侵食への抵抗",
+      "primary_uses": ["異能発動", "侵食への抵抗", "怪異の精神攻撃への耐久", "恐怖への対処"]
+    },
+    {
+      "id": "bond",
+      "name": "縁",
+      "reading": "えん",
+      "description": "人脈・評判・組織との関係維持",
+      "primary_uses": ["聞き込み", "情報収集", "組織間交渉", "二つ名による信頼構築"]
+    }
+  ],
+
+  "character_creation": {
+    "total_points": 18,
+    "min_per_attribute": 1,
+    "max_per_attribute": 5,
+    "note": "18点を6属性に配分。各属性最低1、最大5。"
+  },
+
+  "erosion_track": {
+    "range_min": 0,
+    "range_max": 100,
+    "can_decrease": false,
+    "note": "侵食率は下がらない。一度踏み込んだ道は戻れない。",
+    "stages": [
+      {
+        "range": "0-25",
+        "name": "正常",
+        "reading": "せいじょう",
+        "effect": "影響なし",
+        "special_ability": null
+      },
+      {
+        "range": "26-50",
+        "name": "変容の兆し",
+        "reading": "へんようのきざし",
+        "effect": "外見に軽微な変化。怪異の声・視点が断片的に聞こえ始める",
+        "special_ability": "怪異の気配察知に+1（視野判定）"
+      },
+      {
+        "range": "51-75",
+        "name": "半化の影",
+        "reading": "はんかのかげ",
+        "effect": "目に見える異形化。定期的に魂判定が発生",
+        "special_ability": "怪異の一部の能力を使用可能（GMが決定）。ただし使用で侵食率+5%"
+      },
+      {
+        "range": "76-99",
+        "name": "臨界",
+        "reading": "りんかい",
+        "effect": "重度の異形化。強力な異能が使用可能。GMは毎場面で怪異への「引き」を試みる",
+        "special_ability": "強力な怪異能力を使用可能。魂判定失敗で一時的に怪異側の行動原理に従う"
+      },
+      {
+        "range": "100",
+        "name": "怪異化",
+        "reading": "かいいか",
+        "effect": "キャラクター終了。PCはGMが管理する怪異になる",
+        "special_ability": null
+      }
+    ],
+    "increase_triggers": [
+      { "trigger": "異能使用（成功）", "amount": "5〜10%（異能レベルによる）" },
+      { "trigger": "異能使用（部分成功）", "amount": "10〜15%" },
+      { "trigger": "異能使用（失敗）", "amount": "10%" },
+      { "trigger": "異能暴走（2d6=2）", "amount": "20%" },
+      { "trigger": "怪異核素材装備の使用", "amount": "5%/使用" }
+    ]
+  },
+
+  "session_structure": {
+    "phases": [
+      {
+        "id": "investigation",
+        "name": "調査フェーズ",
+        "reading": "ちょうさフェーズ",
+        "act": 1,
+        "goal": "情報ボードの三要素を埋める",
+        "information_board": [
+          {
+            "id": "identity",
+            "name": "正体",
+            "description": "この怪異は何か？噂の起源は何か？いつ生まれたか？",
+            "primary_attributes": ["知識", "縁"]
+          },
+          {
+            "id": "core",
+            "name": "核",
+            "description": "怪異の核はどこに宿っているか？",
+            "primary_attributes": ["視野", "識"]
+          },
+          {
+            "id": "rules",
+            "name": "ルール",
+            "description": "この怪異が持つ行動・回避・攻撃の法則は何か？",
+            "primary_attributes": ["視野", "識", "縁（危険を冒して）"]
+          }
+        ],
+        "warning": "改造個体・別個体の罠に注意。解明途中でルールが食い違う瞬間が来る場合がある。"
+      },
+      {
+        "id": "revelation",
+        "name": "解明フェーズ",
+        "reading": "かいめいフェーズ",
+        "act": 2,
+        "goal": "暴露判定を行い、怪異の弱点を確定する",
+        "revelation_roll": {
+          "base_attribute": "識 または 視野（状況に応じてGMが判断）",
+          "modifiers": [
+            { "condition": "正体のみ判明", "modifier": -2 },
+            { "condition": "正体＋核 判明", "modifier": 0 },
+            { "condition": "3要素すべて判明", "modifier": 2 }
+          ],
+          "outcomes": {
+            "success": "暴露ウィンドウが開く。討伐フェーズ全体を通じて弱点攻撃に+3",
+            "partial": "ウィンドウは開くが怪異も警戒を高める（GMが追加行動1回）",
+            "failure": "怪異が看破を感知し行動を変える（GMが怪異の行動に変更1つ加える）"
+          }
+        }
+      },
+      {
+        "id": "combat",
+        "name": "討伐フェーズ",
+        "reading": "とうばつフェーズ",
+        "act": 3,
+        "goal": "核を破壊して怪異を無力化する",
+        "attack_modifiers": [
+          { "condition": "怪異のルールを利用した攻撃", "modifier": 0, "note": "標準" },
+          { "condition": "暴露ウィンドウ中の弱点攻撃", "modifier": 3 },
+          { "condition": "ルールを無視した攻撃", "modifier": -3 },
+          { "condition": "ルール依存型怪異へのルール無視攻撃", "modifier": null, "note": "無効" }
+        ],
+        "principle": "戦闘力だけで解決できる怪異は存在しない"
+      }
+    ]
+  },
+
+  "magic_system": {
+    "description": "世界のソースコードへの直接介入。素養が必要であり訓練によって習得する。",
+    "roll": "2d6 + 術",
+    "risk": {
+      "name": "怪異誘発判定",
+      "trigger": "失敗時、または大規模魔法使用時",
+      "resolution": "GMが2d6を振り、出目 > 術値なら周辺に小型怪異（五級〜四級）が発生"
+    },
+    "languages": [
+      {
+        "id": "P",
+        "name": "P",
+        "color": "なし",
+        "approach": "汎用基礎言語。全言語と組み合わせ可能。魔導具の基幹",
+        "note": "P: と P' の習得前提となる基礎言語"
+      },
+      {
+        "id": "igniscript",
+        "name": "Igniscript",
+        "color": "赤",
+        "approach": "燃やす・爆発・熱変容。力任せで直線的",
+        "example": "空中移動→ジェット噴射のように自分を吹き飛ばして飛ぶ"
+      },
+      {
+        "id": "lupis_surf",
+        "name": "Lupis Surf",
+        "color": "青",
+        "approach": "流す・包む・圧力で押し動かす。柔軟で広範囲",
+        "example": "空中移動→空気の流れを体で受けて泳ぐように滑空する"
+      },
+      {
+        "id": "ivyo",
+        "name": "Ivyo",
+        "color": "緑",
+        "approach": "育てる・自然のサイクルに乗せる。即効性より持続性",
+        "example": null
+      },
+      {
+        "id": "NGT",
+        "name": "NGT",
+        "color": "黄",
+        "approach": "加速・電気的処理・情報として解析する。デジタルインフラと親和性高い",
+        "example": null
+      },
+      {
+        "id": "monyx",
+        "name": "Monyx",
+        "color": "無色",
+        "approach": "最小限の術式で組む。どんな方向にも転用できる。魔導具調整の主力",
+        "example": "空中移動→重力干渉を最小術式で組んで静かに浮く"
+      },
+      {
+        "id": "P_colon",
+        "name": "P:",
+        "color": "紫",
+        "approach": "弱体化・妨害・封印。対象を削ぐ・縛る・封じる",
+        "note": "Pの派生。習得者が少ない。怪異の封じ込めに使う特殊言語"
+      },
+      {
+        "id": "P_prime",
+        "name": "P'",
+        "color": "桃",
+        "approach": "回復・強化・修復。傷を癒す・能力を底上げする",
+        "note": "Pの派生。身体的負荷が大きい。P'の資格があると医療補助職に就ける"
+      }
+    ]
+  },
+
+  "inou_system": {
+    "description": "内側から生まれる力。怪異と同じ発生原理を持つ。使い続けると怪異に近づく。",
+    "roll": "2d6 + 魂",
+    "outcomes": [
+      { "result": "成功（12以上）", "effect": "効果発揮", "erosion_increase": "5〜10%（異能レベルによる）" },
+      { "result": "部分成功（9〜11）", "effect": "効果発揮", "erosion_increase": "10〜15%" },
+      { "result": "失敗（8以下）", "effect": "効果なし", "erosion_increase": "10%" },
+      { "result": "暴走（2d6の目が2）", "effect": "制御不能な効果発動（GM決定）", "erosion_increase": "20%" }
+    ],
+    "note": "侵食率が高いほど強力な異能効果が使用可能になる。力と変質は表裏一体だ。"
+  },
+
+  "equipment_types": [
+    {
+      "id": "weapon",
+      "name": "武装型",
+      "reading": "ぶそうがた",
+      "english": "Weapon Type",
+      "combat_bonus": "+1",
+      "kaiai_risk": "低",
+      "usability": "誰でも使える",
+      "traits": ["最も歴史が長い", "携行性が高い", "持ち替えが容易"],
+      "special": null
+    },
+    {
+      "id": "autonomous",
+      "name": "独立型",
+      "reading": "どくりつがた",
+      "english": "Autonomous Type",
+      "combat_bonus": "援護+1",
+      "kaiai_risk": "中",
+      "usability": "機体依存",
+      "traits": ["偵察・索敵・援護・包囲を並行展開できる唯一の分類", "所有者の命令なしで行動可能"],
+      "special": "怪異のルールを破った機体が怪異に捕捉される事故が報告されている"
+    },
+    {
+      "id": "semi_clad",
+      "name": "半装身型",
+      "reading": "せみくらっどがた",
+      "english": "Semi-Clad Type",
+      "combat_bonus": "攻防+1",
+      "kaiai_risk": "中",
+      "usability": "中程度",
+      "traits": ["武器と一体型が多い", "魔導具との統合が最も進んでいる", "個人カスタムに向く"],
+      "special": "傭兵の二つ名持ちが個人専用にカスタムするケースが多い"
+    },
+    {
+      "id": "full_clad",
+      "name": "全装身型",
+      "reading": "ふるくらっどがた",
+      "english": "Full-Clad Type",
+      "combat_bonus": "攻防+2",
+      "kaiai_risk": "高",
+      "usability": "低い（扱える人間が少ない）",
+      "traits": ["高火力・高防御", "機体と使用者の相性が最も重要"],
+      "special": "一般市民に目撃されると都市伝説化しやすい。怪異発生リスクが高い"
+    },
+    {
+      "id": "maneuver",
+      "name": "搭乗型",
+      "reading": "まにゅーばがた",
+      "english": "Maneuver Type",
+      "combat_bonus": "機動力+2",
+      "kaiai_risk": "中",
+      "usability": "中程度",
+      "traits": ["機動力と積載能力が強み", "バイク〜特殊車両まで幅広い"],
+      "special": null
+    },
+    {
+      "id": "combat_maneuver",
+      "name": "戦闘用搭乗型",
+      "reading": "こんばっとまにゅーばがた",
+      "english": "Combat Maneuver Type",
+      "combat_bonus": "三級以下の怪異に+3",
+      "kaiai_risk": "非常に高",
+      "usability": "非常に低い",
+      "traits": ["三級〜四級の怪異への対処が主目的", "戦闘後に周辺で小型怪異が発生することは現場の常識"],
+      "special": "個人が私有・運用することは法律で禁止。長期使用した機体が怪異の干渉を受けて暴走した事案あり",
+      "legal_restriction": "祓部・国家機関・認可傭兵集団のみ合法運用可能"
+    }
+  ],
+
+  "factions": [
+    {
+      "id": "haraebe",
+      "name": "祓部",
+      "reading": "はらえべ",
+      "organization": "魔導省内部組織",
+      "benefits": [
+        { "name": "データベースアクセス", "effect": "識を使う調査判定に +2" },
+        { "name": "援軍要請", "effect": "1セッション1回、NPC祓士の支援を呼べる" },
+        { "name": "古い怪異の知識", "effect": "古怪班配属なら古代・中世の怪異への識判定に +1" }
+      ],
+      "constraints": [
+        "任務命令への服従。独断行動は処分対象",
+        "装備と行動に法的・組織的な制限がかかる",
+        "討伐派vs封印派の方針対立が任務中に影響することがある"
+      ],
+      "sub_units": [
+        { "name": "古怪班", "specialty": "古い怪異・神道的手法・民俗学" },
+        { "name": "新怪班", "specialty": "SNS・ネットロア・デジタル調査" },
+        { "name": "封印班", "specialty": "禁足地の管理・封印処理" },
+        { "name": "調査部", "specialty": "情報収集・データベース管理" },
+        { "name": "技術部", "specialty": "装備整備・開発" }
+      ]
+    },
+    {
+      "id": "mercenary",
+      "name": "傭兵",
+      "reading": "ようへい",
+      "organization": "個人〜集団（企業バックアップあり）",
+      "benefits": [
+        { "name": "装備グレード", "effect": "キャラクター作成時の装備評価が1段階上" },
+        { "name": "フリーエージェント", "effect": "承認なしで任意の戦術・手段を使用可能" },
+        { "name": "二つ名効果", "effect": "実績に応じてGMが二つ名を与え、関連分野の判定に+1" }
+      ],
+      "constraints": [
+        "収益がなければ活動継続が困難",
+        "バック企業の方針に縛られる場合がある",
+        "法的に保護される範囲が限られる"
+      ],
+      "unwritten_rules": [
+        "同じ現場に複数の傭兵が入った場合は情報共有が原則",
+        "依頼人の情報を無断で第三者に売らない",
+        "逃亡者・実験体の覚醒経緯を詮索しない",
+        "仕事中の私怨は持ち込まない"
+      ]
+    },
+    {
+      "id": "unaffiliated",
+      "name": "無所属",
+      "reading": "むしょぞく",
+      "organization": "なし",
+      "benefits": [
+        { "name": "裏のルート", "effect": "1セッション1回、曰く付き装備・違法情報にアクセスできる" },
+        { "name": "無所属ネットワーク", "effect": "無所属間の緩やかな情報共有ネットワークを利用できる" },
+        { "name": "完全な自由", "effect": "あらゆる判断を独断で下せる" }
+      ],
+      "constraints": [
+        "法的保護がない。討伐行為が犯罪として問われることがある",
+        "祓部・傭兵・謎の組織のどこからも警戒される",
+        "安定した補給・装備整備のルートがない"
+      ]
+    }
+  ],
+
+  "kaiai_classification": {
+    "existence_grades": [
+      { "grade": "特級", "description": "現状の手段では消滅が極めて困難。封印・管理が限界", "hp_range": "100以上" },
+      { "grade": "一級", "description": "信念密度が非常に高い。長い歴史を持つ強力な怪異", "hp_range": "60〜100" },
+      { "grade": "二級", "description": "記録のある古い怪異の大半", "hp_range": "35〜60" },
+      { "grade": "三級", "description": "拡散が進んだ新しい怪異など", "hp_range": "20〜35" },
+      { "grade": "四級", "description": "発生したばかりの新しい怪異", "hp_range": "10〜20" },
+      { "grade": "五級", "description": "魔法事故由来の微小怪異。自然消滅することが多い", "hp_range": "5〜10" }
+    ],
+    "threat_levels": [
+      { "level": "甲種", "description": "無差別に人を害する。接触した全員が標的" },
+      { "level": "乙種", "description": "ルールを破った者など条件付きで害する" },
+      { "level": "丙種", "description": "刺激しなければ安全。放置が最善の場合がある" },
+      { "level": "丁種", "description": "人を害さない。共存可能または信仰対象に近い" }
+    ],
+    "persistence_types": [
+      { "type": "一時型", "description": "核が破壊されると消滅する標準的な怪異" },
+      { "type": "循環型（都市伝説型）", "description": "核を破壊しても噂が続く限り再出現する。完全根絶はほぼ不可能" },
+      { "type": "定着型（禁足地・土地型）", "description": "特定の土地そのものに根を張った怪異" }
+    ],
+    "resistance_types": [
+      { "type": "物理耐性型", "description": "霊的手段・魔法・魔導具は有効だが物理攻撃がほぼ通じない" },
+      { "type": "霊的耐性型", "description": "物理・魔導具は有効だが魔法や霊的手段が通じない" },
+      { "type": "ルール依存型", "description": "怪異のルールに則った手段でしか攻撃が通らない。解明なしでは攻撃が無効" }
+    ],
+    "modified_individual_rules": {
+      "modified": "ルール変質が50%未満。元の知識がある程度通用するが決定的にルールが食い違う瞬間がある",
+      "separate": "ルール変質が50%以上。新しい核と新しいルールを持つ完全に別の怪異として扱う"
+    }
+  },
+
+  "awakening_patterns": [
+    {
+      "id": "innate",
+      "name": "先天覚醒型",
+      "description": "生まれつき素養を持ち訓練で開花",
+      "tendency": "祓部に多い。技術の安定性が高い"
+    },
+    {
+      "id": "shock",
+      "name": "ショック覚醒型",
+      "description": "怪異に関わる強烈な体験が引き金",
+      "tendency": "恨みや喪失が動機に直結しやすい"
+    },
+    {
+      "id": "experiment",
+      "name": "実験覚醒型",
+      "description": "何者かによる人体実験で強制覚醒",
+      "tendency": "素養強度が高いが身体への代償が大きい"
+    },
+    {
+      "id": "contact",
+      "name": "接触覚醒型",
+      "description": "怪異の核や特殊な素材への長期接触で覚醒",
+      "tendency": "怪異への感知能力が高い。変質リスクを伴う"
+    }
+  ],
+
+  "world_setting": {
+    "era": "近未来の架空日本",
+    "magic_status": "電気・ガスと同等のインフラ。資格制度と安全基準が存在",
+    "kaiai_origin": "集合的な信念・噂・都市伝説が臨界を超えた時に物理的な形を取る",
+    "kaiai_structure": {
+      "core": "核（かく）：怪異の本質が宿る部位。破壊で消滅",
+      "rules": "ルール：怪異が持つ行動原則。ルールを破ると怪異に狙われやすくなる"
+    },
+    "power_structure": {
+      "first_pole": "国家・国家系企業（秩序の維持）",
+      "second_pole": "独立系企業・傭兵集団（利益の追求）",
+      "third_pole": "謎の組織（既存の権力構造の外側。怪異を利用する勢力）"
+    },
+    "key_events": [
+      { "year": "現在から3年前", "name": "御神楽事変", "impact": "祓部が甚大な損害を受け人員不足が慢性化" },
+      { "year": "2034年", "name": "白銀の廃線事件", "impact": "祓部・傭兵・無所属が初めて本格協力。現在の無所属コミュニティの核を形成" },
+      { "year": "2037年", "name": "機動兵器と怪異の相互作用事案", "impact": "機動兵器が怪異化する可能性を示した" }
+    ]
+  }
+}

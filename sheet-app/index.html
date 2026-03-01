@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KAI-I//KILL キャラクターシート</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header class="site-header">
+    <div class="header-title">
+      <span class="logo-text">KAI-I<span class="logo-slash">//</span>KILL</span>
+      <span class="logo-sub">キャラクターシート</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" id="btn-new">新規</button>
+      <button class="btn btn-ghost" id="btn-load">読み込み</button>
+      <button class="btn btn-ghost" id="btn-export">エクスポート</button>
+      <button class="btn btn-accent" id="btn-save">保存</button>
+    </div>
+  </header>
+
+  <!-- 読み込みモーダル -->
+  <div id="modal-load" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <h2 class="modal-title">キャラクター選択</h2>
+      <div id="character-list" class="character-list">
+        <p class="empty-message">保存済みキャラクターがありません。</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="btn-modal-load-close">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- エクスポートモーダル -->
+  <div id="modal-export" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content modal-content-wide">
+      <h2 class="modal-title">テキストエクスポート</h2>
+      <p class="modal-desc">以下のテキストをコピーしてDiscordなどに貼り付けられます。</p>
+      <textarea id="export-text" class="export-textarea" readonly></textarea>
+      <div class="modal-footer">
+        <button class="btn btn-accent" id="btn-copy">クリップボードにコピー</button>
+        <button class="btn btn-ghost" id="btn-export-close">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- タブナビゲーション -->
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" role="tab" data-tab="basic">① 基本情報</button>
+    <button class="tab-btn" role="tab" data-tab="abilities">② 能力値</button>
+    <button class="tab-btn" role="tab" data-tab="emotions">③ 感情・侵食</button>
+    <button class="tab-btn" role="tab" data-tab="equipment">④ 装備</button>
+    <button class="tab-btn" role="tab" data-tab="judgment">⑤ 判定</button>
+  </nav>
+
+  <!-- メインコンテンツ -->
+  <main class="main-content">
+
+    <!-- ─── タブ①：基本情報 ───────────────────────────────────── -->
+    <div id="tab-basic" class="tab-panel active" role="tabpanel">
+      <div class="panel-grid">
+
+        <!-- 基本フィールド -->
+        <section class="card">
+          <h2 class="card-title">基本情報</h2>
+
+          <div class="field-group">
+            <label class="field-label" for="char-name">キャラクター名</label>
+            <input class="field-input" type="text" id="char-name" placeholder="名前を入力…">
+          </div>
+
+          <div class="field-row-2">
+            <div class="field-group">
+              <label class="field-label" for="char-affiliation">所属</label>
+              <select class="field-select" id="char-affiliation"></select>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="char-awakening">覚醒パターン</label>
+              <select class="field-select" id="char-awakening"></select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="char-belief">信念</label>
+            <select class="field-select" id="char-belief"></select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="char-background">背景・詳細</label>
+            <textarea class="field-textarea" id="char-background" rows="3" placeholder="キャラクターの背景や詳細を記入…"></textarea>
+          </div>
+        </section>
+
+        <!-- ギフト -->
+        <section class="card">
+          <h2 class="card-title">
+            ギフト（特殊能力）
+            <span class="cp-inline-badge">CP残: <span id="cp-gifts-remaining">10</span> / 10</span>
+          </h2>
+          <div id="gifts-list" class="gifts-grid">
+            <!-- JS で生成 -->
+          </div>
+        </section>
+
+        <!-- メモ -->
+        <section class="card">
+          <h2 class="card-title">メモ</h2>
+          <textarea class="field-textarea" id="char-notes" rows="4" placeholder="自由記入欄…"></textarea>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ─── タブ②：能力値 ─────────────────────────────────────── -->
+    <div id="tab-abilities" class="tab-panel hidden" role="tabpanel">
+      <section class="card">
+        <h2 class="card-title">能力値</h2>
+        <p class="card-desc">各能力をD〜Sのランクで設定します。ランクが高いほど判定時に振るダイスが増えます。</p>
+        <div id="abilities-grid" class="abilities-grid">
+          <!-- JS で生成 -->
+        </div>
+      </section>
+
+      <!-- ランク説明 -->
+      <section class="card rank-legend">
+        <h2 class="card-title">ランク早見表</h2>
+        <div class="rank-legend-grid">
+          <div class="rank-legend-item rank-d"><span class="rank-badge">D</span><span>未覚醒 / 1d6</span></div>
+          <div class="rank-legend-item rank-c"><span class="rank-badge">C</span><span>覚醒 / 2d6</span></div>
+          <div class="rank-legend-item rank-b"><span class="rank-badge">B</span><span>強化 / 3d6</span></div>
+          <div class="rank-legend-item rank-a"><span class="rank-badge">A</span><span>超常 / 4d6</span></div>
+          <div class="rank-legend-item rank-s"><span class="rank-badge">S</span><span>神域 / 5d6</span></div>
+        </div>
+        <p class="card-desc" style="margin-top:0.5rem;">達成値 = 振ったダイスの最大値。1=ファンブル / 4=部分成功 / 5=成功 / 6=完全成功</p>
+      </section>
+    </div>
+
+    <!-- ─── タブ③：感情・侵食 ──────────────────────────────────── -->
+    <div id="tab-emotions" class="tab-panel hidden" role="tabpanel">
+      <div class="panel-grid">
+
+        <!-- 共鳴メーター -->
+        <section class="card">
+          <h2 class="card-title">共鳴メーター</h2>
+          <p class="card-desc">感情が10に達すると「臨界！」が発生します。</p>
+          <div id="emotions-grid" class="emotions-grid">
+            <!-- JS で生成 -->
+          </div>
+        </section>
+
+        <!-- 侵食率 -->
+        <section class="card">
+          <h2 class="card-title">侵食率</h2>
+          <p class="card-desc">怪異に侵食された度合い。100%で怪異化します。</p>
+
+          <div class="erosion-display">
+            <span class="erosion-percent" id="erosion-value">0%</span>
+            <span class="erosion-status-badge erosion-normal" id="erosion-label">正常</span>
+          </div>
+
+          <input class="erosion-slider" type="range"
+            id="erosion-slider" min="0" max="100" value="0">
+
+          <div class="erosion-track">
+            <div class="erosion-fill" id="erosion-fill"></div>
+          </div>
+
+          <div id="erosion-kaiki-alert" class="kaiki-alert hidden">
+            ⚠ 怪異化 ⚠ キャラクターはもはや人ではない。
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ─── タブ④：装備 ──────────────────────────────────────── -->
+    <div id="tab-equipment" class="tab-panel hidden" role="tabpanel">
+      <div class="panel-grid">
+
+        <!-- CP ゲージ -->
+        <section class="card cp-section">
+          <h2 class="card-title">CP（作成ポイント）残量</h2>
+          <div class="cp-gauge-row">
+            <span class="cp-remain" id="cp-remain">10</span>
+            <span class="cp-slash">/</span>
+            <span class="cp-total">10</span>
+            <span class="cp-unit">CP</span>
+          </div>
+          <div class="cp-track">
+            <div class="cp-fill" id="cp-fill"></div>
+          </div>
+        </section>
+
+        <!-- 装備済み一覧 -->
+        <section class="card">
+          <h2 class="card-title">装備済みリスト</h2>
+          <div id="equipped-list" class="equipped-list">
+            <p class="empty-message" id="equipped-empty">装備が追加されていません。</p>
+          </div>
+        </section>
+
+        <!-- 装備追加フォーム -->
+        <section class="card">
+          <h2 class="card-title">装備を追加</h2>
+
+          <div class="add-equip-form">
+            <div class="field-row-2">
+              <div class="field-group">
+                <label class="field-label" for="equip-category">カテゴリ</label>
+                <select class="field-select" id="equip-category">
+                  <option value="">-- カテゴリを選択 --</option>
+                  <option value="武器">武器</option>
+                  <option value="防具">防具</option>
+                  <option value="道具">道具</option>
+                  <option value="特殊">特殊</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="equip-select">装備</label>
+                <select class="field-select" id="equip-select">
+                  <option value="">-- 先にカテゴリを選択 --</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="equip-options-container" class="equip-options-container hidden">
+              <p class="field-label">オプション（追加CP消費）</p>
+              <div id="equip-options-list" class="options-checklist"></div>
+            </div>
+
+            <div class="add-equip-footer">
+              <span class="cost-preview">追加コスト: <strong id="equip-cost-preview">0</strong> CP</span>
+              <button class="btn btn-accent" id="btn-add-equipment" disabled>装備する</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ─── タブ⑤：判定 ──────────────────────────────────────── -->
+    <div id="tab-judgment" class="tab-panel hidden" role="tabpanel">
+      <div class="panel-grid">
+
+        <!-- 判定フォーム -->
+        <section class="card">
+          <h2 class="card-title">ダイス判定</h2>
+
+          <div class="judgment-form">
+            <div class="field-group">
+              <label class="field-label" for="judgment-ability">使用する能力値</label>
+              <select class="field-select field-select-large" id="judgment-ability"></select>
+            </div>
+
+            <div class="rank-preview-row">
+              <span class="rank-preview-label">現在のランク：</span>
+              <span class="rank-badge-large" id="judgment-rank-badge">D</span>
+              <span class="rank-preview-arrow">→</span>
+              <span class="rank-preview-dice" id="judgment-dice-count">1d6</span>
+            </div>
+
+            <button class="btn btn-accent btn-roll" id="btn-roll">🎲 ダイスを振る</button>
+          </div>
+
+          <!-- 判定結果 -->
+          <div id="judgment-result" class="judgment-result hidden">
+            <div class="dice-row" id="dice-display"></div>
+            <div class="achievement-row">
+              達成値：<span class="achievement-value" id="achievement-value">0</span>
+            </div>
+            <div class="result-badge-container" id="result-badge"></div>
+          </div>
+        </section>
+
+        <!-- 判定履歴 -->
+        <section class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">判定履歴</h2>
+            <button class="btn btn-ghost btn-sm" id="btn-clear-history">クリア</button>
+          </div>
+          <div id="roll-history" class="roll-history">
+            <p class="empty-message" id="history-empty">まだ判定を行っていません。</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

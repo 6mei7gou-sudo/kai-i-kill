@@ -42,6 +42,13 @@ const navGroups = [
       { href: '/organizations/unaffiliated/', icon: '◈', text: '無所属詳細' },
     ],
   },
+  {
+    label: '投稿ツール',
+    items: [
+      { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
+      { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
+    ],
+  },
 ];
 
 export default function RootLayout({ children }) {
