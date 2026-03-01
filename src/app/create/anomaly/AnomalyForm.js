@@ -1,8 +1,9 @@
 // 怪異調査書（TMP）投稿フォーム — クライアントコンポーネント
 'use client';
 
-import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState, useCallback, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
 
 // フォームの初期値
@@ -63,10 +64,34 @@ const HP_GUIDE = { '五級': '5〜10', '四級': '10〜20', '三級': '20〜35',
 const GRADE_COLOR = { '特級': 'var(--accent-danger)', '一級': 'var(--accent-gold)', '二級': 'var(--accent-blue)', '三級': 'var(--text-primary)', '四級': 'var(--text-secondary)', '五級': 'var(--text-muted)', '不明': 'var(--text-muted)' };
 const THREAT_COLOR = { '甲種': 'var(--accent-danger)', '乙種': 'var(--accent-gold)', '丙種': 'var(--text-secondary)', '丁種': 'var(--accent-blue)', '不明': 'var(--text-muted)' };
 
-export default function AnomalyForm() {
+export default function AnomalyForm({ editId = null, initialData = null }) {
+    const { user } = useUser();
+    const router = useRouter();
+    const isEdit = !!editId;
+
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
+
+    // 編集モード: 既存データをフォームにセット
+    useEffect(() => {
+        if (initialData) {
+            const parsed = { ...initialData };
+            // JSONB配列フィールドを配列に変換
+            ['core_candidates', 'triggers', 'taboos', 'testimonies', 'media_urls'].forEach(key => {
+                if (typeof parsed[key] === 'string') parsed[key] = JSON.parse(parsed[key] || '[]');
+                if (!Array.isArray(parsed[key]) || parsed[key].length === 0) parsed[key] = [''];
+            });
+            setForm(prev => ({ ...prev, ...parsed }));
+        }
+    }, [initialData]);
+
+    // ユーザー名を自動セット
+    useEffect(() => {
+        if (user && !form.author_name && !isEdit) {
+            setForm(prev => ({ ...prev, author_name: `@${user.username || user.firstName || 'user'}` }));
+        }
+    }, [user, isEdit]);
 
     // フォーム更新
     const set = useCallback((key, val) => setForm(prev => ({ ...prev, [key]: val })), []);
@@ -88,7 +113,7 @@ export default function AnomalyForm() {
         tags: prev.tags.includes(tag) ? prev.tags.filter(t => t !== tag) : [...prev.tags, tag]
     })), []);
 
-    // 投稿処理
+    // 投稿/更新処理 — APIルート経由
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.anomaly_name.trim()) { setResult({ ok: false, msg: '怪異の通称は必須です' }); return; }
@@ -102,22 +127,37 @@ export default function AnomalyForm() {
                 testimonies: JSON.stringify(form.testimonies.filter(Boolean)),
                 media_urls: JSON.stringify(form.media_urls.filter(Boolean)),
             };
-            const { error } = await supabase.from('anomaly_drafts').insert([payload]);
-            if (error) throw error;
-            setResult({ ok: true, msg: '怪異調査書を投稿しました！' });
-            setForm(INITIAL);
+            // user_id, id, created_at, updated_at はAPIルートで処理
+            delete payload.id;
+            delete payload.created_at;
+            delete payload.updated_at;
+            delete payload.user_id;
+
+            const method = isEdit ? 'PATCH' : 'POST';
+            const body = isEdit
+                ? { table: 'anomaly_drafts', id: editId, data: payload }
+                : { table: 'anomaly_drafts', data: payload };
+
+            const res = await fetch('/api/posts', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+
+            setResult({ ok: true, msg: isEdit ? '調査書を更新しました！' : '怪異調査書を投稿しました！' });
+            if (!isEdit) setForm(INITIAL);
+            // 投稿/編集後に詳細ページへ遷移
+            setTimeout(() => router.push(`/community/anomalies/${json.data?.id || editId}/`), 1500);
         } catch (err) {
-            setResult({ ok: false, msg: `投稿に失敗しました: ${err.message}` });
+            setResult({ ok: false, msg: `${isEdit ? '更新' : '投稿'}に失敗しました: ${err.message}` });
         } finally { setSubmitting(false); }
     };
 
     return (
         <div className="container">
             <section className="section">
-                <span className="section__title">// CREATE — ANOMALY INVESTIGATION</span>
-                <h1 className="section__heading">怪異調査書を作成</h1>
+                <span className="section__title">// {isEdit ? 'EDIT' : 'CREATE'} — ANOMALY INVESTIGATION</span>
+                <h1 className="section__heading">{isEdit ? '怪異調査書を編集' : '怪異調査書を作成'}</h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
-                    目撃した怪異、調査中の怪異をコミュニティに共有しましょう。
+                    {isEdit ? '調査書の内容を修正できます。' : '目撃した怪異、調査中の怪異をコミュニティに共有しましょう。'}
                 </p>
                 <div className="callout" style={{ marginBottom: 0 }}>
                     <div className="callout__label">注意：</div>
@@ -273,7 +313,7 @@ export default function AnomalyForm() {
                 <button type="submit" style={S.submitBtn} disabled={submitting}
                     onMouseEnter={e => { e.target.style.background = 'linear-gradient(135deg, rgba(0, 255, 170, 0.3), rgba(0, 170, 255, 0.3))'; e.target.style.boxShadow = '0 0 30px rgba(0, 255, 170, 0.2)'; }}
                     onMouseLeave={e => { e.target.style.background = 'linear-gradient(135deg, rgba(0, 255, 170, 0.2), rgba(0, 170, 255, 0.2))'; e.target.style.boxShadow = 'none'; }}>
-                    {submitting ? 'SUBMITTING...' : '▶ 怪異調査書を投稿'}
+                    {submitting ? 'SUBMITTING...' : isEdit ? '▶ 調査書を更新' : '▶ 怪異調査書を投稿'}
                 </button>
             </form>
         </div>

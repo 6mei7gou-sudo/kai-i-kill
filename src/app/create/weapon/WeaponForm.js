@@ -1,8 +1,9 @@
 // 武器・装備投稿フォーム — クライアントコンポーネント
 'use client';
 
-import { useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState, useCallback, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
 
 // フォームの初期値
@@ -46,10 +47,36 @@ const CATEGORY_INFO = {
 
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
 
-export default function WeaponForm() {
+export default function WeaponForm({ editId = null, initialData = null }) {
+    const { user } = useUser();
+    const router = useRouter();
+    const isEdit = !!editId;
+
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
+
+    // 編集モード: 既存データをフォームにセット
+    useEffect(() => {
+        if (initialData) {
+            const parsed = { ...initialData };
+            ['strengths', 'weaknesses', 'options', 'asset_urls'].forEach(key => {
+                if (typeof parsed[key] === 'string') parsed[key] = JSON.parse(parsed[key] || '[]');
+            });
+            if (!Array.isArray(parsed.strengths) || parsed.strengths.length === 0) parsed.strengths = [''];
+            if (!Array.isArray(parsed.weaknesses) || parsed.weaknesses.length === 0) parsed.weaknesses = [''];
+            if (!Array.isArray(parsed.asset_urls) || parsed.asset_urls.length === 0) parsed.asset_urls = [''];
+            if (!Array.isArray(parsed.options) || parsed.options.length === 0) parsed.options = [{ name: '', type: '汎用', cp: 0, resonance: '', risk: '低', note: '' }];
+            setForm(prev => ({ ...prev, ...parsed }));
+        }
+    }, [initialData]);
+
+    // ユーザー名を自動セット
+    useEffect(() => {
+        if (user && !form.author_name && !isEdit) {
+            setForm(prev => ({ ...prev, author_name: `@${user.username || user.firstName || 'user'}` }));
+        }
+    }, [user, isEdit]);
 
     const set = useCallback((key, val) => setForm(prev => ({ ...prev, [key]: val })), []);
 
@@ -90,7 +117,7 @@ export default function WeaponForm() {
         return '低';
     };
 
-    // 投稿処理
+    // 投稿/更新処理 — APIルート経由
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.gear_name.trim()) { setResult({ ok: false, msg: '武器名は必須です' }); return; }
@@ -106,12 +133,22 @@ export default function WeaponForm() {
                 asset_urls: JSON.stringify(form.asset_urls.filter(Boolean)),
                 total_cp: totalCp, option_count: optCount, risk_level: calcRisk(),
             };
-            const { error } = await supabase.from('gear_posts').insert([payload]);
-            if (error) throw error;
-            setResult({ ok: true, msg: '武器・装備を投稿しました！' });
-            setForm(INITIAL);
+            delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id;
+
+            const method = isEdit ? 'PATCH' : 'POST';
+            const body = isEdit
+                ? { table: 'gear_posts', id: editId, data: payload }
+                : { table: 'gear_posts', data: payload };
+
+            const res = await fetch('/api/posts', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+
+            setResult({ ok: true, msg: isEdit ? '装備データを更新しました！' : '武器・装備を投稿しました！' });
+            if (!isEdit) setForm(INITIAL);
+            setTimeout(() => router.push(`/community/gear/${json.data?.id || editId}/`), 1500);
         } catch (err) {
-            setResult({ ok: false, msg: `投稿に失敗しました: ${err.message}` });
+            setResult({ ok: false, msg: `${isEdit ? '更新' : '投稿'}に失敗しました: ${err.message}` });
         } finally { setSubmitting(false); }
     };
 
@@ -120,9 +157,9 @@ export default function WeaponForm() {
     return (
         <div className="container">
             <section className="section">
-                <span className="section__title">// CREATE — WEAPON / GEAR</span>
-                <h1 className="section__heading">武器・装備を投稿</h1>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>自作の武器・装備データをコミュニティに共有しましょう。</p>
+                <span className="section__title">// {isEdit ? 'EDIT' : 'CREATE'} — WEAPON / GEAR</span>
+                <h1 className="section__heading">{isEdit ? '武器・装備を編集' : '武器・装備を投稿'}</h1>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>{isEdit ? '装備データを修正できます。' : '自作の武器・装備データをコミュニティに共有しましょう。'}</p>
             </section>
 
             <form onSubmit={handleSubmit}>
@@ -288,7 +325,7 @@ export default function WeaponForm() {
                 <button type="submit" style={S.submitBtn} disabled={submitting}
                     onMouseEnter={e => { e.target.style.background = 'linear-gradient(135deg, rgba(0, 255, 170, 0.3), rgba(0, 170, 255, 0.3))'; e.target.style.boxShadow = '0 0 30px rgba(0, 255, 170, 0.2)'; }}
                     onMouseLeave={e => { e.target.style.background = 'linear-gradient(135deg, rgba(0, 255, 170, 0.2), rgba(0, 170, 255, 0.2))'; e.target.style.boxShadow = 'none'; }}>
-                    {submitting ? 'SUBMITTING...' : '▶ 武器・装備を投稿'}
+                    {submitting ? 'SUBMITTING...' : isEdit ? '▶ 装備データを更新' : '▶ 武器・装備を投稿'}
                 </button>
             </form>
         </div>

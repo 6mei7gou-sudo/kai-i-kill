@@ -1,6 +1,7 @@
 import './globals.css';
 import Link from 'next/link';
 import MobileMenuButton from './MobileMenuButton';
+import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 
 // メタデータ（SEO対応）
 export const metadata = {
@@ -60,50 +61,80 @@ const navGroups = [
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ja">
-      <body>
-        <MobileMenuButton />
+    <ClerkProvider appearance={{ variables: { colorPrimary: '#00ffaa', colorBackground: '#0a0e1a', colorText: '#e0e0e0', colorInputBackground: '#12182a', colorInputText: '#e0e0e0' } }}>
+      <html lang="ja">
+        <body>
+          <MobileMenuButton />
 
-        <div className="site-layout">
-          {/* 固定サイドバー */}
-          <aside className="site-sidebar" id="sidebar">
-            <div className="site-sidebar__header">
-              <div className="site-sidebar__title-sm">電脳怪異譚</div>
-              <div className="site-sidebar__title">KAI-I//KILL</div>
-              <div className="site-sidebar__subtitle">討伐者ハンドブック</div>
-              <div className="site-sidebar__version">VER. 1.0 — PLAYER DOC</div>
-            </div>
+          <div className="site-layout">
+            {/* 固定サイドバー */}
+            <aside className="site-sidebar" id="sidebar">
+              <div className="site-sidebar__header">
+                <div className="site-sidebar__title-sm">電脳怪異譚</div>
+                <div className="site-sidebar__title">KAI-I//KILL</div>
+                <div className="site-sidebar__subtitle">討伐者ハンドブック</div>
+                <div className="site-sidebar__version">VER. 1.0 — PLAYER DOC</div>
+              </div>
 
-            <nav>
-              {navGroups.map((group, gi) => (
-                <div key={gi} className="sidebar-nav__group">
-                  <div className="sidebar-nav__group-label">{group.label}</div>
-                  {group.items.map((item, ii) => (
-                    <Link
-                      key={ii}
-                      href={item.href}
-                      className="sidebar-nav__link"
-                    >
-                      <span className="sidebar-nav__icon">{item.icon}</span>
-                      {item.text}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </nav>
-          </aside>
+              {/* 認証ボタン */}
+              <div style={{ padding: '0 var(--space-md) var(--space-md)', borderBottom: 'var(--border-subtle)' }}>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button style={{
+                      width: '100%', padding: '10px', fontFamily: 'var(--font-mono)',
+                      fontSize: 'var(--font-size-sm)', background: 'rgba(0, 255, 170, 0.1)',
+                      border: '1px solid var(--accent-cyber)', color: 'var(--accent-cyber)',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                    }}>▶ ログイン / 登録</button>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: { width: 32, height: 32 },
+                        },
+                      }}
+                    />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                      ログイン中
+                    </span>
+                  </div>
+                </SignedIn>
+              </div>
 
-          {/* メインコンテンツ */}
-          <main className="main-content">
-            {children}
+              <nav>
+                {navGroups.map((group, gi) => (
+                  <div key={gi} className="sidebar-nav__group">
+                    <div className="sidebar-nav__group-label">{group.label}</div>
+                    {group.items.map((item, ii) => (
+                      <Link
+                        key={ii}
+                        href={item.href}
+                        className="sidebar-nav__link"
+                      >
+                        <span className="sidebar-nav__icon">{item.icon}</span>
+                        {item.text}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </nav>
+            </aside>
 
-            {/* フッター */}
-            <footer className="site-footer">
-              <p>© 電脳怪異譚 KAI-I//KILL Project</p>
-            </footer>
-          </main>
-        </div>
-      </body>
-    </html>
+            {/* メインコンテンツ */}
+            <main className="main-content">
+              {children}
+
+              {/* フッター */}
+              <footer className="site-footer">
+                <p>© 電脳怪異譚 KAI-I//KILL Project</p>
+              </footer>
+            </main>
+          </div>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

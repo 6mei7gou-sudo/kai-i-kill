@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
@@ -50,9 +51,11 @@ const ListField = ({ label, items }) => {
 };
 
 export default function AnomalyDetail({ id }) {
+    const { user } = useUser();
     const [entry, setEntry] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const isOwner = user && entry?.user_id && user.id === entry.user_id;
     useEffect(() => {
         (async () => {
             const { data, error } = await supabase
@@ -87,6 +90,14 @@ export default function AnomalyDetail({ id }) {
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                         by {entry.author_name || '名無し'} · {new Date(entry.created_at).toLocaleDateString('ja-JP')}
                     </div>
+                    {isOwner && (
+                        <Link href={`/create/anomaly/${id}/`} style={{
+                            display: 'inline-block', marginTop: 'var(--space-md)',
+                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                            color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)',
+                            padding: '6px 16px', textDecoration: 'none',
+                        }}>✏ 編集する</Link>
+                    )}
                 </div>
 
                 <div className="callout" style={{ marginTop: 'var(--space-lg)' }}>
