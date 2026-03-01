@@ -5,6 +5,7 @@ export const metadata = {
     title: '武器・装備詳細 — 電脳怪異譚 KAI-I//KILL',
 };
 
-export default function GearDetailPage({ params }) {
-    return <GearDetail id={params.id} />;
+export default async function GearDetailPage({ params }) {
+    const { id } = await params;
+    return <GearDetail id={id} />;
 }
