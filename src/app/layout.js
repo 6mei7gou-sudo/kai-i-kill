@@ -13,15 +13,15 @@ export const metadata = {
 // サイドバーのナビゲーション構造
 const navGroups = [
   {
-    label: 'ページ一覧',
+    label: '導入',
     items: [
-      { href: '/', icon: '◉', text: '導入・世界概要' },
+      { href: '/', icon: '◉', text: 'トップ' },
       { href: '/anomalies/', icon: '△', text: '怪異・能力・装備' },
       { href: '/organizations/', icon: '✕', text: '組織・人物' },
     ],
   },
   {
-    label: '導入',
+    label: '世界観',
     items: [
       { href: '/world/', icon: '◉', text: '世界概要' },
       { href: '/timeline/', icon: '◈', text: '世界年表' },

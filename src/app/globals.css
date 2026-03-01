@@ -821,6 +821,195 @@ h6 {
   }
 }
 
+/* --- トップページ：ヒーロー拡張 --- */
+.hero__catchcopy {
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  color: var(--text-heading);
+  margin-bottom: var(--space-lg);
+  animation: fadeInUp 0.8s ease both;
+}
+
+.hero__catchcopy .hero__accent {
+  color: var(--accent-gold);
+  text-shadow: 0 0 24px var(--accent-gold-glow);
+}
+
+.hero__tagline {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  line-height: 2;
+  max-width: 540px;
+  margin-bottom: var(--space-2xl);
+  animation: fadeInUp 0.8s 0.2s ease both;
+}
+
+.hero__cta-group {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeInUp 0.8s 0.4s ease both;
+}
+
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 12px 32px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--accent-gold-border);
+  background: var(--accent-gold-subtle);
+  color: var(--accent-gold);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+}
+
+.hero__cta:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-glow-gold);
+  color: var(--accent-gold-bright);
+}
+
+.hero__cta--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+.hero__cta--ghost:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+/* --- トップページ：コンセプトグリッド --- */
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  border: var(--border-subtle);
+  margin-bottom: var(--space-3xl);
+}
+
+.concept-card {
+  background: var(--bg-card);
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  transition: all var(--transition-normal);
+}
+
+.concept-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.concept-card__number {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--accent-gold);
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-sm);
+}
+
+.concept-card__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+  color: var(--text-heading);
+}
+
+.concept-card__title-en {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+}
+
+.concept-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* --- トップページ：ティーザー --- */
+.teaser {
+  padding: var(--space-3xl) 0;
+  margin-bottom: var(--space-3xl);
+  text-align: center;
+  border-top: var(--border-section);
+  border-bottom: var(--border-section);
+}
+
+.teaser__quote {
+  font-size: clamp(1.3rem, 3vw, var(--font-size-3xl));
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.6;
+  margin-bottom: var(--space-lg);
+  letter-spacing: 0.04em;
+}
+
+.teaser__quote .teaser__em {
+  color: var(--accent-gold);
+}
+
+.teaser__body {
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 2;
+}
+
+/* --- トップページ：クロージング --- */
+.closing {
+  text-align: center;
+  padding: var(--space-3xl) 0;
+}
+
+.closing__text {
+  font-size: var(--font-size-lg);
+  color: var(--text-muted);
+  font-style: italic;
+  letter-spacing: 0.06em;
+  line-height: 1.8;
+}
+
+.closing__text .closing__em {
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* --- フェードインアニメーション --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 各セクション用の段階的フェードイン（Intersection Observer不要の簡易版） */
+.section--animate {
+  animation: fadeInUp 0.6s ease both;
+}
+
 /* --- フッター --- */
 .site-footer {
   border-top: var(--border-subtle);
@@ -873,7 +1062,8 @@ h6 {
   }
 
   .card-grid,
-  .two-col {
+  .two-col,
+  .concept-grid {
     grid-template-columns: 1fr;
   }
 
