@@ -61,7 +61,27 @@ const navGroups = [
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider appearance={{ variables: { colorPrimary: '#00ffaa', colorBackground: '#0a0e1a', colorText: '#e0e0e0', colorInputBackground: '#12182a', colorInputText: '#e0e0e0' } }}>
+    <ClerkProvider appearance={{
+      variables: {
+        colorPrimary: '#00ffaa',
+        colorBackground: '#1a1f2e',
+        colorText: '#ffffff',
+        colorTextSecondary: '#cccccc',
+        colorInputBackground: '#252b3d',
+        colorInputText: '#ffffff',
+        colorNeutral: '#ffffff',
+      },
+      elements: {
+        card: { backgroundColor: '#1a1f2e', border: '1px solid rgba(0,255,170,0.15)' },
+        headerTitle: { color: '#ffffff' },
+        headerSubtitle: { color: '#bbbbbb' },
+        socialButtonsBlockButtonText: { color: '#ffffff' },
+        formFieldLabel: { color: '#cccccc' },
+        formFieldInput: { backgroundColor: '#252b3d', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)' },
+        footerActionLink: { color: '#00ffaa' },
+        identityPreviewEditButton: { color: '#00ffaa' },
+      },
+    }}>
       <html lang="ja">
         <body>
           <MobileMenuButton />
