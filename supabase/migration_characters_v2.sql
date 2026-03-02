@@ -24,7 +24,7 @@ ALTER TABLE character_sheets ADD COLUMN rank_jutsu TEXT NOT NULL DEFAULT 'D' CHE
 ALTER TABLE character_sheets ADD COLUMN rank_kon TEXT NOT NULL DEFAULT 'D' CHECK (rank_kon IN ('D','C','B','A','S'));
 
 -- ■ 新カラム追加：背景・クラス
-ALTER TABLE character_sheets ADD COLUMN background TEXT CHECK (background IN ('祓部','個人傭兵','所属傭兵','特異点','野良犬'));
+ALTER TABLE character_sheets ADD COLUMN background TEXT CHECK (background IN ('鋼の肉体','学者肌','霊媒体質','技術畑','ストリート上がり','信仰者'));
 ALTER TABLE character_sheets ADD COLUMN class TEXT CHECK (class IN ('祓士','機甲士','魂使い','解明師','情報屋'));
 
 -- ■ 新カラム追加：得意/苦手言語（配列型）

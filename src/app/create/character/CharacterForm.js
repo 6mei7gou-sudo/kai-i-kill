@@ -24,11 +24,12 @@ const ABILITIES = [
 
 // 背景（5種）— 選択で2能力値がC昇格+初期効果
 const BACKGROUNDS = [
-    { id: '祓部', upgrades: ['rank_shiki', 'rank_shiya'], effect: '得意言語を1つ追加で選べる（苦手の追加なし）。古い怪異への識判定+1' },
-    { id: '個人傭兵', upgrades: ['rank_tai', 'rank_haya'], effect: '武装型・半装身型のCP+4。護衛への初回攻撃に+1修正' },
-    { id: '所属傭兵', upgrades: ['rank_tai', 'rank_han'], effect: '独立型装備のCP+3。企業コネを使う判定に+1' },
-    { id: '特異点', upgrades: ['rank_shiki', 'rank_han'], effect: '調査判定スペシャル時に解明鍵追加入手の可能性。初期信念ポイント+1' },
-    { id: '野良犬', upgrades: ['rank_haya', 'rank_kon'], effect: 'NGT魔法判定に+1。怪異核素材装備の入手判定+2' },
+    { id: '鋼の肉体', upgrades: ['rank_tai', 'rank_haya'], effect: '護衛への初回攻撃に+1修正。戦術的な離脱判定+1' },
+    { id: '学者肌', upgrades: ['rank_shiki', 'rank_han'], effect: '調査スペシャル時に解明鍵追加入手の可能性。古い文献の識判定+1' },
+    { id: '霊媒体質', upgrades: ['rank_shiya', 'rank_kon'], effect: '怪異の気配感知+1。得意言語を1つ追加選択可（苦手追加なし）' },
+    { id: '技術畑', upgrades: ['rank_jutsu', 'rank_shiki'], effect: '装備CP+2。魔導具の調整・修理判定+1' },
+    { id: 'ストリート上がり', upgrades: ['rank_haya', 'rank_kon'], effect: 'NGT魔法判定に+1。闇市場での入手判定+2' },
+    { id: '信仰者', upgrades: ['rank_kon', 'rank_han'], effect: '初期信念ポイント+1。浄化メーター上昇時に追加+1' },
 ];
 
 // クラス（5種）— 選択で1能力値がB昇格+クラス特技
@@ -178,7 +179,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     // 信念ポイント計算（背景・覚醒で+1の場合あり）
     const calcBeliefPoints = useCallback(() => {
         let pts = 5;
-        if (form.background === '特異点') pts += 1;
+        if (form.background === '信仰者') pts += 1;
         if (form.awakening === 'ショック覚醒型') pts += 1;
         return pts;
     }, [form.background, form.awakening]);
