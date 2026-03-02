@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
+import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findWeapon, findOption } from '@/data/weaponData';
 
 // フォームの初期値
 const INITIAL = {
@@ -25,7 +26,7 @@ const INITIAL = {
 const OPTIONS = {
     categories: ['武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型'],
     bodyParts: ['腕部', '脚部', '肩部', '胴部', 'その他'],
-    manufacturers: ['蒼鉄機工', '雷禽重工', '鴉羽技研', '銀鎚精機', '蜃気楼工廠', 'その他'],
+    manufacturers: MANUFACTURER_NAMES,
     affiliations: ['どれでも', '祓部', '傭兵', '無所属'],
     roles: ['攻撃', '防御', '支援', '解明', '封鎖', '逃走'],
     qualities: ['標準', '高品質', '試作品', '特注'],
@@ -222,7 +223,34 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 3 — BASE</div>
                     <h2 style={S.sectionHeading}>ベース装備</h2>
-                    <FormInput label="ベース名" value={form.base_name} onChange={v => set('base_name', v)} placeholder="例：強化戦術銃【制式型】" />
+                    <div style={S.fieldGroup}>
+                        <label style={S.label}>ベース装備を選択</label>
+                        <select
+                            value={form.base_name}
+                            onChange={e => {
+                                const name = e.target.value;
+                                set('base_name', name);
+                                const w = findWeapon(name);
+                                if (w) {
+                                    set('base_cp', w.cp);
+                                    set('slot_count', w.slot);
+                                    set('manufacturer', w.maker);
+                                    set('base_modifier', w.mod);
+                                    set('additional_traits', w.note);
+                                }
+                            }}
+                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
+                        >
+                            <option value="">— ベース装備を選択 —</option>
+                            {(BASE_WEAPONS_BY_CATEGORY[form.category] || []).map(w => (
+                                <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / {w.maker}）</option>
+                            ))}
+                            <option value="_custom">自由入力…</option>
+                        </select>
+                    </div>
+                    {form.base_name === '_custom' && (
+                        <FormInput label="ベース名（自由入力）" value={form.custom_base_name || ''} onChange={v => set('custom_base_name', v)} placeholder="例：強化戦術銃【制式型】" />
+                    )}
                     <div style={S.row}>
                         <FormSelect label="品質" value={form.quality} onChange={v => set('quality', v)} options={OPTIONS.qualities} />
                         <FormInput label="装備CP（本体）" value={form.base_cp} onChange={v => set('base_cp', v)} type="number" />
@@ -245,7 +273,33 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                                 {form.options.length > 1 && <button type="button" style={{ ...S.addBtn, color: 'var(--accent-danger)', borderColor: 'rgba(255,77,77,0.3)', padding: '4px 10px' }} onClick={() => removeOption(i)}>✕</button>}
                             </div>
                             <div style={S.row}>
-                                <FormInput label="オプション名" value={opt.name} onChange={v => updateOption(i, 'name', v)} placeholder="例：出力増幅" />
+                                <select
+                                    value={opt.name}
+                                    onChange={e => {
+                                        const name = e.target.value;
+                                        updateOption(i, 'name', name);
+                                        const o = findOption(name);
+                                        if (o) {
+                                            updateOption(i, 'cp', o.cp);
+                                            updateOption(i, 'resonance', o.resonance);
+                                            updateOption(i, 'risk', o.risk);
+                                        }
+                                    }}
+                                    style={{ flex: 1, padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
+                                >
+                                    <option value="">— オプションを選択 —</option>
+                                    {Object.entries(CUSTOM_OPTIONS).map(([group, opts]) => (
+                                        <optgroup key={group} label={group}>
+                                            {opts.map(o => (
+                                                <option key={o.name} value={o.name}>{o.name}（{o.cp}CP）</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                    <option value="_custom">自由入力…</option>
+                                </select>
+                                {opt.name === '_custom' && (
+                                    <FormInput label="" value={opt.custom_name || ''} onChange={v => updateOption(i, 'custom_name', v)} placeholder="オプション名" />
+                                )}
                                 <FormSelect label="区分" value={opt.type} onChange={v => updateOption(i, 'type', v)} options={OPTIONS.optionTypes} />
                                 <FormInput label="CP" value={opt.cp} onChange={v => updateOption(i, 'cp', v)} type="number" />
                                 <FormSelect label="リスク" value={opt.risk} onChange={v => updateOption(i, 'risk', v)} options={OPTIONS.risks} />

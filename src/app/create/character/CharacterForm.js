@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
+import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, findWeapon } from '@/data/weaponData';
 
 // ===== 定数定義 =====
 
@@ -559,10 +560,31 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.sectionTitle}>SECTION 7 — EQUIPMENT</div>
                     <h2 style={S.sectionHeading}>主力装備</h2>
                     <div style={S.row}>
-                        <FormSelect label="装備種別" value={form.equipment_type} onChange={v => set('equipment_type', v)} options={EQUIPMENT_TYPES} />
-                        <FormInput label="装備名" value={form.equipment_name} onChange={v => set('equipment_name', v)} placeholder="例：強化戦術銃【制式型】" />
-                        <FormInput label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} placeholder="例：蒼鉄機工" />
+                        <FormSelect label="装備種別" value={form.equipment_type} onChange={v => { set('equipment_type', v); set('equipment_name', ''); }} options={EQUIPMENT_TYPES} />
+                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={MANUFACTURER_NAMES} />
                     </div>
+                    <div style={S.fieldGroup}>
+                        <label style={S.label}>装備名</label>
+                        <select
+                            value={form.equipment_name}
+                            onChange={e => {
+                                const name = e.target.value;
+                                set('equipment_name', name);
+                                const w = findWeapon(name);
+                                if (w) set('equipment_maker', w.maker);
+                            }}
+                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
+                        >
+                            <option value="">— 装備を選択 —</option>
+                            {(BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).map(w => (
+                                <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / {w.maker}）</option>
+                            ))}
+                            <option value="_custom">自由入力…</option>
+                        </select>
+                    </div>
+                    {form.equipment_name === '_custom' && (
+                        <FormInput label="装備名（自由入力）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="装備名" />
+                    )}
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
                     {/* 投稿済み装備の紐づけ */}
                     <div style={{ marginTop: 'var(--space-lg)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
