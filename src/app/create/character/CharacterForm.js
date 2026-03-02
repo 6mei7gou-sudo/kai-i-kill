@@ -55,20 +55,42 @@ const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
 const AWAKENINGS = ['先天覚醒型', 'ショック覚醒型', '実験覚醒型', '接触覚醒型'];
 const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型'];
 
-// 所属特典の詳細
+// 所属特典の詳細（バランス調整済み）
 const AFFILIATION_INFO = {
     '祓部': {
-        bonus: '識の調査+2（3回/セッション）、援軍要請（1回/セッション）、古怪班で識+1',
+        bonus: '識の調査+1（3回/セッション）＋班ボーナス',
         constraint: '任務命令への服従が義務。装備・行動に法的制限。',
     },
     '傭兵': {
-        bonus: '装備1ランクUP、企業コネ判定+2（3回/セッション）、初期二つ名+1',
+        bonus: '装備1ランクUP、二つ名+1（常時）＋系統ボーナス',
         constraint: '収益がないと活動困難。バック企業の方針に縛られる。',
     },
     '無所属': {
-        bonus: '視野判定+1常時、裏ルート（1回/セッション）、改造個体センサー（1回/セッション）',
+        bonus: '視野+1常時、裏ルート（1回/セッション）、改造センサー（1回/セッション）＋出自ボーナス',
         constraint: '法的保護なし。全組織から警戒される。補給ルート不安定。',
     },
+};
+
+// 所属サブカテゴリ
+const SUB_AFFILIATIONS = {
+    '祓部': [
+        { id: '古怪班', desc: '古い怪異の専門部署。文献調査と封印管理', bonus: '一級・二級の古い怪異への識判定+2。禁足地知識判定+1' },
+        { id: '新怪班', desc: '新規発生怪異への初動対応。SNS型・流行型に強い', bonus: 'SNS起源怪異への視野判定+1。ルール発動直後に視野再判定（1回/セッション）' },
+        { id: '特務班', desc: '少数精鋭の実戦部隊。危険等級の現場に投入', bonus: '甲種怪異戦闘時、体/疾判定+1。援軍要請（1回/セッション）' },
+        { id: '技術班', desc: '魔導具の整備・解析・現場支援', bonus: '装備の応急修理判定+2。味方の装備不具合を無効化（1回/セッション）' },
+    ],
+    '傭兵': [
+        { id: '戦闘屋', desc: '正面火力で解決する。腕が商品', bonus: '護衛への初回攻撃+1。スペシャル時追加ダメージ+1' },
+        { id: '調査屋', desc: '情報に値段をつける。解明が本業', bonus: '調査判定+1（常時）。NPCから追加情報引き出し（1回/セッション）' },
+        { id: '運び屋', desc: '護衛と輸送の専門家。逃走のプロ', bonus: '疾判定+1（逃走・離脱時）。仲間1人へのダメージ1点肩代わり' },
+        { id: '技術屋', desc: '装備のカスタムと現場修理が得意', bonus: '装備CP+2。オプション一時差し替え（1回/セッション）' },
+    ],
+    '無所属': [
+        { id: '路地裏の犬', desc: 'スラムで生き延びた。暴力と飢えが教師', bonus: '体判定+1（素手・逃走）。NPCの嘘看破時、判/視野判定+1' },
+        { id: 'はぐれ狼', desc: '流れの用心棒。一人で戦い続けてきた', bonus: '魂判定+1（単独行動時）。先行行動（イニシアチブ無視、1回/セッション）' },
+        { id: '小さな群れ', desc: '仲間と生きる小規模クラン。信頼だけが武器', bonus: '信念ポイント+1。仲間隣接時、全判定+1' },
+        { id: '脱走兵', desc: '祓部か企業の育成施設から逃げた。内部知識がある', bonus: '識+1（セッション2回まで）。企業製装備の弱点判定+1' },
+    ],
 };
 
 // 覚醒パターン情報
@@ -91,7 +113,7 @@ const EROSION_STAGES = [
 const INITIAL = {
     author_name: '', visibility: '公開', image_url: '',
     character_name: '', title: '', age: '', gender: '',
-    affiliation: '祓部', awakening: '先天覚醒型',
+    affiliation: '祓部', sub_affiliation: '', awakening: '先天覚醒型',
     background: '', class: '',
     // 7能力値ランク（全てDスタート）
     rank_tai: 'D', rank_haya: 'D', rank_shiki: 'D', rank_han: 'D',
@@ -263,7 +285,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.row}>
                         <FormInput label="年齢" value={form.age} onChange={v => set('age', v)} placeholder="例：24" />
                         <FormInput label="性別" value={form.gender} onChange={v => set('gender', v)} placeholder="自由記述" />
-                        <FormSelect label="所属 *" value={form.affiliation} onChange={v => set('affiliation', v)} options={AFFILIATIONS} />
+                        <FormSelect label="所属 *" value={form.affiliation} onChange={v => { set('affiliation', v); set('sub_affiliation', ''); }} options={AFFILIATIONS} />
                         <FormSelect label="覚醒パターン *" value={form.awakening} onChange={v => set('awakening', v)} options={AWAKENINGS} />
                     </div>
                     {/* 所属ボーナス */}
@@ -272,6 +294,38 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>▸ {affInfo.bonus}</div>
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>▹ {affInfo.constraint}</div>
                     </div>
+
+                    {/* 所属サブカテゴリ選択 */}
+                    {SUB_AFFILIATIONS[form.affiliation] && (
+                        <div style={{ marginTop: 'var(--space-lg)' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>
+                                {form.affiliation === '祓部' ? '配属班 *' : form.affiliation === '傭兵' ? '系統 *' : '出自 *'}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
+                                {SUB_AFFILIATIONS[form.affiliation].map(sub => {
+                                    const selected = form.sub_affiliation === sub.id;
+                                    return (
+                                        <button key={sub.id} type="button"
+                                            onClick={() => set('sub_affiliation', selected ? '' : sub.id)}
+                                            style={{
+                                                padding: '12px', textAlign: 'left', cursor: 'pointer',
+                                                border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+                                                background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
+                                                color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                                transition: 'all 0.2s',
+                                            }}>
+                                            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
+                                                {sub.id}
+                                            </div>
+                                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', lineHeight: 1.5 }}>{sub.desc}</div>
+                                            <div style={{ fontSize: '10px', color: selected ? 'var(--accent-gold)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>▸ {sub.bonus}</div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* 覚醒パターン情報 */}
                     <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '6px' }}>{form.awakening}</div>
