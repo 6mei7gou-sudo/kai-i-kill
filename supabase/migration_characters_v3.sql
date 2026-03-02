@@ -6,3 +6,6 @@
 
 -- ■ 所属サブカテゴリ
 ALTER TABLE character_sheets ADD COLUMN sub_affiliation TEXT;
+
+-- ■ 初期ギフト
+ALTER TABLE character_sheets ADD COLUMN gift TEXT;

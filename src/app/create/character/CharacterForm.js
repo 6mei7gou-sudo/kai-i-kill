@@ -102,6 +102,16 @@ const AWAKENING_INFO = {
     '接触覚醒型': { effect: '視野判定に常時+1（怪異の気配への鋭敏さ）', extra: null },
 };
 
+// 初期ギフト（6種から1つ選択）
+const GIFTS = [
+    { id: '鍵の直感', desc: '調査フェイズで1日1回、解明鍵のヒントをGMに求められる' },
+    { id: '生還の意地', desc: 'HP0時、魂判定成功で1HP残して生存（1シナリオ1回）' },
+    { id: '装備の鬼', desc: '武装型・半装身型装備の武器修正+1' },
+    { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
+    { id: '怪異の残響', desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
+    { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
+];
+
 const EROSION_STAGES = [
     { max: 25, name: '正常', color: '#88cc44', desc: '影響なし' },
     { max: 50, name: '変容の兆し', color: '#ffcc00', desc: '外見に軽微な変化。怪異の「声」が断片的に聞こえ始める' },
@@ -115,7 +125,7 @@ const INITIAL = {
     author_name: '', visibility: '公開', image_url: '',
     character_name: '', title: '', age: '', gender: '',
     affiliation: '祓部', sub_affiliation: '', awakening: '先天覚醒型',
-    background: '', class: '',
+    background: '', class: '', gift: '',
     // 7能力値ランク（全てDスタート）
     rank_tai: 'D', rank_haya: 'D', rank_shiki: 'D', rank_han: 'D',
     rank_shiya: 'D', rank_jutsu: 'D', rank_kon: 'D',
@@ -452,9 +462,39 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
-                {/* SEC 5: 得意/苦手言語 */}
+                {/* SEC 5: ギフト選択 */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 5 — LANGUAGE</div>
+                    <div style={S.sectionTitle}>SECTION 5 — GIFT</div>
+                    <h2 style={S.sectionHeading}>初期ギフト</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' }}>
+                        キャラクター作成時に1つ選択。覚醒段階は不要。
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
+                        {GIFTS.map(gift => {
+                            const selected = form.gift === gift.id;
+                            return (
+                                <button key={gift.id} type="button"
+                                    onClick={() => set('gift', selected ? '' : gift.id)}
+                                    style={{
+                                        padding: '14px', textAlign: 'left', cursor: 'pointer',
+                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+                                        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
+                                        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                        transition: 'all 0.2s',
+                                    }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
+                                        {gift.id}
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>{gift.desc}</div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* SEC 6: 得意/苦手言語 */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 6 — LANGUAGE</div>
                     <h2 style={S.sectionHeading}>得意言語・苦手言語</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-sm)', fontStyle: 'italic' }}>
                         得意と苦手は同じ数だけ選んでください（0〜3個ずつ）。P言語は全員が使用可能です。
@@ -514,9 +554,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
-                {/* SEC 6: 装備 */}
+                {/* SEC 7: 装備 */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 6 — EQUIPMENT</div>
+                    <div style={S.sectionTitle}>SECTION 7 — EQUIPMENT</div>
                     <h2 style={S.sectionHeading}>主力装備</h2>
                     <div style={S.row}>
                         <FormSelect label="装備種別" value={form.equipment_type} onChange={v => set('equipment_type', v)} options={EQUIPMENT_TYPES} />
@@ -526,9 +566,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
                 </div>
 
-                {/* SEC 7: 侵食率 */}
+                {/* SEC 8: 侵食率 */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 7 — EROSION</div>
+                    <div style={S.sectionTitle}>SECTION 8 — EROSION</div>
                     <h2 style={S.sectionHeading}>侵食率</h2>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: erosionStage.color }}>{form.erosion_rate}%</span>
@@ -549,17 +589,17 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
                 </div>
 
-                {/* SEC 8: 因縁・バックストーリー */}
+                {/* SEC 9: 因縁・バックストーリー */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 8 — STORY</div>
+                    <div style={S.sectionTitle}>SECTION 9 — STORY</div>
                     <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>
                     <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
                     <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." rows={6} />
                 </div>
 
-                {/* SEC 9: 関連リンク */}
+                {/* SEC 10: 関連リンク */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 9 — LINKS</div>
+                    <div style={S.sectionTitle}>SECTION 10 — LINKS</div>
                     <h2 style={S.sectionHeading}>関連リンク</h2>
                     <div style={S.row}>
                         <FormInput label="関連怪異" value={form.related_anomalies} onChange={v => set('related_anomalies', v)} placeholder="TMP-??? / KAI-####" />
