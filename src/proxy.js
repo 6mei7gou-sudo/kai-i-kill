@@ -1,4 +1,4 @@
-// Clerkミドルウェア — 認証ルートの制御
+// Clerkプロキシ — 認証ルートの制御（Next.js 16: middleware → proxy）
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // 保護が必要なルート（投稿作成・編集ページ）
