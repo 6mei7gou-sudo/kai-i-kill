@@ -564,6 +564,27 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <FormInput label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} placeholder="例：蒼鉄機工" />
                     </div>
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
+                    {/* 投稿済み装備の紐づけ */}
+                    <div style={{ marginTop: 'var(--space-lg)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '8px' }}>装備投稿との連携</div>
+                        <FormInput label="投稿済み装備ID（任意）" value={form.linked_gear_id || ''} onChange={v => set('linked_gear_id', v)} placeholder="gear_postsのUUIDを貼り付け" />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                            <a href="/create/weapon" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', textDecoration: 'underline' }}>→ 装備を新規投稿する</a>
+                            <a href="/community/gear" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', textDecoration: 'underline' }}>→ コミュニティ装備一覧</a>
+                        </div>
+                    </div>
+                    {/* CP予算の目安 */}
+                    {(() => {
+                        let cpBudget = 10;
+                        if (form.background === '技術畑') cpBudget += 2;
+                        if (form.sub_affiliation === '技術屋') cpBudget += 2;
+                        return (
+                            <div style={{ marginTop: 'var(--space-sm)', padding: '10px 12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>このキャラの装備CP予算</span>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* SEC 8: 侵食率 */}

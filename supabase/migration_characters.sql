@@ -1,5 +1,7 @@
 -- =====================================================
--- キャラクターシート テーブル定義
+-- キャラクターシート テーブル定義（新ルールブック対応）
+-- 7能力値ランクD-S / 背景6種 / クラス5種 / サブカテゴリ
+-- 得意・苦手言語 / 信念ポイント / 初期ギフト
 -- Supabase SQL Editorで実行してください
 -- =====================================================
 
@@ -20,19 +22,26 @@ CREATE TABLE character_sheets (
   age TEXT,
   gender TEXT,
   affiliation TEXT NOT NULL CHECK (affiliation IN ('祓部', '傭兵', '無所属')),
+  sub_affiliation TEXT,
   awakening TEXT NOT NULL CHECK (awakening IN ('先天覚醒型', 'ショック覚醒型', '実験覚醒型', '接触覚醒型')),
 
-  -- 6属性（各1〜5、合計18）
-  attr_shiya INT NOT NULL DEFAULT 3 CHECK (attr_shiya BETWEEN 1 AND 5),
-  attr_shiki INT NOT NULL DEFAULT 3 CHECK (attr_shiki BETWEEN 1 AND 5),
-  attr_tai INT NOT NULL DEFAULT 3 CHECK (attr_tai BETWEEN 1 AND 5),
-  attr_jutsu INT NOT NULL DEFAULT 3 CHECK (attr_jutsu BETWEEN 1 AND 5),
-  attr_kon INT NOT NULL DEFAULT 3 CHECK (attr_kon BETWEEN 1 AND 5),
-  attr_en INT NOT NULL DEFAULT 3 CHECK (attr_en BETWEEN 1 AND 5),
+  -- 背景・クラス・ギフト
+  background TEXT CHECK (background IN ('鋼の肉体','学者肌','霊媒体質','技術畑','ストリート上がり','信仰者')),
+  class TEXT CHECK (class IN ('祓士','機甲士','魂使い','解明師','情報屋')),
+  gift TEXT,
 
-  -- 得意言語（魔法言語）
-  primary_language TEXT,
-  secondary_language TEXT,
+  -- 7能力値ランク（D,C,B,A,S）
+  rank_tai TEXT NOT NULL DEFAULT 'D' CHECK (rank_tai IN ('D','C','B','A','S')),
+  rank_haya TEXT NOT NULL DEFAULT 'D' CHECK (rank_haya IN ('D','C','B','A','S')),
+  rank_shiki TEXT NOT NULL DEFAULT 'D' CHECK (rank_shiki IN ('D','C','B','A','S')),
+  rank_han TEXT NOT NULL DEFAULT 'D' CHECK (rank_han IN ('D','C','B','A','S')),
+  rank_shiya TEXT NOT NULL DEFAULT 'D' CHECK (rank_shiya IN ('D','C','B','A','S')),
+  rank_jutsu TEXT NOT NULL DEFAULT 'D' CHECK (rank_jutsu IN ('D','C','B','A','S')),
+  rank_kon TEXT NOT NULL DEFAULT 'D' CHECK (rank_kon IN ('D','C','B','A','S')),
+
+  -- 得意/苦手言語（配列型）
+  proficient_languages TEXT[] DEFAULT '{}',
+  weak_languages TEXT[] DEFAULT '{}',
 
   -- 装備
   equipment_type TEXT CHECK (equipment_type IN ('武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型')),
@@ -40,8 +49,10 @@ CREATE TABLE character_sheets (
   equipment_maker TEXT,
   equipment_detail TEXT,
 
-  -- 侵食率
+  -- 侵食率・信念
   erosion_rate INT DEFAULT 0 CHECK (erosion_rate BETWEEN 0 AND 100),
+  erosion_note TEXT,
+  belief_points INT DEFAULT 5 CHECK (belief_points BETWEEN 0 AND 10),
 
   -- 因縁・バックストーリー
   fate TEXT,
