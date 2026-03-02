@@ -9,7 +9,7 @@ import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, ALL_OPTIO
 
 // フォームの初期値
 const INITIAL = {
-    author_name: '', visibility: '公開', image_url: '', video_url: '', usage_url: '',
+    author_name: '', visibility: '公開', image_url: '', thumbnail_url: '', icon_url: '', image_urls: ['', '', ''], video_url: '', usage_url: '',
     gear_name: '', category: '武装型', body_part: '', manufacturer: 'その他', affiliation_fit: 'どれでも',
     summary: '', intended_role: [], strengths: [''], weaknesses: [''],
     base_name: '', quality: '標準', base_cp: 0, slot_count: 0, aptitude_dependency: '低',
@@ -176,7 +176,15 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
                     </div>
                     <div style={S.row}>
-                        <FormInput label="画像URL" value={form.image_url} onChange={v => set('image_url', v)} placeholder="https://..." />
+                        <FormInput label="サムネイルURL" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} placeholder="サムネイル画像 URL" />
+                        <FormInput label="アイコンURL" value={form.icon_url} onChange={v => set('icon_url', v)} placeholder="アイコン画像 URL" />
+                    </div>
+                    <div style={S.row}>
+                        <FormInput label="画像1 URL" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <FormInput label="画像2 URL" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <FormInput label="画像3 URL" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} placeholder="https://..." />
+                    </div>
+                    <div style={S.row}>
                         <FormInput label="動画URL（任意）" value={form.video_url} onChange={v => set('video_url', v)} placeholder="https://..." />
                         <FormInput label="使用例URL（任意）" value={form.usage_url} onChange={v => set('usage_url', v)} placeholder="VRワールド/配信 等" />
                     </div>

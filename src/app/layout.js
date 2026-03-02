@@ -54,6 +54,7 @@ const navGroups = [
   {
     label: 'コミュニティDB',
     items: [
+      { href: '/mypage/', icon: '◆', text: 'マイページ' },
       { href: '/community/anomalies/', icon: '◇', text: '怪異調査書一覧' },
       { href: '/community/gear/', icon: '⊕', text: '武器・装備一覧' },
       { href: '/community/characters/', icon: '☖', text: 'キャラシート一覧' },

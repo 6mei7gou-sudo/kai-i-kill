@@ -9,6 +9,28 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+// GET: 投稿一覧取得（tableとuser_idでフィルタ可）
+export async function GET(request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const table = searchParams.get('table');
+        const userId = searchParams.get('user_id');
+
+        if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
+            return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
+        }
+
+        let query = supabase.from(table).select('*').order('created_at', { ascending: false });
+        if (userId) query = query.eq('user_id', userId);
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return NextResponse.json({ ok: true, data });
+    } catch (err) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+}
+
 // POST: 新規投稿
 export async function POST(request) {
     try {

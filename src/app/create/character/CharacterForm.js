@@ -123,7 +123,7 @@ const EROSION_STAGES = [
 
 // 初期値
 const INITIAL = {
-    author_name: '', visibility: '公開', image_url: '',
+    author_name: '', visibility: '公開', image_url: '', thumbnail_url: '', icon_url: '', image_urls: ['', '', ''],
     character_name: '', title: '', age: '', gender: '',
     affiliation: '祓部', sub_affiliation: '', awakening: '先天覚醒型',
     background: '', class: '', gift: '',
@@ -282,7 +282,13 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.row}>
                         <FormInput label="投稿者名" value={form.author_name} onChange={v => set('author_name', v)} placeholder="@ユーザー名" />
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
-                        <FormInput label="キャラ画像URL（任意）" value={form.image_url} onChange={v => set('image_url', v)} placeholder="https://..." />
+                        <FormInput label="サムネイルURL" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} placeholder="サムネイル画像 URL" />
+                        <FormInput label="アイコンURL" value={form.icon_url} onChange={v => set('icon_url', v)} placeholder="アイコン画像 URL" />
+                    </div>
+                    <div style={S.row}>
+                        <FormInput label="画像1 URL" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <FormInput label="画像2 URL" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <FormInput label="画像3 URL" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} placeholder="https://..." />
                     </div>
                 </div>
 

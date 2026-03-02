@@ -10,6 +10,8 @@ import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/compo
 const INITIAL = {
     author_name: '',
     visibility: '公開',
+    thumbnail_url: '',
+    icon_url: '',
     status: '未確認',
     grade: '不明',
     threat_type: '不明',
@@ -176,6 +178,10 @@ export default function AnomalyForm({ editId = null, initialData = null }) {
                         <FormInput label="投稿者名" value={form.author_name} placeholder="@ユーザー名" onChange={v => set('author_name', v)} />
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
                         <FormSelect label="調査状態" value={form.status} onChange={v => set('status', v)} options={OPTIONS.statuses} />
+                    </div>
+                    <div style={S.row}>
+                        <FormInput label="サムネイルURL" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} placeholder="サムネイル画像 URL" />
+                        <FormInput label="アイコンURL" value={form.icon_url} onChange={v => set('icon_url', v)} placeholder="アイコン画像 URL" />
                     </div>
                 </div>
 
