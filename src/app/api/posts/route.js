@@ -9,6 +9,9 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+// 管理者IDリスト
+const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 // GET: 投稿一覧取得（tableとuser_idでフィルタ可）
 export async function GET(request) {
     try {
@@ -82,7 +85,7 @@ export async function PATCH(request) {
         const { data: existing, error: fetchError } = await supabase
             .from(table).select('user_id').eq('id', id).single();
         if (fetchError) throw fetchError;
-        if (existing.user_id !== userId) {
+        if (existing.user_id !== userId && !ADMIN_IDS.includes(userId)) {
             return NextResponse.json({ error: '自分の投稿のみ編集できます' }, { status: 403 });
         }
 
@@ -121,7 +124,7 @@ export async function DELETE(request) {
         const { data: existing, error: fetchError } = await supabase
             .from(table).select('user_id').eq('id', id).single();
         if (fetchError) throw fetchError;
-        if (existing.user_id !== userId) {
+        if (existing.user_id !== userId && !ADMIN_IDS.includes(userId)) {
             return NextResponse.json({ error: '自分の投稿のみ削除できます' }, { status: 403 });
         }
 
