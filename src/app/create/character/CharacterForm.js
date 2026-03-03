@@ -624,6 +624,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.sectionTitle}>SECTION 7.5 — CYBERNETICS</div>
                     <h2 style={S.sectionHeading}>サイバネティクス（身体改造）</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だが侵食リスクが増す。</p>
+                    <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ff6666' }}>⚠ 装備と違い、サイバネティクスは一度施術すると取り外せません。慎重に選択してください。</div>
                     <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
                     {form.cyber_grade !== 'none' && (() => {
                         const grade = CYBER_GRADES.find(g => g.id === form.cyber_grade);
