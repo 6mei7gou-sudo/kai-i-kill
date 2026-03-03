@@ -6,6 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, findWeapon } from '@/data/weaponData';
+import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
 
 // ===== 定数定義 =====
 
@@ -139,6 +140,9 @@ const INITIAL = {
     // ストーリー
     fate: '', backstory: '',
     related_anomalies: '', related_characters: '', related_factions: '',
+    // サイバネティクス
+    cyber_grade: 'none',
+    cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
 };
 
 // ===== コンポーネント =====
@@ -611,6 +615,70 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>このキャラの装備CP予算</span>
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
                             </div>
+                        );
+                    })()}
+                </div>
+
+                {/* SEC 7.5: サイバネティクス */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 7.5 — CYBERNETICS</div>
+                    <h2 style={S.sectionHeading}>サイバネティクス（身体改造）</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だが侵食リスクが増す。</p>
+                    <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
+                    {form.cyber_grade !== 'none' && (() => {
+                        const grade = CYBER_GRADES.find(g => g.id === form.cyber_grade);
+                        const availList = [];
+                        // 等級以下のサイバネティクスを集める
+                        const gradeOrder = ['I', 'II', 'III'];
+                        const gradeIdx = gradeOrder.indexOf(form.cyber_grade);
+                        for (let i = 0; i <= gradeIdx; i++) {
+                            (CYBERNETICS[gradeOrder[i]] || []).forEach(c => availList.push(c));
+                        }
+                        const usedCP = form.cybernetics.reduce((sum, c) => {
+                            const found = findCybernetic(c.name);
+                            return sum + (found ? found.cp : 0);
+                        }, 0);
+                        return (
+                            <>
+                                <div style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                        {grade.label} — 基礎侵食 +{grade.erosion}%
+                                    </span>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: usedCP > grade.cpLimit ? 'var(--accent-danger)' : 'var(--accent-gold)' }}>
+                                        {usedCP} / {grade.cpLimit} CP
+                                    </span>
+                                </div>
+                                {form.cybernetics.map((slot, i) => (
+                                    <div key={i} style={{ marginBottom: 'var(--space-sm)', padding: '10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', marginBottom: '6px' }}>スロット {i + 1}</div>
+                                        <select
+                                            value={slot.name}
+                                            onChange={e => {
+                                                const name = e.target.value;
+                                                const arr = [...form.cybernetics];
+                                                const found = findCybernetic(name);
+                                                arr[i] = { name, part: found ? found.part : '' };
+                                                set('cybernetics', arr);
+                                            }}
+                                            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
+                                        >
+                                            <option value="">— 選択なし —</option>
+                                            {availList.map(c => (
+                                                <option key={c.name} value={c.name}>{c.name}（{c.cp}CP / {c.part} / {c.maker}）</option>
+                                            ))}
+                                        </select>
+                                        {slot.name && (() => {
+                                            const c = findCybernetic(slot.name);
+                                            if (!c) return null;
+                                            return (
+                                                <div style={{ marginTop: '6px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                                                    効果: {c.effect} · 共鳴: {c.resonance}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                ))}
+                            </>
                         );
                     })()}
                 </div>
