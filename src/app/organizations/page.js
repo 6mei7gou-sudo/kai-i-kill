@@ -1,15 +1,5 @@
-// 組織ページ — HUD風デザイン v2
-import fs from 'fs';
-import path from 'path';
+// 組織ページ — 三勢力の概要と権力構造
 import Link from 'next/link';
-
-function loadOrgData(key) {
-    const filePath = path.join(process.cwd(), 'data', 'organizations', `${key}.json`);
-    if (fs.existsSync(filePath)) {
-        return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    }
-    return null;
-}
 
 export const metadata = {
     title: '組織・人物 — 電脳怪異譚 KAI-I//KILL',
