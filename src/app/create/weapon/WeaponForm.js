@@ -24,7 +24,7 @@ const INITIAL = {
 
 // 選択肢
 const OPTIONS = {
-    categories: ['武装型', '独立型', '半装身型', '全装身型', '搭乗型'],
+    categories: ['武装型', '独立型', '半装身型', '搭乗型'],
     bodyParts: ['腕部', '脚部', '肩部', '胴部', 'その他'],
     manufacturers: MANUFACTURER_NAMES,
     affiliations: ['どれでも', '祓部', '傭兵', '無所属'],
@@ -41,7 +41,6 @@ const CATEGORY_INFO = {
     '武装型': { mod: '+1', risk: '低', note: '誰でも使える' },
     '独立型': { mod: '援護+1', risk: '中', note: '機体依存' },
     '半装身型': { mod: '攻防+1', risk: '中', note: '部位選択必要' },
-    '全装身型': { mod: '攻防+2', risk: '高', note: '扱える人間が少ない' },
     '搭乗型': { mod: '機動力+2', risk: '中', note: '狭所不向き' },
 };
 
