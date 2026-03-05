@@ -51,13 +51,25 @@ export const S = {
         resize: 'vertical',
     },
     select: {
+        width: '100%',
         background: 'var(--bg-elevated)',
         border: 'var(--border-subtle)',
         color: 'var(--text-primary)',
-        padding: '10px 14px',
+        padding: '10px 36px 10px 14px',
         fontSize: 'var(--font-size-base)',
         fontFamily: 'inherit',
         cursor: 'pointer',
+        appearance: 'none',
+        WebkitAppearance: 'none',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 12px center',
+        backgroundSize: '12px',
+    },
+    option: {
+        background: '#0a0c10',
+        color: '#e8e6e3',
+        padding: '8px',
     },
     fieldGroup: {
         marginBottom: 'var(--space-lg)',
@@ -100,9 +112,9 @@ export const S = {
         padding: '6px 14px',
         fontSize: 'var(--font-size-sm)',
         fontFamily: 'var(--font-mono)',
-        background: active ? 'rgba(0, 255, 170, 0.15)' : 'var(--bg-elevated)',
-        border: active ? '1px solid var(--accent-cyber)' : 'var(--border-subtle)',
-        color: active ? 'var(--accent-cyber)' : 'var(--text-muted)',
+        background: active ? 'var(--accent-gold-subtle)' : 'var(--bg-elevated)',
+        border: active ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+        color: active ? 'var(--accent-gold)' : 'var(--text-muted)',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
     }),
@@ -114,7 +126,7 @@ export function FormSelect({ label, value, onChange, options, hint }) {
         <div style={S.fieldGroup}>
             <label style={S.label}>{label}</label>
             <select style={S.select} value={value} onChange={e => onChange(e.target.value)}>
-                {options.map(o => <option key={o} value={o}>{o}</option>)}
+                {options.map(o => <option key={o} value={o} style={S.option}>{o}</option>)}
             </select>
             {hint && <div style={S.hint}>{hint}</div>}
         </div>
