@@ -67,7 +67,9 @@ export const S = {
         backgroundSize: '12px',
     },
     option: {
-        color: '#111',
+        background: '#0a0c10',
+        color: '#e8e6e3',
+        padding: '8px',
     },
     fieldGroup: {
         marginBottom: 'var(--space-lg)',

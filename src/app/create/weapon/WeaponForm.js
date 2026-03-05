@@ -248,11 +248,11 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                             }}
                             style={{ width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
                         >
-                            <option value="" style={{ color: '#111' }}>— ベース装備を選択 —</option>
+                            <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— ベース装備を選択 —</option>
                             {(BASE_WEAPONS_BY_CATEGORY[form.category] || []).map(w => (
-                                <option key={w.name} value={w.name} style={{ color: '#111' }}>{w.name}（{w.cp}CP / {w.maker}）</option>
+                                <option key={w.name} value={w.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{w.name}（{w.cp}CP / {w.maker}）</option>
                             ))}
-                            <option value="_custom" style={{ color: '#111' }}>自由入力…</option>
+                            <option value="_custom" style={{ background: '#0a0c10', color: '#e8e6e3' }}>自由入力…</option>
                         </select>
                     </div>
                     {form.base_name === '_custom' && (
@@ -294,15 +294,15 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                                     }}
                                     style={{ flex: 1, padding: '10px 36px 10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
                                 >
-                                    <option value="" style={{ color: '#111' }}>— オプションを選択 —</option>
+                                    <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— オプションを選択 —</option>
                                     {Object.entries(CUSTOM_OPTIONS).map(([group, opts]) => (
                                         <optgroup key={group} label={group}>
                                             {opts.map(o => (
-                                                <option key={o.name} value={o.name} style={{ color: '#111' }}>{o.name}（{o.cp}CP）</option>
+                                                <option key={o.name} value={o.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{o.name}（{o.cp}CP）</option>
                                             ))}
                                         </optgroup>
                                     ))}
-                                    <option value="_custom" style={{ color: '#111' }}>自由入力…</option>
+                                    <option value="_custom" style={{ background: '#0a0c10', color: '#e8e6e3' }}>自由入力…</option>
                                 </select>
                                 {opt.name === '_custom' && (
                                     <FormInput label="" value={opt.custom_name || ''} onChange={v => updateOption(i, 'custom_name', v)} placeholder="オプション名" />
