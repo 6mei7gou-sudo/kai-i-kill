@@ -296,9 +296,9 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                                 >
                                     <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— オプションを選択 —</option>
                                     {Object.entries(CUSTOM_OPTIONS).map(([group, opts]) => (
-                                        <optgroup key={group} label={group}>
+                                        <optgroup key={group} label={`▸ ${group}`} style={{ color: '#d4af37', background: '#0a0c10', fontWeight: 700, fontStyle: 'normal' }}>
                                             {opts.map(o => (
-                                                <option key={o.name} value={o.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{o.name}（{o.cp}CP）</option>
+                                                <option key={o.name} value={o.name} style={{ background: '#0a0c10', color: '#e8e6e3', fontWeight: 400 }}>{o.name}（{o.cp}CP）</option>
                                             ))}
                                         </optgroup>
                                     ))}
