@@ -29,16 +29,17 @@ export default function GlossaryClient({ data }) {
 
     return (
         <div className="container">
-            <section className="section">
-                <span className="section__title">// Glossary</span>
-                <h1 className="section__heading">用語集</h1>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-xl)' }}>
-                    この世界の主要な用語を分類別に検索・閲覧できます。
-                    <span className="badge badge--cyber" style={{ marginLeft: '8px' }}>
+            {/* ページヘッダー */}
+            <div className="page-header">
+                <div className="page-header__badge">GLOSSARY — TERMINOLOGY DATABASE</div>
+                <h1 className="page-header__title">用語集</h1>
+                <div className="page-header__subtitle">
+                    電脳怪異譚　KAI-I//KILL — 討伐者ハンドブック
+                    <span className="badge badge--gold" style={{ marginLeft: '12px' }}>
                         {data.length}件
                     </span>
-                </p>
-            </section>
+                </div>
+            </div>
 
             {/* 検索フィールド */}
             <div className="glossary-search">
@@ -84,7 +85,7 @@ export default function GlossaryClient({ data }) {
                             {entry.importance && (
                                 <span style={{
                                     marginLeft: '8px',
-                                    color: entry.importance === '★' ? 'var(--accent-gold)' : 'var(--accent-cyber)',
+                                    color: entry.importance === '★' ? 'var(--accent-gold)' : 'var(--accent-danger)',
                                     fontSize: '0.9em'
                                 }}>
                                     {entry.importance}
@@ -93,13 +94,18 @@ export default function GlossaryClient({ data }) {
                         </h3>
                         <div className="glossary-entry__meta">
                             {entry.category && (
-                                <span className="badge badge--kai">{entry.category}</span>
+                                <span className="badge badge--gold">{entry.category}</span>
                             )}
                             {entry.date && (
-                                <span className="badge badge--cyber">{entry.date}</span>
+                                <span className="badge badge--muted">{entry.date}</span>
                             )}
                             {entry.related.length > 0 && entry.related.map((rel, j) => (
-                                <span key={j} style={{ color: 'var(--accent-cyber)', cursor: 'pointer' }}
+                                <span key={j} style={{
+                                    color: 'var(--accent-gold)',
+                                    cursor: 'pointer',
+                                    fontSize: 'var(--font-size-xs)',
+                                    transition: 'color var(--transition-fast)',
+                                }}
                                     onClick={() => setSearchQuery(rel)}>
                                     {rel}
                                 </span>

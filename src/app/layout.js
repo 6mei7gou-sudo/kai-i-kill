@@ -66,23 +66,23 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider appearance={{
       variables: {
-        colorPrimary: '#00ffaa',
-        colorBackground: '#1a1f2e',
-        colorText: '#ffffff',
-        colorTextSecondary: '#cccccc',
-        colorInputBackground: '#252b3d',
-        colorInputText: '#ffffff',
-        colorNeutral: '#ffffff',
+        colorPrimary: '#d4af37',
+        colorBackground: '#0a0c10',
+        colorText: '#e8e6e3',
+        colorTextSecondary: '#9a9a9a',
+        colorInputBackground: '#0d1015',
+        colorInputText: '#e8e6e3',
+        colorNeutral: '#e8e6e3',
       },
       elements: {
-        card: { backgroundColor: '#1a1f2e', border: '1px solid rgba(0,255,170,0.15)' },
+        card: { backgroundColor: '#0a0c10', border: '1px solid rgba(212, 175, 55, 0.15)' },
         headerTitle: { color: '#ffffff' },
-        headerSubtitle: { color: '#bbbbbb' },
-        socialButtonsBlockButtonText: { color: '#ffffff' },
-        formFieldLabel: { color: '#cccccc' },
-        formFieldInput: { backgroundColor: '#252b3d', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)' },
-        footerActionLink: { color: '#00ffaa' },
-        identityPreviewEditButton: { color: '#00ffaa' },
+        headerSubtitle: { color: '#9a9a9a' },
+        socialButtonsBlockButtonText: { color: '#e8e6e3' },
+        formFieldLabel: { color: '#9a9a9a' },
+        formFieldInput: { backgroundColor: '#0d1015', color: '#e8e6e3', borderColor: 'rgba(255,255,255,0.1)' },
+        footerActionLink: { color: '#d4af37' },
+        identityPreviewEditButton: { color: '#d4af37' },
       },
     }}>
       <html lang="ja">
@@ -105,8 +105,8 @@ export default function RootLayout({ children }) {
                   <SignInButton mode="modal">
                     <button style={{
                       width: '100%', padding: '10px', fontFamily: 'var(--font-mono)',
-                      fontSize: 'var(--font-size-sm)', background: 'rgba(0, 255, 170, 0.1)',
-                      border: '1px solid var(--accent-cyber)', color: 'var(--accent-cyber)',
+                      fontSize: 'var(--font-size-sm)', background: 'rgba(212, 175, 55, 0.1)',
+                      border: '1px solid var(--accent-gold-border)', color: 'var(--accent-gold)',
                       cursor: 'pointer', transition: 'all 0.2s',
                     }}>▶ ログイン / 登録</button>
                   </SignInButton>
