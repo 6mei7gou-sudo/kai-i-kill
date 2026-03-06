@@ -34,11 +34,13 @@ docs/
     │   ├── combat_hp_v1.md          戦闘ルール補遺 v1.0
     │   ├── combat_hp_v2.md          戦闘ルール補遺 v2.0（拡充版）
     │   ├── cybernetics_v1.md        サイバネティクス補遺 v1.0
-    │   └── weapon_custom_data.md    武器カスタムデータ
+    │   ├── weapon_custom_data.md    武器カスタムデータ
+    │   └── expansion_v1.md         追加データブック《禁域解放》 v1.0（教団・怪異核・全装身型・搭乗型）
     ├── create/
     │   ├── anomaly_investigation_template_TMP_v1.0.md  怪異調査書テンプレート
     │   ├── weapon_gear_post_template.md                武器投稿テンプレート
-    │   └── ia_site_structure_simple_v0.1.md            サイト構造設計
+    │   ├── ia_site_structure_simple_v0.1.md            サイト構造設計
+    │   └── official_pc_template_v1.0.md               公式PC記入フォーマット v1.0
     ├── haraebe/          ← public/と同内容（整形済み）
     ├── mercenaries/
     ├── companies/
