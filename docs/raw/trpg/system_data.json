@@ -28,7 +28,7 @@
     { "id": "speed", "name": "疾", "reading": "はや", "description": "先手・回避・追跡（イニシアチブに使用）" },
     { "id": "knowledge", "name": "識", "reading": "しき", "description": "調査・知識・文献・解明" },
     { "id": "judgment", "name": "判", "reading": "はん", "description": "解明宣言・看破・戦術" },
-    { "id": "vision", "name": "察", "reading": "しや", "description": "怪異感知・観察・証言聴取" },
+    { "id": "vision", "name": "察", "reading": "さつ", "description": "怪異感知・観察・証言聴取" },
     { "id": "technique", "name": "術", "reading": "じゅつ", "description": "魔法行使・魔導具操作・装備の高度な運用" },
     { "id": "soul", "name": "魂", "reading": "こん", "description": "異能制御・侵食抵抗・信念維持" }
   ],

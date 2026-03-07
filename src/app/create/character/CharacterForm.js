@@ -19,7 +19,7 @@ const ABILITIES = [
     { key: 'rank_haya', name: '疾', reading: 'はや', desc: '先手・回避・追跡（イニシアチブ）' },
     { key: 'rank_shiki', name: '識', reading: 'しき', desc: '調査・知識・文献・解明' },
     { key: 'rank_han', name: '判', reading: 'はん', desc: '解明宣言・看破・戦術判断' },
-    { key: 'rank_shiya', name: '察', reading: 'しや', desc: '怪異感知・観察・証言聴取' },
+    { key: 'rank_shiya', name: '察', reading: 'さつ', desc: '怪異感知・観察・証言聴取' },
     { key: 'rank_jutsu', name: '術', reading: 'じゅつ', desc: '魔法行使・魔導具操作' },
     { key: 'rank_kon', name: '魂', reading: 'こん', desc: '侵食抵抗・信念維持・精神防御' },
 ];

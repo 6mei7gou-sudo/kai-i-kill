@@ -130,7 +130,7 @@ export default function QuickstartPage() {
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: 'var(--accent-gold)', fontSize: 'var(--font-size-lg)' }}>察</td>
-                                <td>しや</td>
+                                <td>さつ</td>
                                 <td>知覚・直感。怪異の気配の察知、罠の発見、嘘の看破、周囲の異変に使う</td>
                             </tr>
                             <tr>
