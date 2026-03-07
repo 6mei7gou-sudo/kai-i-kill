@@ -30,7 +30,7 @@ const navGroups = [
   {
     label: '怪異システム',
     items: [
-      { href: '/world/', icon: '◉', text: '怪異とは' },
+      { href: '/anomalies/about/', icon: '△', text: '怪異とは' },
       { href: '/glossary/', icon: '▤', text: '用語集' },
     ],
   },
