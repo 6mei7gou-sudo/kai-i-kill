@@ -1,168 +1,249 @@
-// 怪異記録ページ — HUD風デザイン v2
-import fs from 'fs';
-import path from 'path';
+// 導入ページ — 怪異・能力・装備のイントロダクション
+import Link from 'next/link';
 
 export const metadata = {
     title: '怪異・能力・装備 — 電脳怪異譚 KAI-I//KILL',
-    description: '怪異の等級体系、分類、無力化方法、討伐プロセスなど怪異に関する公開情報データベース。',
+    description: 'この世界の三つの柱を知る。怪異とは何か、討伐者が扱う二つの力、そして装備の体系。',
 };
 
-const grades = [
-    { grade: '特級', desc: '現状の手段では消滅が極めて困難。信念密度が桁外れに高い', example: '禁足地の核レベル。封印・管理が限界', css: 'badge--grade-special' },
-    { grade: '一級', desc: '信念密度が非常に高い。長い歴史を持つ強力な怪異', example: '古い都市伝説型の強力な怪異', css: 'badge--grade-1' },
-    { grade: '二級', desc: '信念密度が高い。記録のある古い怪異の大半', example: '文献に記録が残る怪異', css: 'badge--grade-2' },
-    { grade: '三級', desc: '信念密度が中程度。拡散が進んだ新しい怪異など', example: 'SNSで広まった都市伝説が実体化', css: 'badge--grade-3' },
-    { grade: '四級', desc: '信念密度が低い。発生したばかりの新しい怪異', example: '局所的な噂から生まれた怪異', css: 'badge--muted' },
-    { grade: '五級', desc: 'ほぼ存在を認識できないレベル', example: '魔法事故由来の微小怪異', css: 'badge--muted' },
-];
-
-const threatTypes = [
-    { type: '甲種', desc: '無差別に人を害する。積極的な殺傷意図を持つ', color: 'var(--accent-danger)' },
-    { type: '乙種', desc: '条件付きで害する。ルールを破った者を狙う', color: 'var(--accent-gold)' },
-    { type: '丙種', desc: '基本的に害さないが刺激すると害する', color: 'var(--text-secondary)' },
-    { type: '丁種', desc: '人を害さない。共存可能または信仰対象に近い', color: 'var(--accent-blue)' },
-];
-
-export default function AnomaliesPage() {
+export default function IntroAnomaliesPage() {
     return (
         <div className="container">
             {/* ページヘッダー */}
             <div className="page-header">
-                <div className="page-header__badge">PAGE 2 / 5</div>
+                <div className="page-header__badge">INTRODUCTION</div>
                 <h1 className="page-header__title">怪異・能力・装備</h1>
                 <div className="page-header__subtitle">電脳怪異譚　KAI-I//KILL — 討伐者ハンドブック</div>
             </div>
 
-            {/* 怪異について */}
+            <div className="callout" style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                    このページでは、この世界を構成する三つの柱——<span className="text-gold">怪異</span>・<span className="text-gold">能力</span>・<span className="text-gold">装備</span>を簡潔に紹介する。
+                    詳細は<Link href="/world/" style={{ color: 'var(--accent-gold)' }}>世界観バイブル</Link>を参照。
+                </p>
+            </div>
+
+            {/* ===== 怪異 ===== */}
             <section className="section">
-                <div className="section__number">03 — KAIJIN SYSTEM</div>
+                <div className="section__number">01 — ANOMALY</div>
                 <h2 className="section__heading">
-                    怪異について
+                    怪異
                     <span className="section__heading-en">KAIJIN</span>
                 </h2>
-                <p className="section__desc">
-                    怪異とは、集合的な噂・言説・信念が臨界点を超えた時に現実へと侵食する存在の総称だ。専門家はこれを<span className="text-gold">バグ</span>と呼ぶ。全ての怪異は<span className="text-gold">核</span>と<span className="text-gold">ルール</span>を持つ。
-                </p>
             </section>
 
-            {/* 核とルール — 2カラム */}
-            <div className="two-col" style={{ marginBottom: 'var(--space-2xl)' }}>
-                <div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
-                        CORE — 核
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    噂が広まり、信じる人間が増え、集合的な信念が臨界点を超えると——それは現実に<span className="text-gold">バグ</span>として出力される。これが怪異だ。
+                </p>
+
+                <div className="two-col" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
+                            CORE — 核
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                            怪異の存在の中心。物・場所・記録媒体に宿る。<span className="text-gold">核を壊せば怪異は消える。</span>
+                        </p>
                     </div>
-                    <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-sm)' }}>核とは何か</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                        怪異の存在の中心であり消滅条件の鍵だ。基本的には<span className="text-gold">物に宿る。</span>特定の場所・道具・建造物・記録媒体などが核になる。稀に死体や生きた人間に宿る場合があり、対処の難度と倫理的複雑さが跳ね上がる。
-                    </p>
+                    <div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
+                            RULE — ルール
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                            怪異が人を害するための条件。<span className="text-danger">ルールを破るほど逃げられなくなる。</span>
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
-                        RULE — ルール
-                    </div>
-                    <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-sm)' }}>ルールとは何か</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                        怪異が人間を害するための条件だ。<span className="text-danger">ルールを破れば破るほど怪異から逃げられなくなる。</span>ルールは怪異が人を捕捉・追跡するトリガーでもある。
+
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style={{ width: '90px' }}>強さ</th>
+                                <th>概要</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span className="badge badge--grade-special">特級〜一級</span></td>
+                                <td>歴史ある強大な怪異。調査・解明なしでは討伐不可能。特級は封印しかできない</td>
+                            </tr>
+                            <tr>
+                                <td><span className="badge badge--grade-2">二級〜三級</span></td>
+                                <td>本格的な怪異。二級は解明必須、三級は力押しも可能だが調べた方が安全</td>
+                            </tr>
+                            <tr>
+                                <td><span className="badge badge--muted">四級〜五級</span></td>
+                                <td>日常的に湧く害獣。見つけ次第叩ける。討伐者の日常業務</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="callout">
+                    <div className="callout__label">討伐の原則：</div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                        調査して、解明して、討伐する。この三段階が基本だ。戦闘力だけで解決できる怪異は存在しない——雑魚を除いて。
                     </p>
                 </div>
             </div>
 
-            {/* 等級体系 */}
+            {/* ===== 能力 ===== */}
             <section className="section">
-                <div className="section__number">04 — GRADE SYSTEM</div>
+                <div className="section__number">02 — POWERS</div>
                 <h2 className="section__heading">
-                    存在強度等級
-                    <span className="section__heading-en">EXISTENCE GRADE</span>
+                    二つの力
+                    <span className="section__heading-en">MAGIC & ANOMALY POWER</span>
                 </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
                 <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-                    信念密度と永続性で決まる。等級が高いほど強く、低いほど弱い。
+                    討伐者が扱う力は二種類ある。どちらもリスクを伴う。
                 </p>
 
-                <div className="content-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style={{ width: '80px' }}>等級</th>
-                                <th>特徴</th>
-                                <th>例</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {grades.map((g, i) => (
-                                <tr key={i}>
-                                    <td><span className={`badge ${g.css}`}>{g.grade}</span></td>
-                                    <td style={{ color: 'var(--text-primary)' }}>{g.desc}</td>
-                                    <td>{g.example}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            {/* 脅威度種別 */}
-            <section className="section">
-                <div className="section__number">05 — THREAT TYPE</div>
-                <h2 className="section__heading">
-                    脅威度種別
-                    <span className="section__heading-en">THREAT CLASSIFICATION</span>
-                </h2>
-                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-                    害意の有無と条件で決まる。存在強度とは独立した軸。
-                </p>
-
-                <div className="content-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style={{ width: '80px' }}>種別</th>
-                                <th>行動特性</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {threatTypes.map((t, i) => (
-                                <tr key={i}>
-                                    <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: t.color }}>{t.type}</td>
-                                    <td>{t.desc}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            {/* 討伐プロセス */}
-            <section className="section">
-                <div className="section__number">06 — ELIMINATION PROCESS</div>
-                <h2 className="section__heading">
-                    討伐の三段階
-                    <span className="section__heading-en">THREE PHASES</span>
-                </h2>
-            </section>
-
-            <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
-                <div className="callout__label">重要：</div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                    戦闘力だけで解決できる怪異は存在しない。解明なしの討伐は自殺行為だ。
-                </p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'rgba(255,255,255,0.04)', border: 'var(--border-subtle)', marginBottom: 'var(--space-3xl)' }}>
-                {[
-                    { phase: 'PHASE 1', title: '調査プロセス', desc: '怪異の存在を確認し正体と性質を特定する。核の所在、被害パターン、発生源の噂を調べ上げる。' },
-                    { phase: 'PHASE 2', title: '解明プロセス', desc: '怪異のルールを特定し弱点につながる法則を見つける。このプロセスそのものが命がけ。ルールを破れば逃げられなくなる。' },
-                    { phase: 'PHASE 3', title: '討伐プロセス', desc: '調査と解明で得た情報を元に怪異を無力化する。核を破壊または無効化する方法は怪異によって異なる。' },
-                ].map((phase, i) => (
-                    <div key={i} style={{ background: 'var(--bg-card)', padding: 'var(--space-lg) var(--space-xl)', display: 'flex', gap: 'var(--space-lg)', alignItems: 'flex-start' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', minWidth: '80px', paddingTop: '4px' }}>
-                            {phase.phase}
+                <div className="two-col" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+                            CHEAT CODE
                         </div>
-                        <div>
-                            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-xs)' }}>{phase.title}</h3>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>{phase.desc}</p>
+                        <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-sm)' }}>魔法</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
+                            世界のソースコードへの直接介入。訓練と資格で習得する外部の力。8つの魔法言語（P、Igniscript、Lupis Surf、Ivyo、NGT、Monyx、P:、P'）が存在する。
+                        </p>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', opacity: 0.9 }}>
+                            RISK: 大きな魔法ほど怪異を生む
                         </div>
                     </div>
-                ))}
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+                            APPLICATION
+                        </div>
+                        <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-sm)' }}>異能</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
+                            内側から生まれる力。怪異と同じ発生原理を持ち、体験や執着から発現する。訓練では習得できない。
+                        </p>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', opacity: 0.9 }}>
+                            RISK: 使うたびに自分が怪異に近づく（侵食率上昇）
+                        </div>
+                    </div>
+                </div>
+
+                <div className="callout">
+                    <div className="callout__label">魔法と異能の違い：</div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                        魔法は外から世界を書き換える。異能は内側から力を引き出す。魔法は怪異を生み、異能は使用者を変質させる。どちらの力も無代償ではない。
+                    </p>
+                </div>
+            </div>
+
+            {/* ===== 装備 ===== */}
+            <section className="section">
+                <div className="section__number">03 — EQUIPMENT</div>
+                <h2 className="section__heading">
+                    装備体系
+                    <span className="section__heading-en">ARMAMENTS</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    討伐者の装備は六つの分類に体系化されている。所属や資金力によって使えるものが変わる。
+                </p>
+
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>分類</th>
+                                <th>概要</th>
+                                <th style={{ width: '80px' }}>使いやすさ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>武装型</td>
+                                <td>刀・銃・杖など携行武器。最も歴史が長く誰でも扱える</td>
+                                <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>◎</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>独立型</td>
+                                <td>偵察ドローンや支援機。自律行動で索敵・援護を行う</td>
+                                <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>○</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>半装身型</td>
+                                <td>腕部装甲や背面ユニットなど部位強化装備。カスタム向き</td>
+                                <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>○</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>全装身型</td>
+                                <td>全身を覆う高火力装備。一般市民に見られると都市伝説になる</td>
+                                <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>△</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>搭乗型</td>
+                                <td>バイクから特殊車両まで。機動力と輸送に特化</td>
+                                <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>○</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>戦闘用搭乗型</td>
+                                <td>大型怪異討伐用の機動兵器。個人所有は法律で禁止</td>
+                                <td style={{ textAlign: 'center', color: 'var(--accent-danger)' }}>✕</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="callout">
+                    <div className="callout__label">メーカーについて：</div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                        蒼鉄機工（国家系・安定品質）、雷禽重工（独立系・高出力）、銀鎚精機（カスタムメイド）など複数の企業が装備を製造している。出自不明の闇市場品も流通している。
+                    </p>
+                </div>
+            </div>
+
+            {/* ===== 深掘りリンク ===== */}
+            <section className="section">
+                <div className="section__number">MORE — DEEP DIVE</div>
+                <h2 className="section__heading">
+                    もっと知る
+                    <span className="section__heading-en">FURTHER READING</span>
+                </h2>
+            </section>
+
+            <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
+                <Link href="/world/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">◉</div>
+                        <div className="card__title-en">WORLD BIBLE</div>
+                        <h3 className="card__title">世界観バイブル</h3>
+                        <p className="card__desc">
+                            怪異の等級体系・分類・脅威度・討伐プロセス・魔法言語・装備の詳細を網羅した世界観の全文。
+                        </p>
+                    </div>
+                </Link>
+                <Link href="/organizations/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">⛊</div>
+                        <div className="card__title-en">FACTIONS</div>
+                        <h3 className="card__title">三種の討伐者</h3>
+                        <p className="card__desc">
+                            祓部・傭兵・無所属。それぞれの強み・制約・文化を知る。
+                        </p>
+                    </div>
+                </Link>
+                <Link href="/glossary/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">▤</div>
+                        <div className="card__title-en">GLOSSARY</div>
+                        <h3 className="card__title">用語集</h3>
+                        <p className="card__desc">
+                            専門用語をカテゴリ別に検索。初めての人はここから。
+                        </p>
+                    </div>
+                </Link>
             </div>
         </div>
     );

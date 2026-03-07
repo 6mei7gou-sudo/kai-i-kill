@@ -8,8 +8,8 @@ export const metadata = {
 
 const organizations = [
     { key: 'haraebe', name: '公的機関（祓部）', en: 'HARAEBU — PUBLIC AGENCY', icon: '⊙', desc: '魔導省の内部組織として存在する国家機関の怪異対処部門。警察や自衛隊の入隊検査で素養を持つ人間が選別されて配属される。古い怪異に関する深い知識と専門的な訓練体系を持つ。' },
-    { key: 'mercenaries', name: '傭兵集団', en: 'MERCENARY GROUPS', icon: '✕', desc: '個人から集団まで様々な形を取る。大企業がバックについている討伐者集団。独立系企業の高性能魔導具やプロトタイプを運用する。二つ名を持つ個人特化型の専用装備使いが存在し伝説扱いされる。' },
-    { key: 'unaffiliated', name: '無所属', en: 'UNAFFILIATED', icon: '◈', desc: '国にも企業にも属さない個人または小集団。犯罪者扱いされることも多く法的な保護がない。曰く付きの特殊装備・違法改造品・出どころ不明の専用機を使う。互いの覚醒経緯を詮索しない不文律がある。' },
+    { key: 'mercenaries', name: '傭兵集団', en: 'MERCENARY GROUPS', icon: '✕', desc: '傭兵ネットワーク《Anonymous》を通じて依頼を受ける討伐者たち。レーティング制で管理され、高ランクの者に高難度の依頼が回る。独立系企業の高性能魔導具やプロトタイプを運用し、二つ名を持つ伝説的な専用装備使いが存在する。' },
+    { key: 'unaffiliated', name: '無所属', en: 'UNAFFILIATED', icon: '◈', desc: '祓部にも《Anonymous》にも属さない者たち。装備店の主人、企業の用心棒、スラムで無免許のまま戦う生存者など多様な顔を持つ。スラムにはリトルクランと呼ばれる子供たちの寄り合いも存在する。' },
 ];
 
 export default function OrganizationsPage() {

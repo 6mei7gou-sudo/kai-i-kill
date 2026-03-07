@@ -28,14 +28,18 @@ docs/
 │
 └── raw/                 ← 原本・ルールブック・テンプレート
     ├── trpg/
-    │   ├── CONTEXT.md               引き継ぎ用コンテキスト
     │   ├── rules_unified.md         ★主文書★ 統合ルールブック v3.0
-    │   ├── rulebook_v1.md           旧版ルールブック v1.0（参照用）
-    │   ├── combat_hp_v1.md          戦闘ルール補遺 v1.0
     │   ├── combat_hp_v2.md          戦闘ルール補遺 v2.0（拡充版）
     │   ├── cybernetics_v1.md        サイバネティクス補遺 v1.0
     │   ├── weapon_custom_data.md    武器カスタムデータ
-    │   └── expansion_v1.md         追加データブック《禁域解放》 v1.0（教団・怪異核・全装身型・搭乗型）
+    │   ├── expansion_v1.md         追加データブック《禁域解放》 v1.0（教団・怪異核・全装身型・搭乗型）
+    │   ├── system_data.json         構造化データ（v3.0対応）
+    │   ├── CONTEXT.md               引き継ぎ用コンテキスト
+    │   ├── README.md                索引・利用ガイド
+    │   └── archive/                 旧版（参照用）
+    │       ├── rulebook_v1.md           旧版ルールブック v1.0
+    │       ├── combat_hp_v1.md          戦闘ルール補遺 v1.0
+    │       └── system_data_v1.json      旧版構造化データ v1.0
     ├── create/
     │   ├── anomaly_investigation_template_TMP_v1.0.md  怪異調査書テンプレート
     │   ├── weapon_gear_post_template.md                武器投稿テンプレート
@@ -84,3 +88,24 @@ docs/
 - `supabase/`：データベースマイグレーション
 - `data/`：Webサイト用データファイル
 - Webサイトには**世界観とキャラクター情報のみ**を掲載する。ゲームルールはルールブック（docs/raw/trpg/）に記載する
+
+## 機能拡大ロードマップ
+
+現在 Phase 1 から順に開発中。
+
+| Phase | テーマ | 概要 |
+|:---:|:---|:---|
+| **1** | 足場固め | テスト基盤、sheet-app統合、キャラシ出力（PDF/PNG/JSON）、DB整理 |
+| **2** | コミュニティ深化 | コメント/リアクション、プロフィール強化、通知、公認設定申請・承認フロー |
+| **3** | PBW基盤 | セッションルーム、IC投稿、キャラ状態パネル、非同期プレイ、PBW⇔TRPGリソース変換 |
+| **4** | Webゲーム | ダイスローラー、怪異遭遇シミュレーター、キャラビルダー、GM用DB |
+| **5** | コンテンツ拡充 | ルールブックWebビューア、公式素材DLページ、シナリオテンプレート、ギャラリー |
+| **6** | スケーリング | PWA化、API公開、Discord Bot、i18n |
+| **7** | マネタイズ | Stripe決済、有料コンテンツ管理、クリエイター収益化、サブスクプラン |
+
+### 現在の作業：Phase 1
+
+- [ ] Jest + React Testing Library セットアップ、主要APIとコンポーネントのテスト
+- [ ] sheet-app を `/character-sheet` ルートとして Next.js に統合、Clerk連携
+- [ ] キャラクターシート出力（PDF/PNG/JSON/印刷用レイアウト）
+- [ ] Supabase CLI or Prisma でマイグレーション管理正式化、RLSポリシー強化
