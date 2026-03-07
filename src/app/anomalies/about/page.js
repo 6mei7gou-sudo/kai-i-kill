@@ -213,39 +213,9 @@ export default function AnomalyAboutPage() {
                 </table>
             </div>
 
-            {/* ===== 改造個体と別個体 ===== */}
-            <section className="section">
-                <div className="section__number">06 — MUTATION</div>
-                <h2 className="section__heading">
-                    改造個体と別個体
-                    <span className="section__heading-en">MODIFIED & SEPARATE</span>
-                </h2>
-            </section>
-
-            <div className="two-col" style={{ marginBottom: 'var(--space-xl)' }}>
-                <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-                        MODIFIED — ルール変質50%未満
-                    </div>
-                    <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>改造個体</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                        元の知識がある程度通用するが、決定的にルールが食い違う瞬間がある。途中まで既知の怪異と完全に一致して、ある一点で裏切られる。
-                    </p>
-                </div>
-                <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-                        SEPARATE — ルール変質50%以上
-                    </div>
-                    <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>別個体</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                        新しい核と新しいルールを持つ完全に別の怪異。元の知識はほぼ役に立たない。それまでの解明作業が全て無効になる。
-                    </p>
-                </div>
-            </div>
-
             {/* ===== 討伐の三段階 ===== */}
             <section className="section">
-                <div className="section__number">07 — ELIMINATION PROCESS</div>
+                <div className="section__number">06 — ELIMINATION PROCESS</div>
                 <h2 className="section__heading">
                     討伐の三段階
                     <span className="section__heading-en">THREE PHASES</span>
