@@ -7,7 +7,7 @@ import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from '@c
 export const metadata = {
   title: '電脳怪異譚 KAI-I//KILL — 討伐者ハンドブック',
   description: '噂が形を持ち、現実にバグとして侵食する世界。電脳怪異譚 KAI-I//KILLの公式世界観・設定資料・怪異記録データベース。',
-  keywords: ['電脳怪異譚', 'KAI-I//KILL', 'TRPG', 'PBW', '怪異', 'サイバーパンク', '和風ホラー'],
+  keywords: ['電脳怪異譚', 'KAI-I//KILL', 'TRPG', 'Webゲーム', '怪異', 'サイバーパンク', '和風ホラー'],
 };
 
 // サイドバーのナビゲーション構造

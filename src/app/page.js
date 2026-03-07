@@ -8,7 +8,7 @@ export default function HomePage() {
       {/* ===== ヒーローセクション ===== */}
       <section className="hero">
         <div className="hero__hex" />
-        <div className="hero__label">TRPG × VRChat × PBW × Community — LIVING WORLD PROJECT</div>
+        <div className="hero__label">TRPG × VRChat × Web Game × Community — LIVING WORLD PROJECT</div>
         <div className="hero__title-sm">電 脳 怪 異 譚</div>
         <h1 className="hero__title">KAI-I//KILL</h1>
         <div className="hero__reading">カ イ イ キ ル</div>
@@ -18,7 +18,7 @@ export default function HomePage() {
         </p>
 
         <p className="hero__tagline">
-          TRPG、VRChat、PBW、コミュニティ投稿——四つの入口が一つの世界に繋がる。
+          TRPG、VRChat、Webゲーム、コミュニティ投稿——四つの入口が一つの世界に繋がる。
           <br />
           あなたがどこから参加しても、この世界の歴史になる。
         </p>
@@ -62,7 +62,7 @@ export default function HomePage() {
           </div>
           <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-              PBW — PLAY BY WEB
+              WEB GAME
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>非同期で世界に参加する</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
@@ -75,12 +75,12 @@ export default function HomePage() {
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>仮想空間で世界に立つ</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              VRChat上に構築された世界で、キャラクターとして存在する。セッションやPBWの結果がワールドに反映され、物語が進行する。
+              VRChat上に構築された世界で、キャラクターとして存在する。セッションやWebゲームの結果がワールドに反映され、物語が進行する。
             </p>
           </div>
           <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-              COMMUNITY DB — SCP STYLE
+              COMMUNITY DB
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>世界を記録し、共有する</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
@@ -89,44 +89,44 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* TRPG ↔ PBW コンバート */}
+        {/* TRPG ↔ Webゲーム コンバート */}
         <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: '1px solid var(--accent-gold-border)', marginBottom: 'var(--space-lg)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
-            RESOURCE CONVERSION — TRPG ⇄ PBW
+            RESOURCE CONVERSION — TRPG ⇄ WEB GAME
           </div>
           <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-md)' }}>リソースは非同期でコンバートできる</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
-            TRPGセッションで得た経験・装備・実績はPBWに持ち込める。PBWで蓄積した調査結果・人脈・資金はTRPGセッションに反映される。二つの遊び方は同じキャラクター、同じ世界を共有している。
+            TRPGセッションで得た経験・装備・実績はWebゲームに持ち込める。Webゲームで蓄積した調査結果・人脈・資金はTRPGセッションに反映される。二つの遊び方は同じキャラクター、同じ世界を共有している。
           </p>
           <div className="content-body">
             <table>
               <thead>
                 <tr>
                   <th>リソース</th>
-                  <th>TRPG → PBW</th>
-                  <th>PBW → TRPG</th>
+                  <th>TRPG → Webゲーム</th>
+                  <th>Webゲーム → TRPG</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>キャラクター</td>
-                  <td>セッション後のステータスがPBWに同期</td>
-                  <td>PBWでの成長・変化がセッション開始時に反映</td>
+                  <td>セッション後のステータスがWebゲームに同期</td>
+                  <td>Webゲームでの成長・変化がセッション開始時に反映</td>
                 </tr>
                 <tr>
                   <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>装備・資金</td>
-                  <td>入手した装備・報酬がPBW上で管理される</td>
-                  <td>PBWで購入・改造した装備をセッションに持ち込み</td>
+                  <td>入手した装備・報酬がWebゲーム上で管理される</td>
+                  <td>Webゲームで購入・改造した装備をセッションに持ち込み</td>
                 </tr>
                 <tr>
                   <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>情報・手がかり</td>
                   <td>セッション中に得た怪異情報がDB化</td>
-                  <td>PBWの調査行動で得た手がかりをセッションに使用</td>
+                  <td>Webゲームの調査行動で得た手がかりをセッションに使用</td>
                 </tr>
                 <tr>
                   <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>実績・ランク</td>
                   <td>討伐実績が傭兵ランク・祓部昇進に反映</td>
-                  <td>PBWでの依頼達成もランク評価の対象</td>
+                  <td>Webゲームでの依頼達成もランク評価の対象</td>
                 </tr>
               </tbody>
             </table>
@@ -136,7 +136,7 @@ export default function HomePage() {
         <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
           <div className="callout__label">世界は拡張される：</div>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            セッションで起きた事件、PBWで進行した依頼、コミュニティに投稿された怪異——すべてが世界の歴史に刻まれる。この世界は完成しない。<span className="text-gold">プレイヤーが遊ぶたびに拡張されていく。</span>
+            セッションで起きた事件、Webゲームで進行した依頼、コミュニティに投稿された怪異——すべてが世界の歴史に刻まれる。この世界は完成しない。<span className="text-gold">プレイヤーが遊ぶたびに広がっていく。</span>
           </p>
         </div>
       </div>

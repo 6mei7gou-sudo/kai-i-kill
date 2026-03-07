@@ -1,4 +1,4 @@
-// キャラクターシート詳細 — PBW風プロフィールページ
+// キャラクターシート詳細 — プロフィールページ
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -71,7 +71,7 @@ export default function CharacterDetail({ id }) {
         <div className="container">
             <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-cyber)', textDecoration: 'none' }}>← 一覧に戻る</Link>
 
-            {/* ===== ヒーローセクション（PBW風） ===== */}
+            {/* ===== ヒーローセクション ===== */}
             <div style={{
                 marginTop: 'var(--space-lg)',
                 padding: 'var(--space-2xl)',
