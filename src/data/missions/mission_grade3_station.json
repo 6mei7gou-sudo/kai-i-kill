@@ -1,0 +1,50 @@
+{
+  "id": "mission_grade3_station",
+  "name": "終わらない終電",
+  "description": "深夜の無人駅に停車し続ける幽霊列車。乗客は降りられず、車両が一つずつ「消えて」いく。三級怪異。護衛が強力で、核の防御も高い。",
+  "difficulty": "C",
+  "client": "祓部 関東管区",
+  "reward": "信念ポイント+3、特殊装備解放",
+  "tags": ["三級", "交通型", "高難度"],
+  "battle": {
+    "max_rounds": 8,
+    "core": {
+      "name": "列車核「無限回送」",
+      "hp": 15,
+      "defense": 2
+    },
+    "guardians": [
+      {
+        "id": "g1",
+        "name": "車掌の亡霊",
+        "hp": 8,
+        "attack": 3,
+        "defense": 2,
+        "traits": ["不可視", "強打"],
+        "ai": "defensive"
+      },
+      {
+        "id": "g2",
+        "name": "乗客の残像A",
+        "hp": 4,
+        "attack": 2,
+        "defense": 0,
+        "traits": [],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g3",
+        "name": "乗客の残像B",
+        "hp": 4,
+        "attack": 2,
+        "defense": 0,
+        "traits": [],
+        "ai": "aggressive"
+      }
+    ]
+  },
+  "achievements": [
+    { "id": "grade3_clear", "name": "三級討伐者", "type": "mission" },
+    { "id": "survive_8rounds", "name": "長期戦の生存者", "type": "mission" }
+  ]
+}

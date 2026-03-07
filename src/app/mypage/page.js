@@ -64,6 +64,9 @@ export default function MyPage() {
     const [characters, setCharacters] = useState([]);
     const [gear, setGear] = useState([]);
     const [anomalies, setAnomalies] = useState([]);
+    const [missionResults, setMissionResults] = useState([]);
+    const [advCompletions, setAdvCompletions] = useState([]);
+    const [achievements, setAchievements] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -72,18 +75,24 @@ export default function MyPage() {
         const fetchAll = async () => {
             setLoading(true);
             try {
-                // 3テーブルを並列取得
-                const [charRes, gearRes, anomalyRes] = await Promise.all([
+                const [charRes, gearRes, anomalyRes, missionRes, advRes, achRes] = await Promise.all([
                     fetch(`/api/posts?table=character_sheets&user_id=${user.id}`),
                     fetch(`/api/posts?table=gear_posts&user_id=${user.id}`),
                     fetch(`/api/posts?table=anomaly_drafts&user_id=${user.id}`),
+                    fetch(`/api/games?table=mission_results&user_id=${user.id}`),
+                    fetch(`/api/games?table=adv_completions&user_id=${user.id}`),
+                    fetch(`/api/games?table=character_achievements&user_id=${user.id}`),
                 ]);
-                const [charJson, gearJson, anomalyJson] = await Promise.all([
+                const [charJson, gearJson, anomalyJson, missionJson, advJson, achJson] = await Promise.all([
                     charRes.json(), gearRes.json(), anomalyRes.json(),
+                    missionRes.json(), advRes.json(), achRes.json(),
                 ]);
                 setCharacters(charJson.data || []);
                 setGear(gearJson.data || []);
                 setAnomalies(anomalyJson.data || []);
+                setMissionResults(missionJson.data || []);
+                setAdvCompletions(advJson.data || []);
+                setAchievements(achJson.data || []);
             } catch (err) {
                 console.error('マイページ取得エラー:', err);
             } finally {
@@ -150,8 +159,66 @@ export default function MyPage() {
                                 </div>
                             )}
 
+                            {/* ミッション戦績 */}
+                            <SectionHeader icon="⚔" title="ミッション戦績" count={missionResults.length} />
+                            {missionResults.length === 0 ? (
+                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>まだミッションに挑戦していません。 <Link href="/games/mission/" style={{ color: 'var(--accent-gold)' }}>依頼掲示板 →</Link></p>
+                            ) : (
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {missionResults.slice(0, 10).map(m => {
+                                        const resultColor = m.result === '勝利' ? 'var(--accent-gold)' : m.result === '敗北' ? 'var(--accent-danger)' : 'var(--text-muted)';
+                                        return (
+                                            <div key={m.id} style={{ ...cardStyle, cursor: 'default' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginRight: '8px' }}>{m.difficulty}</span>
+                                                        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{m.mission_name}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{m.rounds_taken}R</span>
+                                                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: resultColor }}>{m.result}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* ADVクリア記録 */}
+                            <SectionHeader icon="◈" title="怪異譚クリア記録" count={advCompletions.length} />
+                            {advCompletions.length === 0 ? (
+                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>まだ怪異譚をクリアしていません。 <Link href="/games/adv/" style={{ color: 'var(--accent-gold)' }}>シナリオ一覧 →</Link></p>
+                            ) : (
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {advCompletions.map(a => {
+                                        const typeColor = a.ending_type === 'true' ? 'var(--accent-gold)' : a.ending_type === 'good' ? 'var(--accent-blue)' : a.ending_type === 'bad' ? 'var(--accent-danger)' : 'var(--text-secondary)';
+                                        return (
+                                            <div key={a.id} style={{ ...cardStyle, cursor: 'default' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{a.scenario_name}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: typeColor }}>{a.ending_name} ({a.ending_type.toUpperCase()})</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* 実績 */}
+                            {achievements.length > 0 && (
+                                <>
+                                    <SectionHeader icon="★" title="実績" count={achievements.length} />
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {achievements.map(a => (
+                                            <span key={a.id} className="badge--gold" style={{ fontSize: 'var(--font-size-xs)' }}>{a.achievement_name}</span>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
                             {/* 統計 */}
-                            <div style={{ marginTop: '48px', padding: '20px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', display: 'flex', gap: '32px', justifyContent: 'center' }}>
+                            <div style={{ marginTop: '48px', padding: '20px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--accent-gold)' }}>{characters.length + gear.length + anomalies.length}</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>TOTAL POSTS</div>
@@ -161,12 +228,16 @@ export default function MyPage() {
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>CHARACTERS</div>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{gear.length}</div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>GEAR</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{missionResults.filter(m => m.result === '勝利').length}</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>VICTORIES</div>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{anomalies.length}</div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>ANOMALIES</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{advCompletions.length}</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>ADV CLEARED</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{achievements.length}</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>ACHIEVEMENTS</div>
                                 </div>
                             </div>
                         </>

@@ -1,0 +1,217 @@
+{
+  "id": "scenario_alley_whisper",
+  "name": "路地裏の囁き",
+  "description": "深夜の繁華街。路地裏から聞こえる声に導かれ、あなたは暗闘の中へ踏み込む。そこに待つのは、消えた討伐者の痕跡と、新たな怪異の気配。",
+  "difficulty": "E",
+  "tags": ["都市型", "調査", "初心者向け"],
+  "estimated_time": "10分",
+  "start_node": "start",
+  "nodes": {
+    "start": {
+      "type": "narration",
+      "text": "深夜2時。繁華街の喧騒が遠ざかる裏路地に、あなたは立っている。\n\n祓部からの依頼書には「行方不明の討伐者の痕跡を追え」とあった。最後の目撃情報は、この路地裏だった。\n\n冷たい風が吹き抜ける。どこかから、微かな囁き声が聞こえる。",
+      "next": "choice_1"
+    },
+    "choice_1": {
+      "type": "choice",
+      "text": "囁き声が聞こえる。どうする？",
+      "choices": [
+        {
+          "text": "声の方向へ慎重に進む",
+          "next": "scene_careful"
+        },
+        {
+          "text": "気配を読む",
+          "condition": { "type": "rank_min", "attr": "rank_shiya", "min": "B" },
+          "next": "scene_sense",
+          "locked_text": "（察B以上が必要）"
+        },
+        {
+          "text": "魔法で周囲を探査する",
+          "condition": { "type": "rank_min", "attr": "rank_jutsu", "min": "C" },
+          "next": "scene_magic_scan",
+          "locked_text": "（術C以上が必要）"
+        },
+        {
+          "text": "声を無視して物証を探す",
+          "next": "scene_evidence"
+        }
+      ]
+    },
+    "scene_careful": {
+      "type": "narration",
+      "text": "足音を殺して、路地の奥へ進む。\n\n壁面にべったりと「何か」が張り付いている。よく見ると、それは人の影だった。影は壁に縫い付けられるように広がり、微かに蠢いている。\n\nこれが噂に聞く「壁影」か。怪異の痕跡だ。",
+      "next": "check_observe"
+    },
+    "scene_sense": {
+      "type": "narration",
+      "text": "目を閉じ、意識を研ぎ澄ます。\n\n路地の奥——約30メートル先に、異常な気配がある。人間ではない。怪異特有の、空間を歪める不快な圧力。しかし弱い。五級相当だろう。\n\nさらに、その手前に……倒れている人影？ 討伐者か。",
+      "next": "choice_rescue"
+    },
+    "scene_magic_scan": {
+      "type": "narration",
+      "text": "小さく詠唱を紡ぎ、探査魔法を展開する。\n\n周囲50メートルに魔法の網が広がる。反応が2つ。1つは路地の奥、弱い怪異反応。もう1つは——壁の中だ。壁面に怪異の核が埋まっている。\n\n「核の位置が分かった。このまま破壊できる。」",
+      "next": "choice_magic_direct"
+    },
+    "scene_evidence": {
+      "type": "narration",
+      "text": "声には応じず、地面や壁を調べる。\n\nゴミ捨て場の脇に、祓部の身分証が落ちていた。行方不明の討伐者のものだ。血痕はない。しかし、身分証の表面に奇妙な黒い染みが広がっている。\n\n触れた瞬間、指先が冷たくなる。怪異の残留物だ。",
+      "next": "check_observe"
+    },
+    "check_observe": {
+      "type": "check",
+      "text": "状況を正確に把握するため、観察判定を行う。",
+      "attr": "rank_shiki",
+      "difficulty": 4,
+      "success": "scene_observe_success",
+      "failure": "scene_observe_fail"
+    },
+    "scene_observe_success": {
+      "type": "narration",
+      "text": "壁の影を注意深く観察する。規則的に脈動している——心臓のように。\n\nパターンが見えた。影は路地の特定の一点を中心に広がっている。そこが核だ。排水溝の蓋の下、コンクリートに埋まっている小さな黒い石。\n\n核の位置を特定した。",
+      "next": "choice_final"
+    },
+    "scene_observe_fail": {
+      "type": "narration",
+      "text": "影を観察するが、暗くてよく見えない。規則性があるようにも見えるが、確信が持てない。\n\n突然、影が動いた。壁から剥がれるように、黒い腕が伸びてくる。\n\n危ない——！",
+      "next": "choice_danger"
+    },
+    "choice_rescue": {
+      "type": "choice",
+      "text": "倒れている人影がある。怪異の気配も感じる。",
+      "choices": [
+        {
+          "text": "まず人影を確認する",
+          "next": "scene_rescue_person"
+        },
+        {
+          "text": "怪異を先に排除する",
+          "next": "check_combat_early"
+        }
+      ]
+    },
+    "scene_rescue_person": {
+      "type": "narration",
+      "text": "駆け寄ると、祓部の制服を着た若い女性が倒れていた。息はある。意識を失っているだけだ。\n\n身体に目立った外傷はないが、影が彼女の足元から壁に向かって伸びている。怪異に「繋がれて」いる。\n\n影を断ち切る必要がある。",
+      "next": "choice_final"
+    },
+    "choice_magic_direct": {
+      "type": "choice",
+      "text": "核の位置が判明した。どう行動する？",
+      "choices": [
+        {
+          "text": "魔法で直接核を破壊する",
+          "next": "check_magic_destroy"
+        },
+        {
+          "text": "慎重に近づいて確認する",
+          "next": "scene_careful"
+        }
+      ]
+    },
+    "check_magic_destroy": {
+      "type": "check",
+      "text": "壁の中の核を、魔法で直接破壊する。",
+      "attr": "rank_jutsu",
+      "difficulty": 5,
+      "success": "ending_true",
+      "failure": "scene_magic_fail"
+    },
+    "scene_magic_fail": {
+      "type": "narration",
+      "text": "魔法を叩き込むが、壁に阻まれて威力が足りない。核にヒビは入ったが、破壊しきれなかった。\n\n怪異が反応した。影が一斉に蠢き出す。",
+      "next": "choice_danger"
+    },
+    "check_combat_early": {
+      "type": "check",
+      "text": "怪異の護衛を排除する。戦闘判定。",
+      "attr": "rank_shiki",
+      "difficulty": 4,
+      "success": "scene_combat_success",
+      "failure": "scene_combat_fail"
+    },
+    "scene_combat_success": {
+      "type": "narration",
+      "text": "影の護衛を素早く斬り払う。手応えは薄いが、確実に削っている。\n\n影が散り、路地の奥が見通せるようになった。排水溝の蓋の下に、微かに光る黒い石が見える。核だ。",
+      "next": "choice_final"
+    },
+    "scene_combat_fail": {
+      "type": "narration",
+      "text": "影に攻撃を仕掛けるが、暗闘では分が悪い。何度斬っても影は再生する。\n\n核を壊さなければ終わらない。しかし、護衛がまだ健在だ。",
+      "next": "choice_danger"
+    },
+    "choice_danger": {
+      "type": "choice",
+      "text": "状況が悪化した。どうする？",
+      "choices": [
+        {
+          "text": "全力で核を探して破壊する",
+          "next": "check_desperate"
+        },
+        {
+          "text": "撤退して応援を呼ぶ",
+          "next": "ending_normal"
+        }
+      ]
+    },
+    "check_desperate": {
+      "type": "check",
+      "text": "追い詰められた状況での最後の判定。",
+      "attr": "rank_kon",
+      "difficulty": 5,
+      "success": "ending_good",
+      "failure": "ending_bad"
+    },
+    "choice_final": {
+      "type": "choice",
+      "text": "核の位置が判明した。最後の一撃を。",
+      "choices": [
+        {
+          "text": "核を破壊する",
+          "next": "ending_true"
+        }
+      ]
+    },
+    "ending_true": {
+      "type": "ending",
+      "text": "核に手を伸ばし、力を込めて握り潰す。\n\n黒い石が砕けた瞬間、路地裏を覆っていた影が一斉に消えた。街灯の光が戻り、冷たかった空気が和らぐ。\n\n怪異「壁影」——討伐完了。\n\n行方不明だった討伐者も意識を取り戻した。大事には至らなかったようだ。\n\n「……助かった。ありがとう。」\n\n夜明けの路地裏に、安堵の息が漏れる。",
+      "ending_id": "true_end",
+      "ending_name": "完全討伐",
+      "ending_type": "true",
+      "achievements": [
+        { "id": "alley_true_end", "name": "路地裏の真実", "type": "adv" },
+        { "id": "first_adv_clear", "name": "初めての怪異譚", "type": "adv" }
+      ]
+    },
+    "ending_good": {
+      "type": "ending",
+      "text": "魂の力を振り絞り、影の中に飛び込む。\n\n闇の中で、微かに脈動する核を見つけた。掴み取り、全力で破壊する。\n\n影が消えた。怪異は討伐された。ただし、あなた自身もかなり消耗した。\n\nしばらくは休養が必要だろう。",
+      "ending_id": "good_end",
+      "ending_name": "辛勝",
+      "ending_type": "good",
+      "achievements": [
+        { "id": "alley_good_end", "name": "路地裏の生還者", "type": "adv" }
+      ]
+    },
+    "ending_normal": {
+      "type": "ending",
+      "text": "ここは引くべきだと判断し、路地裏から離脱する。\n\n祓部に報告を入れ、応援チームの到着を待つ。翌朝、増援が到着し、怪異は無事討伐された。\n\n自分の手で倒すことはできなかったが、情報は正確に伝えられた。それもまた、討伐者の仕事だ。",
+      "ending_id": "normal_end",
+      "ending_name": "戦略的撤退",
+      "ending_type": "normal",
+      "achievements": [
+        { "id": "alley_normal_end", "name": "慎重なる判断", "type": "adv" }
+      ]
+    },
+    "ending_bad": {
+      "type": "ending",
+      "text": "影の中に飛び込んだが、核を見つけられない。闇が深すぎる。\n\n意識が遠のく。次に目を覚ましたのは、病院のベッドの上だった。\n\n応援チームが駆けつけて助けてくれたらしい。怪異は後日、別のチームが討伐した。\n\n今回は……負けだ。",
+      "ending_id": "bad_end",
+      "ending_name": "敗走",
+      "ending_type": "bad",
+      "achievements": [
+        { "id": "alley_bad_end", "name": "路地裏の教訓", "type": "adv" }
+      ]
+    }
+  }
+}

@@ -53,6 +53,14 @@ const navGroups = [
     ],
   },
   {
+    label: 'Webゲーム',
+    items: [
+      { href: '/games/', icon: '▶', text: 'ゲームハブ' },
+      { href: '/games/mission/', icon: '⚔', text: '怪異討伐ミッション' },
+      { href: '/games/adv/', icon: '◈', text: '怪異譚ADV' },
+    ],
+  },
+  {
     label: 'コミュニティDB',
     items: [
       { href: '/mypage/', icon: '◆', text: 'マイページ' },

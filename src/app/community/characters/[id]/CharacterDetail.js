@@ -42,12 +42,16 @@ export default function CharacterDetail({ id }) {
     const [e, setE] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeImg, setActiveImg] = useState(0);
+    const [achievements, setAchievements] = useState([]);
     const isOwner = user && e?.user_id && user.id === e.user_id;
 
     useEffect(() => {
         (async () => {
             const { data } = await supabase.from('character_sheets').select('*').eq('id', id).single();
             if (data) setE(data);
+            // 実績を取得
+            const { data: achData } = await supabase.from('character_achievements').select('*').eq('character_id', id);
+            if (achData) setAchievements(achData);
             setLoading(false);
         })();
     }, [id]);
@@ -149,6 +153,28 @@ export default function CharacterDetail({ id }) {
                     </div>
                 </div>
             </div>
+
+            {/* ===== 実績バッジ ===== */}
+            {achievements.length > 0 && (
+                <div style={{ ...SS.section, marginTop: 'var(--space-lg)' }}>
+                    <div style={SS.sTitle}>ACHIEVEMENTS</div>
+                    <h2 style={SS.sHead}>実績</h2>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {achievements.map(a => (
+                            <span key={a.id} style={{
+                                fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', fontWeight: 700,
+                                padding: '4px 12px',
+                                background: a.achievement_type === 'mission' ? 'rgba(212, 175, 55, 0.1)' : a.achievement_type === 'adv' ? 'rgba(58, 110, 165, 0.1)' : 'rgba(255,255,255,0.05)',
+                                border: a.achievement_type === 'mission' ? '1px solid rgba(212, 175, 55, 0.3)' : a.achievement_type === 'adv' ? '1px solid rgba(58, 110, 165, 0.3)' : 'var(--border-subtle)',
+                                color: a.achievement_type === 'mission' ? 'var(--accent-gold)' : a.achievement_type === 'adv' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                                borderRadius: 'var(--radius-sm)',
+                            }}>
+                                {a.achievement_name}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* ===== 属性レーダー ===== */}
             <div style={SS.section}>

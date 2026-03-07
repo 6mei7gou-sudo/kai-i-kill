@@ -1,0 +1,32 @@
+{
+  "id": "mission_grade5_stray",
+  "name": "迷い家の影",
+  "description": "都市部の路地裏に出現する「迷い家」の怪異。入り込んだ者は出口を見失い、影に飲まれる。五級怪異ながら、油断すると危険。",
+  "difficulty": "E",
+  "client": "祓部 東京支部",
+  "reward": "信念ポイント+1",
+  "tags": ["五級", "都市型", "初心者向け"],
+  "battle": {
+    "max_rounds": 5,
+    "core": {
+      "name": "迷い家の核「忘却の門扉」",
+      "hp": 6,
+      "defense": 0
+    },
+    "guardians": [
+      {
+        "id": "g1",
+        "name": "影人形",
+        "hp": 4,
+        "attack": 1,
+        "defense": 0,
+        "traits": [],
+        "ai": "aggressive"
+      }
+    ]
+  },
+  "achievements": [
+    { "id": "first_victory", "name": "初陣突破", "type": "mission" },
+    { "id": "grade5_clear", "name": "五級討伐者", "type": "mission" }
+  ]
+}
