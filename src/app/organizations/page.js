@@ -7,8 +7,8 @@ export const metadata = {
 };
 
 const organizations = [
-    { key: 'haraebe', name: '公的機関（祓部）', en: 'HARAEBU — PUBLIC AGENCY', icon: '⊙', desc: '魔導省の内部組織として存在する国家機関の怪異対処部門。警察や自衛隊の入隊検査で素養を持つ人間が選別されて配属される。古い怪異に関する深い知識と専門的な訓練体系を持つ。' },
-    { key: 'mercenaries', name: '傭兵集団', en: 'MERCENARY GROUPS', icon: '✕', desc: '傭兵ネットワーク《Anonymous》を通じて依頼を受ける討伐者たち。レーティング制で管理され、高ランクの者に高難度の依頼が回る。独立系企業の高性能魔導具やプロトタイプを運用し、二つ名を持つ伝説的な専用装備使いが存在する。' },
+    { key: 'haraebe', name: '公的機関（祓部）', en: 'HARAEBU — PUBLIC AGENCY', icon: '⊙', desc: '魔導省の内部組織として存在する国家機関の怪異対処部門。素養を持つ人間が選別されて配属される。規格外の実力者には指揮系統の外に置かれる特別称号《御柱》が存在する。PL作成時の職位上限は祓士。' },
+    { key: 'mercenaries', name: '傭兵集団', en: 'MERCENARY GROUPS', icon: '✕', desc: '傭兵ネットワーク《Anonymous》を通じて依頼を受ける討伐者たち。E〜Aの五段階ランクで管理され、その外側に業界が自然と認めた規格外《冠名》のSランクが存在する。PL作成時のランク上限はCランク。' },
     { key: 'unaffiliated', name: '無所属', en: 'UNAFFILIATED', icon: '◈', desc: '祓部にも《Anonymous》にも属さない者たち。装備店の主人、企業の用心棒、スラムで無免許のまま戦う生存者など多様な顔を持つ。スラムにはリトルクランと呼ばれる子供たちの寄り合いも存在する。' },
 ];
 
@@ -83,6 +83,49 @@ export default function OrganizationsPage() {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            {/* PL作成制限 */}
+            <section className="section">
+                <h2 className="section__heading">
+                    キャラクター作成制限
+                    <span className="section__heading-en">PC CREATION LIMITS</span>
+                </h2>
+            </section>
+
+            <div className="content-body" style={{ marginBottom: 'var(--space-2xl)' }}>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>所属</th>
+                            <th>作成可能な上限</th>
+                            <th>それ以上</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>祓部</td>
+                            <td><span className="text-gold">祓士</span>（見習祓士・初任祓士も選択可）</td>
+                            <td>上級祓士以上はセッション実績で到達</td>
+                        </tr>
+                        <tr>
+                            <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>傭兵</td>
+                            <td><span className="text-gold">Cランク（実戦級）</span>（E・Dも選択可）</td>
+                            <td>Bランク以上はセッション実績で到達</td>
+                        </tr>
+                        <tr>
+                            <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>無所属</td>
+                            <td colSpan={2}>ランク制度なし。詳細は<Link href="/organizations/unaffiliated/" style={{ color: 'var(--accent-gold)' }}>無所属詳細</Link>を参照</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="callout" style={{ marginBottom: 'var(--space-3xl)' }}>
+                <div className="callout__label">規格外の存在について：</div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                    祓部の《御柱》・傭兵のSランク《冠名》はいずれもPLが初期作成で選べる枠ではない。物語の果てに辿り着くか、NPCとして出会うか——そういう領域の存在だ。
+                </p>
             </div>
         </div>
     );
