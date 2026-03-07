@@ -130,8 +130,8 @@ export default function HomePage() {
                 </tr>
                 <tr>
                   <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>侵食率</td>
-                  <td style={{ color: 'var(--accent-danger)' }}>セッション中の上昇はそのまま引き継ぎ</td>
-                  <td style={{ color: 'var(--accent-danger)' }}>PBWでの異能使用も上昇する。どこで遊んでも戻らない</td>
+                  <td>セッション中の上昇はそのまま引き継ぎ</td>
+                  <td>PBWでの異能使用も上昇。怪異非接触期間で自然回復するが、<span style={{ color: 'var(--accent-danger)' }}>51%以上は50%以下に戻らない</span></td>
                 </tr>
               </tbody>
             </table>

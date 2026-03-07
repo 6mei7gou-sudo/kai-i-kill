@@ -459,7 +459,7 @@ export default function QuickstartPage() {
 
             <div style={{ marginBottom: 'var(--space-2xl)' }}>
                 <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-                    異能を使うたびに上昇し、<span style={{ color: 'var(--accent-danger)' }}>絶対に下がらない</span>。100%に達したらキャラクター終了——怪異になる。
+                    異能を使うたびに上昇する。怪異に関わらない期間が続くと徐々に低下するが、<span style={{ color: 'var(--accent-danger)' }}>51%以上は50%以下に戻らない</span>。100%に達したらキャラクター終了——怪異になる。
                 </p>
 
                 <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
@@ -501,10 +501,17 @@ export default function QuickstartPage() {
                     </table>
                 </div>
 
-                <div className="callout">
+                <div className="callout" style={{ marginBottom: 'var(--space-md)' }}>
                     <div className="callout__label">覚えておくこと：</div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
                         異能は強力だが使うたびに侵食率が<span className="text-gold">+5〜20%</span>上昇する。ファンブル（出目1）なら+20%。魔法は侵食率を上げないが、代わりに怪異を生む。どちらの力も無代償ではない。
+                    </p>
+                </div>
+
+                <div className="callout">
+                    <div className="callout__label">自然回復：</div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
+                        怪異に関わらない期間が続けば侵食率は徐々に低下する（1週間で−1%、1ヶ月で−5%、最大−15%）。ただし<span className="text-gold">51%以上は50%以下に戻らない</span>。半化の影に踏み込んだ変質は、時間では完全に癒えない。
                     </p>
                 </div>
             </div>
