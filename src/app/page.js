@@ -8,7 +8,7 @@ export default function HomePage() {
       {/* ===== ヒーローセクション ===== */}
       <section className="hero">
         <div className="hero__hex" />
-        <div className="hero__label">TRPG × VRChat — LIVING WORLD PROJECT</div>
+        <div className="hero__label">TRPG × VRChat × PBW × Community — LIVING WORLD PROJECT</div>
         <div className="hero__title-sm">電 脳 怪 異 譚</div>
         <h1 className="hero__title">KAI-I//KILL</h1>
         <div className="hero__reading">カ イ イ キ ル</div>
@@ -18,9 +18,9 @@ export default function HomePage() {
         </p>
 
         <p className="hero__tagline">
-          TRPGとVRChatが交差する、拡張し続ける世界。
+          TRPG、VRChat、PBW、コミュニティ投稿——四つの入口が一つの世界に繋がる。
           <br />
-          あなたが遊んだセッションが、この世界の歴史になる。
+          あなたがどこから参加しても、この世界の歴史になる。
         </p>
 
         <div className="hero__cta-group">
@@ -46,17 +46,27 @@ export default function HomePage() {
 
       <div style={{ marginBottom: 'var(--space-2xl)' }}>
         <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-          電脳怪異譚 KAI-I//KILL は、<span className="text-gold">TRPG</span>と<span className="text-gold">VRChat</span>を軸に展開する「生きた世界」プロジェクトだ。
+          電脳怪異譚 KAI-I//KILL は、四つのメディアが一つの世界を共有する「生きた世界」プロジェクトだ。
         </p>
 
-        <div className="two-col" style={{ marginBottom: 'var(--space-lg)' }}>
+        {/* 四つの柱 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
           <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
               TRPG
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>卓で物語を紡ぐ</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              オリジナルTRPGシステム《共鳴記録》。怪異を調査し、解明し、討伐する。判定のたびに感情が蓄積し、力と引き換えに人間性が削られていく。
+              オリジナルシステム《共鳴記録》。GMとプレイヤーがリアルタイムで怪異に挑む。判定のたびに感情が蓄積し、力と引き換えに人間性が削られていく。
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              PBW — PLAY BY WEB
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>非同期で世界に参加する</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              Web上でキャラクターの行動を投稿し、物語に参加する。TRPGセッションに参加できない時間帯でも、あなたのキャラクターは世界の中で生きている。
             </p>
           </div>
           <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
@@ -65,15 +75,73 @@ export default function HomePage() {
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>仮想空間で世界に立つ</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              VRChat上に構築された世界で、キャラクターとして存在する。セッションの結果がワールドに反映され、物語が進行する。
+              VRChat上に構築された世界で、キャラクターとして存在する。セッションやPBWの結果がワールドに反映され、物語が進行する。
             </p>
+          </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              COMMUNITY DB — SCP STYLE
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>世界を記録し、共有する</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              怪異調査書・装備・キャラクターシートをプレイヤーが投稿する。投稿された怪異が公認されれば、それは世界の一部になる。
+            </p>
+          </div>
+        </div>
+
+        {/* TRPG ↔ PBW コンバート */}
+        <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: '1px solid var(--accent-gold-border)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
+            RESOURCE CONVERSION — TRPG ⇄ PBW
+          </div>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-md)' }}>リソースは非同期でコンバートできる</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
+            TRPGセッションで得た経験・装備・実績はPBWに持ち込める。PBWで蓄積した調査結果・人脈・資金はTRPGセッションに反映される。二つの遊び方は同じキャラクター、同じ世界を共有している。
+          </p>
+          <div className="content-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>リソース</th>
+                  <th>TRPG → PBW</th>
+                  <th>PBW → TRPG</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>キャラクター</td>
+                  <td>セッション後のステータスがPBWに同期</td>
+                  <td>PBWでの成長・変化がセッション開始時に反映</td>
+                </tr>
+                <tr>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>装備・資金</td>
+                  <td>入手した装備・報酬がPBW上で管理される</td>
+                  <td>PBWで購入・改造した装備をセッションに持ち込み</td>
+                </tr>
+                <tr>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>情報・手がかり</td>
+                  <td>セッション中に得た怪異情報がDB化</td>
+                  <td>PBWの調査行動で得た手がかりをセッションに使用</td>
+                </tr>
+                <tr>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>実績・ランク</td>
+                  <td>討伐実績が傭兵ランク・祓部昇進に反映</td>
+                  <td>PBWでの依頼達成もランク評価の対象</td>
+                </tr>
+                <tr>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>侵食率</td>
+                  <td style={{ color: 'var(--accent-danger)' }}>セッション中の上昇はそのまま引き継ぎ</td>
+                  <td style={{ color: 'var(--accent-danger)' }}>PBWでの異能使用も上昇する。どこで遊んでも戻らない</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
           <div className="callout__label">世界は拡張される：</div>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            セッションで起きた事件は世界の歴史に刻まれる。新しい怪異が発見され、組織が動き、勢力図が書き換わる。この世界は完成しない——<span className="text-gold">プレイヤーが遊ぶたびに拡張されていく。</span>
+            セッションで起きた事件、PBWで進行した依頼、コミュニティに投稿された怪異——すべてが世界の歴史に刻まれる。この世界は完成しない。<span className="text-gold">プレイヤーが遊ぶたびに拡張されていく。</span>
           </p>
         </div>
       </div>
