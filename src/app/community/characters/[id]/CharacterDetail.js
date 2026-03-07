@@ -43,18 +43,63 @@ export default function CharacterDetail({ id }) {
     const [loading, setLoading] = useState(true);
     const [activeImg, setActiveImg] = useState(0);
     const [achievements, setAchievements] = useState([]);
+    const [showTitleSelect, setShowTitleSelect] = useState(false);
+    const [serialCode, setSerialCode] = useState('');
+    const [serialMsg, setSerialMsg] = useState(null);
+    const [serialLoading, setSerialLoading] = useState(false);
     const isOwner = user && e?.user_id && user.id === e.user_id;
 
     useEffect(() => {
         (async () => {
             const { data } = await supabase.from('character_sheets').select('*').eq('id', id).single();
             if (data) setE(data);
-            // 実績を取得
-            const { data: achData } = await supabase.from('character_achievements').select('*').eq('character_id', id);
-            if (achData) setAchievements(achData);
+            // 実績を取得（テーブルが未作成でもエラーにしない）
+            try {
+                const { data: achData } = await supabase.from('character_achievements').select('*').eq('character_id', id);
+                if (achData) setAchievements(achData);
+            } catch (_) { /* テーブル未作成時は無視 */ }
             setLoading(false);
         })();
     }, [id]);
+
+    // 称号設定
+    const handleSetTitle = async (titleName) => {
+        const res = await fetch('/api/games/title', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ character_id: id, active_title: titleName }),
+        });
+        if (res.ok) {
+            setE(prev => ({ ...prev, active_title: titleName }));
+        }
+    };
+
+    // シリアルコード引換
+    const handleRedeem = async () => {
+        if (!serialCode.trim()) return;
+        setSerialLoading(true);
+        setSerialMsg(null);
+        try {
+            const res = await fetch('/api/games/redeem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: serialCode.trim(), character_id: id }),
+            });
+            const json = await res.json();
+            if (res.ok) {
+                setSerialMsg({ ok: true, text: `「${json.achievement.name}」を獲得しました！` });
+                setSerialCode('');
+                // 実績リストを再取得
+                const { data: achData } = await supabase.from('character_achievements').select('*').eq('character_id', id);
+                if (achData) setAchievements(achData);
+            } else {
+                setSerialMsg({ ok: false, text: json.error });
+            }
+        } catch (err) {
+            setSerialMsg({ ok: false, text: '通信エラーが発生しました' });
+        }
+        setSerialLoading(false);
+    };
 
     if (loading) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--text-muted)' }}>読み込み中...</div>;
     if (!e) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--text-muted)' }}>シートが見つかりませんでした。</div>;
@@ -125,6 +170,16 @@ export default function CharacterDetail({ id }) {
                         <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                             {e.character_name}
                             {e.title && <span style={{ fontSize: 'var(--font-size-md)', fontWeight: 400, color: 'var(--text-muted)' }}>「{e.title}」</span>}
+                            {e.active_title && (
+                                <span style={{
+                                    fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', fontWeight: 700,
+                                    padding: '2px 10px', background: 'rgba(212, 175, 55, 0.15)',
+                                    border: '1px solid rgba(212, 175, 55, 0.4)', color: 'var(--accent-gold)',
+                                    borderRadius: 'var(--radius-sm)', verticalAlign: 'middle',
+                                }}>
+                                    {e.active_title}
+                                </span>
+                            )}
                         </h1>
 
                         {/* タグ行 */}
@@ -154,25 +209,90 @@ export default function CharacterDetail({ id }) {
                 </div>
             </div>
 
-            {/* ===== 実績バッジ ===== */}
-            {achievements.length > 0 && (
+            {/* ===== 実績・称号 ===== */}
+            {(achievements.length > 0 || isOwner) && (
                 <div style={{ ...SS.section, marginTop: 'var(--space-lg)' }}>
-                    <div style={SS.sTitle}>ACHIEVEMENTS</div>
-                    <h2 style={SS.sHead}>実績</h2>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                        {achievements.map(a => (
-                            <span key={a.id} style={{
-                                fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', fontWeight: 700,
-                                padding: '4px 12px',
-                                background: a.achievement_type === 'mission' ? 'rgba(212, 175, 55, 0.1)' : a.achievement_type === 'adv' ? 'rgba(58, 110, 165, 0.1)' : 'rgba(255,255,255,0.05)',
-                                border: a.achievement_type === 'mission' ? '1px solid rgba(212, 175, 55, 0.3)' : a.achievement_type === 'adv' ? '1px solid rgba(58, 110, 165, 0.3)' : 'var(--border-subtle)',
-                                color: a.achievement_type === 'mission' ? 'var(--accent-gold)' : a.achievement_type === 'adv' ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                                borderRadius: 'var(--radius-sm)',
-                            }}>
-                                {a.achievement_name}
-                            </span>
-                        ))}
-                    </div>
+                    <div style={SS.sTitle}>ACHIEVEMENTS / TITLE</div>
+                    <h2 style={SS.sHead}>実績・称号</h2>
+
+                    {/* 実績バッジ一覧 */}
+                    {achievements.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: 'var(--space-lg)' }}>
+                            {achievements.map(a => {
+                                const isActive = e.active_title === a.achievement_name;
+                                const achBg = a.achievement_type === 'mission' ? 'rgba(212, 175, 55, 0.1)' : a.achievement_type === 'adv' ? 'rgba(58, 110, 165, 0.1)' : 'rgba(255,255,255,0.05)';
+                                const achBorder = a.achievement_type === 'mission' ? '1px solid rgba(212, 175, 55, 0.3)' : a.achievement_type === 'adv' ? '1px solid rgba(58, 110, 165, 0.3)' : 'var(--border-subtle)';
+                                const achColor = a.achievement_type === 'mission' ? 'var(--accent-gold)' : a.achievement_type === 'adv' ? 'var(--accent-blue)' : 'var(--text-secondary)';
+                                return (
+                                    <span
+                                        key={a.id}
+                                        onClick={() => isOwner && handleSetTitle(isActive ? null : a.achievement_name)}
+                                        style={{
+                                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', fontWeight: 700,
+                                            padding: '4px 12px', borderRadius: 'var(--radius-sm)',
+                                            background: isActive ? 'rgba(212, 175, 55, 0.25)' : achBg,
+                                            border: isActive ? '2px solid var(--accent-gold)' : achBorder,
+                                            color: isActive ? 'var(--accent-gold-bright)' : achColor,
+                                            cursor: isOwner ? 'pointer' : 'default',
+                                            transition: 'all 0.2s',
+                                        }}
+                                    >
+                                        {isActive && '★ '}{a.achievement_name}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* 称号選択の説明（オーナーのみ） */}
+                    {isOwner && achievements.length > 0 && (
+                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-lg)', fontFamily: 'var(--font-mono)' }}>
+                            実績をクリックすると称号として名前の横に表示されます。もう一度クリックで解除。
+                        </div>
+                    )}
+
+                    {/* シリアルコード入力（オーナーのみ） */}
+                    {isOwner && (
+                        <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
+                                SERIAL CODE
+                            </div>
+                            <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                                <input
+                                    type="text"
+                                    value={serialCode}
+                                    onChange={ev => { setSerialCode(ev.target.value); setSerialMsg(null); }}
+                                    placeholder="シリアルコードを入力"
+                                    style={{
+                                        flex: 1, padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                                        background: 'var(--bg-card)', border: 'var(--border-subtle)', color: 'var(--text-primary)',
+                                        borderRadius: 'var(--radius-sm)', textTransform: 'uppercase',
+                                    }}
+                                />
+                                <button
+                                    onClick={handleRedeem}
+                                    disabled={serialLoading || !serialCode.trim()}
+                                    style={{
+                                        padding: '8px 16px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                                        background: serialCode.trim() ? 'var(--accent-gold)' : 'var(--bg-tertiary)',
+                                        color: serialCode.trim() ? 'var(--bg-primary)' : 'var(--text-muted)',
+                                        border: 'none', borderRadius: 'var(--radius-sm)',
+                                        cursor: serialCode.trim() ? 'pointer' : 'not-allowed', fontWeight: 700,
+                                    }}
+                                >
+                                    {serialLoading ? '...' : '引換'}
+                                </button>
+                            </div>
+                            {serialMsg && (
+                                <div style={{
+                                    marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)',
+                                    color: serialMsg.ok ? 'var(--accent-gold)' : 'var(--accent-danger)',
+                                }}>
+                                    {serialMsg.text}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 

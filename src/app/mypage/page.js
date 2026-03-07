@@ -75,24 +75,33 @@ export default function MyPage() {
         const fetchAll = async () => {
             setLoading(true);
             try {
-                const [charRes, gearRes, anomalyRes, missionRes, advRes, achRes] = await Promise.all([
+                // 投稿データ取得
+                const [charRes, gearRes, anomalyRes] = await Promise.all([
                     fetch(`/api/posts?table=character_sheets&user_id=${user.id}`),
                     fetch(`/api/posts?table=gear_posts&user_id=${user.id}`),
                     fetch(`/api/posts?table=anomaly_drafts&user_id=${user.id}`),
-                    fetch(`/api/games?table=mission_results&user_id=${user.id}`),
-                    fetch(`/api/games?table=adv_completions&user_id=${user.id}`),
-                    fetch(`/api/games?table=character_achievements&user_id=${user.id}`),
                 ]);
-                const [charJson, gearJson, anomalyJson, missionJson, advJson, achJson] = await Promise.all([
+                const [charJson, gearJson, anomalyJson] = await Promise.all([
                     charRes.json(), gearRes.json(), anomalyRes.json(),
-                    missionRes.json(), advRes.json(), achRes.json(),
                 ]);
                 setCharacters(charJson.data || []);
                 setGear(gearJson.data || []);
                 setAnomalies(anomalyJson.data || []);
-                setMissionResults(missionJson.data || []);
-                setAdvCompletions(advJson.data || []);
-                setAchievements(achJson.data || []);
+
+                // ゲーム戦績取得（テーブル未作成でもエラーにしない）
+                try {
+                    const [missionRes, advRes, achRes] = await Promise.all([
+                        fetch(`/api/games?table=mission_results&user_id=${user.id}`),
+                        fetch(`/api/games?table=adv_completions&user_id=${user.id}`),
+                        fetch(`/api/games?table=character_achievements&user_id=${user.id}`),
+                    ]);
+                    const [missionJson, advJson, achJson] = await Promise.all([
+                        missionRes.json(), advRes.json(), achRes.json(),
+                    ]);
+                    setMissionResults(missionJson.data || []);
+                    setAdvCompletions(advJson.data || []);
+                    setAchievements(achJson.data || []);
+                } catch (_) { /* ゲームテーブル未作成時は無視 */ }
             } catch (err) {
                 console.error('マイページ取得エラー:', err);
             } finally {
