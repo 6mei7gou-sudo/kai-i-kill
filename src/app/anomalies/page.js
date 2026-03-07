@@ -179,7 +179,7 @@ export default function IntroAnomaliesPage() {
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>全装身型</td>
-                                <td>全身を覆う高火力装備。一般市民に見られると都市伝説になる</td>
+                                <td>全身を覆う高火力・高防御の装備。扱える人間が少ない</td>
                                 <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>△</td>
                             </tr>
                             <tr>
