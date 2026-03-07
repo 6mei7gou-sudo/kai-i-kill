@@ -16,6 +16,7 @@ const navGroups = [
     label: '導入',
     items: [
       { href: '/', icon: '◉', text: 'トップ' },
+      { href: '/quickstart/', icon: '▶', text: 'クイックスタート' },
       { href: '/anomalies/', icon: '△', text: '怪異・能力・装備' },
       { href: '/organizations/', icon: '✕', text: '組織・人物' },
     ],
