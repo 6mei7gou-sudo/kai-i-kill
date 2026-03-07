@@ -17,7 +17,7 @@ const EROSION_STAGES = [
 ];
 
 const ATTRS = [
-    { key: 'attr_shiya', name: '視野', reading: 'しや' },
+    { key: 'attr_shiya', name: '察', reading: 'しや' },
     { key: 'attr_shiki', name: '識', reading: 'しき' },
     { key: 'attr_tai', name: '体', reading: 'たい' },
     { key: 'attr_jutsu', name: '術', reading: 'じゅつ' },

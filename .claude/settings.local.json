@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(pandoc:*)",
+      "Bash(pip list:*)",
+      "Bash(npm list:*)",
+      "Bash(npx:*)",
+      "Bash(pip:*)",
+      "Bash(python:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

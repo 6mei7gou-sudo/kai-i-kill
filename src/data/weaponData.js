@@ -38,7 +38,7 @@ export const WEAPONS_ARMED = [
 export const WEAPONS_INDEPENDENT = [
     // 偵察・索敵
     { name: '偵察球体型【蒼鉄G-01】', maker: '蒼鉄機工', cp: 5, slot: 2, mod: '±0', note: '祓部標準偵察機。護衛配置感知' },
-    { name: '小型索敵ドローン【蒼鉄D-03】', maker: '蒼鉄機工', cp: 6, slot: 2, mod: '+1（索敵時）', note: '視野+1。怪異位置の質問可' },
+    { name: '小型索敵ドローン【蒼鉄D-03】', maker: '蒼鉄機工', cp: 6, slot: 2, mod: '+1（索敵時）', note: '察+1。怪異位置の質問可' },
     { name: '電子妨害探機【雷禽E-07】', maker: '雷禽重工', cp: 7, slot: 3, mod: '±0（妨害+2）', note: '護衛特性を1R無効化' },
     { name: '鴉羽式改造偵察虫', maker: '鴉羽技研', cp: 5, slot: 2, mod: '±0', note: '手のひらサイズ。隠密使用可' },
     // 戦闘

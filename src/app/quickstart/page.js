@@ -129,7 +129,7 @@ export default function QuickstartPage() {
                                 <td>判断力・推理力。解明判定、怪異のルール推測、NPC交渉、状況分析に使う</td>
                             </tr>
                             <tr>
-                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)', fontSize: 'var(--font-size-lg)' }}>視野</td>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)', fontSize: 'var(--font-size-lg)' }}>察</td>
                                 <td>しや</td>
                                 <td>知覚・直感。怪異の気配の察知、罠の発見、嘘の看破、周囲の異変に使う</td>
                             </tr>
@@ -183,7 +183,7 @@ export default function QuickstartPage() {
                             <tbody>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>神社育ち</td>
-                                    <td style={{ whiteSpace: 'nowrap' }}>視野・魂</td>
+                                    <td style={{ whiteSpace: 'nowrap' }}>察・魂</td>
                                     <td>禁足地データベースへの非公式アクセス。古い怪異の解明難易度−1</td>
                                 </tr>
                                 <tr>
@@ -299,7 +299,7 @@ export default function QuickstartPage() {
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>無所属</td>
-                                    <td>視野+1常時、裏ルート、勘判定</td>
+                                    <td>察+1常時、裏ルート、勘判定</td>
                                     <td>法的保護なし、補給不安定、情報に疎い</td>
                                     <td style={{ color: 'var(--text-muted)' }}>制限なし</td>
                                 </tr>
@@ -345,7 +345,7 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>接触覚醒型</td>
                                     <td>怪異の核や特殊素材に長期接触</td>
-                                    <td>視野判定に常時+1</td>
+                                    <td>察判定に常時+1</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -480,7 +480,7 @@ export default function QuickstartPage() {
                             <tr>
                                 <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>26〜50%</td>
                                 <td>変容の兆し</td>
-                                <td>外見に軽微な変化。怪異の声が断片的に聞こえ始める。視野+1</td>
+                                <td>外見に軽微な変化。怪異の声が断片的に聞こえ始める。察+1</td>
                             </tr>
                             <tr>
                                 <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-danger)' }}>51〜75%</td>
