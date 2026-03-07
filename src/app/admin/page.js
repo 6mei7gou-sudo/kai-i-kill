@@ -1,4 +1,4 @@
-// 管理者用ダッシュボード — 全投稿の閲覧・編集・削除・公認承認
+// 管理者用ダッシュボード — 全投稿の閲覧・編集・削除・公認承認 + News投稿
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +10,7 @@ const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filt
 
 // タブ定義
 const TABS = [
+    { key: 'news', label: 'News', icon: '◆', isNews: true },
     { key: 'character_sheets', label: 'キャラクター', icon: '☖', nameField: 'character_name', editPath: '/create/character', detailPath: '/community/characters' },
     { key: 'gear_posts', label: '武器・装備', icon: '⚔', nameField: 'gear_name', editPath: '/create/weapon', detailPath: '/community/gear' },
     { key: 'anomaly_drafts', label: '怪異調査書', icon: '△', nameField: 'anomaly_name', editPath: '/create/anomaly', detailPath: '/community/anomalies' },
@@ -35,13 +36,27 @@ export default function AdminPage() {
     const isAdmin = isLoaded && user && ADMIN_IDS.includes(user.id);
     const tab = TABS.find(t => t.key === activeTab);
 
+    // News投稿フォーム
+    const [newsTitle, setNewsTitle] = useState('');
+    const [newsBody, setNewsBody] = useState('');
+    const [newsCategory, setNewsCategory] = useState('news');
+    const [newsSubmitting, setNewsSubmitting] = useState(false);
+    const [newsPosts, setNewsPosts] = useState([]);
+
     // データ取得
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/posts?table=${activeTab}`);
-            const json = await res.json();
-            setItems(json.data || []);
+            if (activeTab === 'news') {
+                const res = await fetch('/api/news?limit=50');
+                const json = await res.json();
+                setNewsPosts(json.data || []);
+                setItems([]);
+            } else {
+                const res = await fetch(`/api/posts?table=${activeTab}`);
+                const json = await res.json();
+                setItems(json.data || []);
+            }
         } catch (err) {
             console.error('取得エラー:', err);
         } finally {
@@ -52,6 +67,46 @@ export default function AdminPage() {
     useEffect(() => {
         if (isAdmin) fetchData();
     }, [isAdmin, fetchData]);
+
+    // News投稿
+    const handleNewsSubmit = async () => {
+        if (!newsTitle.trim()) return alert('タイトルを入力してください');
+        setNewsSubmitting(true);
+        try {
+            const res = await fetch('/api/news', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: newsTitle,
+                    body: newsBody,
+                    category: newsCategory,
+                    author_name: user?.firstName || user?.username || 'ADMIN',
+                }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+            setNewsTitle('');
+            setNewsBody('');
+            setNewsCategory('news');
+            fetchData();
+        } catch (err) {
+            alert('投稿に失敗: ' + err.message);
+        } finally {
+            setNewsSubmitting(false);
+        }
+    };
+
+    // News削除
+    const handleNewsDelete = async (id) => {
+        if (!confirm('この投稿を削除しますか？')) return;
+        try {
+            const res = await fetch(`/api/news?id=${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('削除失敗');
+            setNewsPosts(prev => prev.filter(p => p.id !== id));
+        } catch (err) {
+            alert(err.message);
+        }
+    };
 
     // 承認ステータス変更
     const handleApprove = async (id, newStatus) => {
@@ -144,8 +199,98 @@ export default function AdminPage() {
                                 </span>
                             </div>
 
-                            {/* テーブル */}
-                            {!loading && (
+                            {/* === News管理パネル === */}
+                            {activeTab === 'news' && !loading && (
+                                <div style={{ marginBottom: 'var(--space-xl)' }}>
+                                    {/* 投稿フォーム */}
+                                    <div style={{ background: 'var(--bg-card)', border: 'var(--border-subtle)', padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}>
+                                        <h3 style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', marginBottom: 'var(--space-md)' }}>
+                                            NEW POST
+                                        </h3>
+                                        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+                                            {['news', 'release', 'event'].map(c => (
+                                                <button key={c} onClick={() => setNewsCategory(c)}
+                                                    style={{
+                                                        padding: '4px 12px', cursor: 'pointer',
+                                                        fontFamily: 'var(--font-mono)', fontSize: '11px',
+                                                        background: newsCategory === c ? 'rgba(212,175,55,0.15)' : 'transparent',
+                                                        border: newsCategory === c ? '1px solid rgba(212,175,55,0.4)' : '1px solid rgba(255,255,255,0.05)',
+                                                        color: newsCategory === c ? 'var(--accent-gold)' : 'var(--text-muted)',
+                                                    }}
+                                                >{c.toUpperCase()}</button>
+                                            ))}
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="タイトル"
+                                            value={newsTitle}
+                                            onChange={e => setNewsTitle(e.target.value)}
+                                            style={{
+                                                width: '100%', padding: '10px', marginBottom: 'var(--space-sm)',
+                                                background: 'var(--bg-primary)', border: '1px solid rgba(255,255,255,0.1)',
+                                                color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                                            }}
+                                        />
+                                        <textarea
+                                            placeholder="本文（省略可）"
+                                            value={newsBody}
+                                            onChange={e => setNewsBody(e.target.value)}
+                                            rows={4}
+                                            style={{
+                                                width: '100%', padding: '10px', marginBottom: 'var(--space-sm)',
+                                                background: 'var(--bg-primary)', border: '1px solid rgba(255,255,255,0.1)',
+                                                color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                                                resize: 'vertical',
+                                            }}
+                                        />
+                                        <button
+                                            onClick={handleNewsSubmit}
+                                            disabled={newsSubmitting}
+                                            style={{
+                                                padding: '10px 24px', cursor: 'pointer',
+                                                background: 'rgba(212,175,55,0.15)', border: '1px solid var(--accent-gold)',
+                                                color: 'var(--accent-gold)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                                                opacity: newsSubmitting ? 0.5 : 1,
+                                            }}
+                                        >
+                                            {newsSubmitting ? '投稿中...' : '▶ 投稿する'}
+                                        </button>
+                                    </div>
+
+                                    {/* 投稿一覧 */}
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
+                                        {newsPosts.length} 件の投稿
+                                    </div>
+                                    {newsPosts.map(post => (
+                                        <div key={post.id} style={{
+                                            display: 'flex', alignItems: 'center', gap: 'var(--space-md)',
+                                            padding: 'var(--space-sm) var(--space-md)',
+                                            borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                        }}>
+                                            <span style={{
+                                                padding: '2px 8px', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700,
+                                                background: post.category === 'release' ? 'rgba(0,255,170,0.1)' : post.category === 'event' ? 'rgba(139,92,246,0.1)' : 'rgba(212,175,55,0.1)',
+                                                border: `1px solid ${post.category === 'release' ? 'rgba(0,255,170,0.3)' : post.category === 'event' ? 'rgba(139,92,246,0.3)' : 'rgba(212,175,55,0.3)'}`,
+                                                color: post.category === 'release' ? '#00ffaa' : post.category === 'event' ? '#8b5cf6' : '#d4af37',
+                                                whiteSpace: 'nowrap',
+                                            }}>
+                                                {post.category.toUpperCase()}
+                                            </span>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                {new Date(post.created_at).toLocaleDateString('ja-JP')}
+                                            </span>
+                                            <span style={{ flex: 1, fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>
+                                                {post.title}
+                                            </span>
+                                            <button onClick={() => handleNewsDelete(post.id)}
+                                                style={{ ...actionBtn, color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)' }}>削除</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* テーブル（既存の投稿管理） */}
+                            {activeTab !== 'news' && !loading && (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                                         <thead>
@@ -214,7 +359,7 @@ export default function AdminPage() {
                                 </div>
                             )}
 
-                            {!loading && filtered.length === 0 && (
+                            {activeTab !== 'news' && !loading && filtered.length === 0 && (
                                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0', fontStyle: 'italic' }}>該当する投稿がありません</p>
                             )}
                         </>
