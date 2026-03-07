@@ -219,7 +219,7 @@ export default function HomePage() {
       {/* ===== クロージング ===== */}
       <section className="closing">
         <p className="closing__text">
-          <span className="closing__em">この世界はまだ書かれていない。次のページを書くのは、あなたのセッションだ。</span>
+          <span className="closing__em">この世界はまだすべて描かれていない。</span>
         </p>
       </section>
     </div>
