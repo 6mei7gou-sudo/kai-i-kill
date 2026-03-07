@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
     title: 'クイックスタート — 電脳怪異譚 KAI-I//KILL',
-    description: 'キャラクター作成の手順と、七つの能力値・ダイスシステム・共鳴記録・侵食率の解説。',
+    description: 'キャラクター作成の手順と、七つの能力値・ダイスシステム・共鳴記録の解説。',
 };
 
 export default function QuickstartPage() {
@@ -141,7 +141,7 @@ export default function QuickstartPage() {
                             <tr>
                                 <td style={{ fontWeight: 700, color: 'var(--accent-gold)', fontSize: 'var(--font-size-lg)' }}>魂</td>
                                 <td>たましい</td>
-                                <td>精神力・意志の強さ。異能の発動、恐怖への抵抗、侵食への抗い、封印処理に使う</td>
+                                <td>精神力・意志の強さ。異能の発動、恐怖への抵抗、封印処理に使う</td>
                             </tr>
                         </tbody>
                     </table>
@@ -199,7 +199,7 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>元実験体</td>
                                     <td style={{ whiteSpace: 'nowrap' }}>魂＋異能+1</td>
-                                    <td>初期侵食率+20%。渇望ギフトのコスト軽減</td>
+                                    <td>渇望ギフトのコスト軽減</td>
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>ハッカー上がり</td>
@@ -244,11 +244,6 @@ export default function QuickstartPage() {
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>機甲士</td>
                                     <td style={{ whiteSpace: 'nowrap' }}>体→B</td>
                                     <td>護衛への連鎖ダメージ条件が緩和される</td>
-                                </tr>
-                                <tr>
-                                    <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>異能者</td>
-                                    <td style={{ whiteSpace: 'nowrap' }}>魂→B</td>
-                                    <td>侵食ロールのファンブル時の上昇を+10%に軽減</td>
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>解明師</td>
@@ -340,7 +335,7 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>実験覚醒型</td>
                                     <td>人体実験で強制覚醒</td>
-                                    <td>異能+1。初期侵食率+10%</td>
+                                    <td>異能+1</td>
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>接触覚醒型</td>
@@ -362,8 +357,7 @@ export default function QuickstartPage() {
                         <p style={{ marginBottom: 'var(--space-sm)' }}><span className="text-gold">5. 初期ギフトを1つ選ぶ</span> — 鍵の直感、生還の意地、装備の鬼、ネットワーク、固有異能、魔法師の直感から選択</p>
                         <p style={{ marginBottom: 'var(--space-sm)' }}><span className="text-gold">6. 装備をCPの範囲内で選ぶ</span> — 所属によって使える装備のグレードが変わる</p>
                         <p style={{ marginBottom: 'var(--space-sm)' }}><span className="text-gold">7. 信念を設定する</span> — 最大5点でスタート。消費して判定を振り直せる</p>
-                        <p style={{ marginBottom: 'var(--space-sm)' }}><span className="text-gold">8. 侵食率を確認する</span> — 通常は0%。背景や覚醒パターンで初期値が変わる</p>
-                        <p><span className="text-gold">9. 怪異予兆カードをGMから受け取る</span> — セッション開始時に配布される</p>
+                        <p><span className="text-gold">8. 怪異予兆カードをGMから受け取る</span> — セッション開始時に配布される</p>
                     </div>
                 </div>
             </div>
@@ -395,7 +389,7 @@ export default function QuickstartPage() {
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#8b2020' }}>恐怖</td>
                                 <td>逃走・防御に失敗した時、怪異のルールを破った時</td>
-                                <td>次の魂判定が自動ファンブル。侵食率+10%</td>
+                                <td>次の魂判定が自動ファンブル</td>
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#cc4400' }}>怒り</td>
@@ -415,7 +409,7 @@ export default function QuickstartPage() {
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#8844aa' }}>渇望</td>
                                 <td>異能・特殊素材装備を使用した時</td>
-                                <td>侵食率+5%。次の侵食ロールの閾値が悪化</td>
+                                <td>次の異能使用のコストが倍増</td>
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#44aa88' }}>浄化</td>
@@ -445,74 +439,6 @@ export default function QuickstartPage() {
                             10点に達すると代償が発動し、メーターは0にリセットされる。<span className="text-gold">浄化だけは代償ではなく大浄化（味方全体への恩恵）が発動する。</span>
                         </p>
                     </div>
-                </div>
-            </div>
-
-            {/* ===== 侵食率 ===== */}
-            <section className="section">
-                <div className="section__number">05 — EROSION</div>
-                <h2 className="section__heading">
-                    侵食率
-                    <span className="section__heading-en">EROSION TRACK</span>
-                </h2>
-            </section>
-
-            <div style={{ marginBottom: 'var(--space-2xl)' }}>
-                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-                    異能を使うたびに上昇する。怪異に関わらない期間が続くと徐々に低下するが、<span style={{ color: 'var(--accent-danger)' }}>51%以上は50%以下に戻らない</span>。100%に達したらキャラクター終了——怪異になる。
-                </p>
-
-                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style={{ width: '100px' }}>侵食率</th>
-                                <th style={{ width: '100px' }}>段階</th>
-                                <th>何が起きるか</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>0〜25%</td>
-                                <td>正常</td>
-                                <td>影響なし</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)' }}>26〜50%</td>
-                                <td>変容の兆し</td>
-                                <td>外見に軽微な変化。怪異の声が断片的に聞こえ始める。察+1</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-danger)' }}>51〜75%</td>
-                                <td>半化の影</td>
-                                <td>目に見える異形化。怪異の能力の一部が使える。毎場面で魂判定</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-danger)' }}>76〜99%</td>
-                                <td>臨界</td>
-                                <td>重度の異形化。強力な異能が使用可能。GMが毎場面で引きを試みる</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontFamily: 'var(--font-mono)', color: '#fff', fontWeight: 700 }}>100%</td>
-                                <td style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>怪異化</td>
-                                <td style={{ color: 'var(--accent-danger)' }}>キャラクター終了。PCはGM管理の怪異になる</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="callout" style={{ marginBottom: 'var(--space-md)' }}>
-                    <div className="callout__label">覚えておくこと：</div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                        異能は強力だが使うたびに侵食率が<span className="text-gold">+5〜20%</span>上昇する。ファンブル（出目1）なら+20%。魔法は侵食率を上げないが、代わりに怪異を生む。どちらの力も無代償ではない。
-                    </p>
-                </div>
-
-                <div className="callout">
-                    <div className="callout__label">自然回復：</div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                        怪異に関わらない期間が続けば侵食率は徐々に低下する（1週間で−1%、1ヶ月で−5%、最大−15%）。ただし<span className="text-gold">51%以上は50%以下に戻らない</span>。半化の影に踏み込んだ変質は、時間では完全に癒えない。
-                    </p>
                 </div>
             </div>
 

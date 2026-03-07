@@ -5,10 +5,10 @@
 
 // 改造等級
 export const CYBER_GRADES = [
-    { id: 'none', label: 'なし（素体）', cpLimit: 0, erosion: 0 },
-    { id: 'I', label: '等級Ⅰ — 表層改造', cpLimit: 3, erosion: 0 },
-    { id: 'II', label: '等級Ⅱ — 深層改造', cpLimit: 6, erosion: 5 },
-    { id: 'III', label: '等級Ⅲ — 全置換', cpLimit: 10, erosion: 15 },
+    { id: 'none', label: 'なし（素体）', cpLimit: 0 },
+    { id: 'I', label: '等級Ⅰ — 表層改造', cpLimit: 3 },
+    { id: 'II', label: '等級Ⅱ — 深層改造', cpLimit: 6 },
+    { id: 'III', label: '等級Ⅲ — 全置換', cpLimit: 10 },
 ];
 
 // 改造部位

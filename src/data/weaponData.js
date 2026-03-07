@@ -59,16 +59,6 @@ export const WEAPONS_HALF = [
     { name: '鴉羽特注改造腕部', maker: '鴉羽技研', cp: 8, slot: 3, mod: '+3〜+4', note: '違法スロット+1。検知リスク', part: '腕部' },
 ];
 
-// 全装身型
-export const WEAPONS_FULL = [
-    { name: '蒼鉄制式甲冑【壱型】', maker: '蒼鉄機工', cp: 10, slot: 4, mod: '+2（防御+2）', note: '特務班正式装備。同調難度低' },
-    { name: '蒼鉄制式甲冑【弐型・重装】', maker: '蒼鉄機工', cp: 14, slot: 4, mod: '+3（防御+3）', note: '壱型上位。重量級。機動力低' },
-    { name: '雷神鎧【雷禽・量産型】', maker: '雷禽重工', cp: 15, slot: 5, mod: '+3（素養+4）', note: '傭兵向け。同調失敗で侵食+5%' },
-    { name: '雷神鎧【雷禽・試作型】', maker: '雷禽重工', cp: 18, slot: 5, mod: '+5（素養B以上）', note: 'テスト限定。同調難度最高' },
-    { name: '銀鎚個人専用全装甲', maker: '銀鎚精機', cp: 22, slot: 5, mod: '+4（専用+5）', note: '世界に一着。侵食補正設計込み' },
-    { name: '蜃気楼製怪異外殻', maker: '蜃気楼工廠', cp: 16, slot: 5, mod: '+3〜+6（侵食依存）', note: '高侵食ほど強い。人間性を失う' },
-];
-
 // 搭乗型
 export const WEAPONS_MOUNT = [
     { name: '蒼鉄軽装バイク【巡回型】', maker: '蒼鉄機工', cp: 8, slot: 3, mod: '機動力+2', note: '祓部巡回用。離脱が容易' },
@@ -80,22 +70,12 @@ export const WEAPONS_MOUNT = [
     { name: '蜃気楼製浮遊輪', maker: '蜃気楼工廠', cp: 12, slot: 3, mod: '機動力+4（3次元）', note: '浮遊。地形無視。侵食ロール' },
 ];
 
-// 戦闘用搭乗型（GM限定）
-export const WEAPONS_COMBAT_MOUNT = [
-    { name: '蒼鉄制式戦闘車輌【鉄壁】', maker: '蒼鉄機工', cp: 18, slot: 4, mod: '三級以下+3（防御+3）', note: '公式作戦限定。2名以上運用' },
-    { name: '雷禽重戦闘機【雷獣】', maker: '雷禽重工', cp: 22, slot: 5, mod: '三級以下+4（攻撃+3）', note: '傭兵集団向け。素養B以上' },
-    { name: '雷禽試作超大型機【雷帝】', maker: '雷禽重工', cp: 25, slot: 6, mod: '二級以下+5（攻撃+4）', note: 'テスト最上位機。暴走リスク' },
-    { name: '鴉羽改造戦闘車輌【夜鴉】', maker: '鴉羽技研', cp: 20, slot: 5, mod: '三級以下+4（隠密+2）', note: '違法運用前提。発見で没収' },
-];
-
 // 分類別にまとめたマップ
 export const BASE_WEAPONS_BY_CATEGORY = {
     '武装型': WEAPONS_ARMED,
     '独立型': WEAPONS_INDEPENDENT,
     '半装身型': WEAPONS_HALF,
-    '全装身型': WEAPONS_FULL,
     '搭乗型': WEAPONS_MOUNT,
-    '戦闘用搭乗型': WEAPONS_COMBAT_MOUNT,
 };
 
 // ----- カスタムオプション一覧 -----
@@ -151,15 +131,6 @@ export const CUSTOM_OPTIONS = {
         { name: '肩部ドローン統合', cp: 4, mod: '±0', resonance: '渇望+1', risk: '高' },
         { name: '緊急冷却装置', cp: 2, mod: '±0', resonance: '浄化+1', risk: '低' },
         { name: '魔力直結ライン', cp: 3, mod: '+3（最大出力）', resonance: '渇望+2', risk: '高' },
-    ],
-    // 全装身型専用
-    '全装身型専用': [
-        { name: '同調深化インターフェース', cp: 4, mod: '+2（同調時）', resonance: '渇望+2', risk: '高' },
-        { name: '全身出力最大化', cp: 3, mod: '+4（最大出力）', resonance: '怒り+3', risk: '非常に高' },
-        { name: '都市伝説抑制システム', cp: 3, mod: '±0', resonance: '浄化+1', risk: '低' },
-        { name: '魔導フィールド展開', cp: 4, mod: '±0', resonance: '浄化+2', risk: '高' },
-        { name: '怪異同調炉', cp: 5, mod: '+2〜+5', resonance: '渇望+3・恐怖+1', risk: '非常に高' },
-        { name: '緊急切離し機構', cp: 2, mod: '±0', resonance: '恐怖+1', risk: '低' },
     ],
 };
 

@@ -125,7 +125,7 @@ export default function IntroAnomaliesPage() {
                             内側から生まれる力。怪異と同じ発生原理を持ち、体験や執着から発現する。訓練では習得できない。
                         </p>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', opacity: 0.9 }}>
-                            RISK: 使うたびに自分が怪異に近づく（侵食率上昇）
+                            RISK: 使うたびに自分が怪異に近づく
                         </div>
                     </div>
                 </div>
@@ -178,19 +178,9 @@ export default function IntroAnomaliesPage() {
                                 <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>○</td>
                             </tr>
                             <tr>
-                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>全装身型</td>
-                                <td>全身を覆う高火力・高防御の装備。扱える人間が少ない</td>
-                                <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>△</td>
-                            </tr>
-                            <tr>
                                 <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>搭乗型</td>
                                 <td>バイクから特殊車両まで。機動力と輸送に特化</td>
                                 <td style={{ textAlign: 'center', color: 'var(--accent-gold)' }}>○</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>戦闘用搭乗型</td>
-                                <td>大型怪異討伐用の機動兵器。個人所有は法律で禁止</td>
-                                <td style={{ textAlign: 'center', color: 'var(--accent-danger)' }}>✕</td>
                             </tr>
                         </tbody>
                     </table>

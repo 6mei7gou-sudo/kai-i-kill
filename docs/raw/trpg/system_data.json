@@ -30,7 +30,7 @@
     { "id": "judgment", "name": "判", "reading": "はん", "description": "解明宣言・看破・戦術" },
     { "id": "vision", "name": "察", "reading": "さつ", "description": "怪異感知・観察・証言聴取" },
     { "id": "technique", "name": "術", "reading": "じゅつ", "description": "魔法行使・魔導具操作・装備の高度な運用" },
-    { "id": "soul", "name": "魂", "reading": "こん", "description": "異能制御・侵食抵抗・信念維持" }
+    { "id": "soul", "name": "魂", "reading": "こん", "description": "異能制御・信念維持・精神防御" }
   ],
 
   "character_creation": {
@@ -48,28 +48,27 @@
     "initial_resources": {
       "belief_points": { "initial": 5, "max": 5 },
       "clues": 0,
-      "erosion": "0%（または背景・覚醒による）",
       "resonance_meters": "全種0（各上限10点）"
     },
     "backgrounds": [
       { "name": "神社育ち", "rank_up": ["察", "魂"], "effect": "禁足地データベースへの非公式アクセス権。古い怪異への解明鍵①の難易度−1" },
       { "name": "元傭兵", "rank_up": ["体", "疾"], "effect": "武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正" },
       { "name": "都市伝説研究者", "rank_up": ["識", "判"], "effect": "調査判定スペシャル時に解明鍵1つ追加入手の可能性" },
-      { "name": "元実験体（逃亡者）", "rank_up": ["魂"], "effect": "異能ランク+1。初期侵食率+20%。渇望メーターの覚醒ギフトを1段階低いコストで使用可能" },
+      { "name": "元実験体（逃亡者）", "rank_up": ["魂"], "effect": "異能ランク+1。渇望メーターの覚醒ギフトを1段階低いコストで使用可能（拡張導入時：初期侵食率+20%）" },
       { "name": "ハッカー上がり", "rank_up": ["識", "疾"], "effect": "NGT魔法判定に+1。独立型装備のCP+3" },
       { "name": "魔法資格持ち", "rank_up": ["術", "識"], "effect": "選択した魔法言語の+1修正が2状況に拡張。怪異誘発判定の確率が1ランク改善" }
     ],
     "classes": [
       { "name": "祓士", "rank_up": "魂→B", "ability": "浄化ギフトを1ランク低い覚醒段階から使用可能" },
       { "name": "機甲士", "rank_up": "体→B", "ability": "護衛への連鎖ダメージ条件が「耐久値以上」→「耐久値−2以上」に緩和" },
-      { "name": "異能者", "rank_up": "魂→B（または異能ランク+1）", "ability": "侵食ロールのファンブル時の侵食率上昇を+10%に軽減" },
+      { "name": "異能者", "rank_up": "魂→B（または異能ランク+1）", "ability": "侵食ロールのファンブル時の侵食率上昇を+10%に軽減", "expansion": "禁域解放" },
       { "name": "解明師", "rank_up": "判→B", "ability": "解明完了宣言時に討伐クロック追加−1" },
       { "name": "情報屋", "rank_up": "識→B", "ability": "怪異予兆カードの公開条件を1回だけ「任意のタイミング」に変更可" }
     ],
     "awakening_patterns": [
       { "id": "innate", "name": "先天覚醒型", "description": "生まれつき素養を持ち訓練で開花", "mechanic": "術または魂のランクがCでスタート（背景の昇格とは別）" },
       { "id": "shock", "name": "ショック覚醒型", "description": "怪異に関わる強烈な体験が引き金", "mechanic": "恨みや喪失に対する判定に+1。初期信念ポイント+1" },
-      { "id": "experiment", "name": "実験覚醒型", "description": "人体実験で強制覚醒", "mechanic": "異能ランクに+1。初期侵食率+10%（背景の実験体と重複可）" },
+      { "id": "experiment", "name": "実験覚醒型", "description": "人体実験で強制覚醒", "mechanic": "異能ランクに+1。察判定+1（怪異の気配への過敏さ）" },
       { "id": "contact", "name": "接触覚醒型", "description": "怪異の核や特殊素材への長期接触で覚醒", "mechanic": "察判定に常時+1（怪異の気配への鋭敏さ）" }
     ]
   },
@@ -79,11 +78,11 @@
     "description": "判定ごとに共鳴ダイスを選択し、行為の文脈に応じた感情メーターが蓄積される。蓄積が深まればギフトが解放されるが、臨界に達すると代償が訪れる",
     "max_per_meter": 10,
     "meters": [
-      { "id": "fear", "name": "恐怖", "english": "FEAR", "color": "暗赤", "trigger": "逃走・退避・防御に失敗した時、怪異のルールを破った時", "critical_penalty": "次の【魂】判定が自動ファンブル。侵食率+10%" },
+      { "id": "fear", "name": "恐怖", "english": "FEAR", "color": "暗赤", "trigger": "逃走・退避・防御に失敗した時、怪異のルールを破った時", "critical_penalty": "次の【魂】判定が自動ファンブル" },
       { "id": "rage", "name": "怒り", "english": "RAGE", "color": "赤橙", "trigger": "攻撃判定スペシャル時、仲間が傷ついた時の行動", "critical_penalty": "1ラウンド行動が強制：最も近い敵への最大火力攻撃のみ" },
       { "id": "sorrow", "name": "哀愁", "english": "SORROW", "color": "青", "trigger": "解明鍵を1つ入手した時、NPCとの別れの場面", "critical_penalty": "次の調査判定がすべて−1。信念ポイント1消費" },
       { "id": "haste", "name": "焦燥", "english": "HASTE", "color": "橙", "trigger": "制限ラウンド残り1で行動した時、手がかりを失った時", "critical_penalty": "次の行動宣言を相手より先に強制公開（奇襲不可）" },
-      { "id": "thirst", "name": "渇望", "english": "THIRST", "color": "紫", "trigger": "異能・特殊素材装備を使用した時、侵食ロール後", "critical_penalty": "侵食率+5%。次の侵食ロールの失敗閾値が1段階悪化" },
+      { "id": "thirst", "name": "渇望", "english": "THIRST", "color": "紫", "trigger": "異能・特殊素材装備を使用した時", "critical_penalty": "次の異能使用のコストが倍増" },
       { "id": "purge", "name": "浄化", "english": "PURGE", "color": "白緑", "trigger": "解明完了宣言成功時、信念ポイントを全消費した時", "critical_penalty": "代償なし（臨界で大浄化ギフト発動→リセット）" }
     ],
     "increase_rules": {
@@ -100,10 +99,8 @@
   },
 
   "erosion_track": {
-    "range_min": 0,
-    "range_max": 100,
-    "can_decrease": false,
-    "note": "怪異に関わらない期間が続くと侵食率は徐々に低下する。ただし51%以上は自然回復で50%以下に戻らない。",
+    "note": "拡張ルール（《禁域解放》EX-5.5）で導入。基本ルールでは使用しない。",
+    "expansion": "禁域解放",
     "stages": [
       { "range": "0-25%", "name": "正常", "effect": "影響なし" },
       { "range": "26-50%", "name": "変容の兆し", "effect": "外見に軽微な変化。怪異の「声」や「視点」が断片的に聞こえ始める。察判定に+1" },
@@ -166,7 +163,7 @@
       { "name": "干渉", "english": "DISTURB", "attribute": "判", "description": "護衛の特性を一時的に無効化" },
       { "name": "回避専念", "english": "EVADE", "attribute": "疾", "description": "攻撃不可だがダメージ無効" },
       { "name": "浄化", "english": "CLEANSE", "attribute": "魂", "description": "成功で共鳴メーター1種を−2点" },
-      { "name": "異能発動", "english": "ABILITY", "attribute": "魂", "description": "異能を使用（侵食ロール発生）" }
+      { "name": "異能発動", "english": "ABILITY", "attribute": "魂", "description": "異能を使用" }
     ],
     "damage_formula": "達成値 + 武器修正 − 対象の防御値",
     "chain_damage": "1ラウンド内で護衛の耐久値以上のダメージ→護衛行動不能＋核に同点ダメージ伝播",
@@ -210,10 +207,10 @@
     "description": "内側から生まれる力。怪異と同じ発生原理を持つ。使い続けると怪異に近づく",
     "roll_attribute": "魂",
     "outcomes": [
-      { "result": "スペシャル（6）", "effect": "最大出力で発揮", "erosion": "+5%", "resonance": "渇望+2" },
-      { "result": "成功（4-5）", "effect": "効果発揮", "erosion": "+5〜10%", "resonance": "渇望+1" },
-      { "result": "失敗（2-3）", "effect": "効果なし", "erosion": "+10%", "resonance": "渇望+1" },
-      { "result": "ファンブル（1）", "effect": "制御不能な効果発動（GM決定）", "erosion": "+20%", "resonance": "渇望+2・恐怖+2" }
+      { "result": "スペシャル（6）", "effect": "最大出力で発揮", "resonance": "渇望+2", "erosion_expansion": "+5%" },
+      { "result": "成功（4-5）", "effect": "効果発揮", "resonance": "渇望+1", "erosion_expansion": "+5〜10%" },
+      { "result": "失敗（2-3）", "effect": "効果なし", "resonance": "渇望+1", "erosion_expansion": "+10%" },
+      { "result": "ファンブル（1）", "effect": "制御不能な効果発動（GM決定）", "resonance": "渇望+2・恐怖+2", "erosion_expansion": "+20%" }
     ]
   },
 

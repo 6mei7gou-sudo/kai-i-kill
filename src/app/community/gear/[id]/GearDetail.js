@@ -6,7 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
-const CAT_COLOR = { '武装型': '#4488ff', '独立型': '#88cc44', '半装身型': '#ffaa00', '全装身型': '#ff4444', '搭乗型': '#8844ff', '戦闘用搭乗型': '#ff44aa' };
+const CAT_COLOR = { '武装型': '#4488ff', '独立型': '#88cc44', '半装身型': '#ffaa00', '搭乗型': '#8844ff' };
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
 
 const S = {

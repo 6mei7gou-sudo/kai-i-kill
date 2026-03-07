@@ -21,7 +21,7 @@ const ABILITIES = [
     { key: 'rank_han', name: '判', reading: 'はん', desc: '解明宣言・看破・戦術判断' },
     { key: 'rank_shiya', name: '察', reading: 'さつ', desc: '怪異感知・観察・証言聴取' },
     { key: 'rank_jutsu', name: '術', reading: 'じゅつ', desc: '魔法行使・魔導具操作' },
-    { key: 'rank_kon', name: '魂', reading: 'こん', desc: '侵食抵抗・信念維持・精神防御' },
+    { key: 'rank_kon', name: '魂', reading: 'こん', desc: '信念維持・精神防御・異能発動' },
 ];
 
 // 背景（5種）— 選択で2能力値がC昇格+初期効果
@@ -38,7 +38,7 @@ const BACKGROUNDS = [
 const CLASSES = [
     { id: '祓士', upgrade: 'rank_kon', effect: '浄化ギフトを1ランク低い覚醒段階から使用可能' },
     { id: '機甲士', upgrade: 'rank_tai', effect: '護衛への連鎖ダメージ条件が「耐久値以上」→「耐久値−2以上」に緩和' },
-    { id: '魂使い', upgrade: 'rank_kon', effect: '侵食抵抗判定+1。ファンブル時の侵食率上昇を+10%に軽減' },
+    { id: '魂使い', upgrade: 'rank_kon', effect: '魂判定+1。異能使用時のコスト軽減' },
     { id: '解明師', upgrade: 'rank_han', effect: '解明完了宣言時に討伐クロック追加−1' },
     { id: '情報屋', upgrade: 'rank_shiki', effect: '怪異予兆カードの公開条件を1回だけ「任意のタイミング」に変更可' },
 ];
@@ -56,7 +56,7 @@ const LANGUAGES = [
 
 const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
 const AWAKENINGS = ['先天覚醒型', 'ショック覚醒型', '実験覚醒型', '接触覚醒型'];
-const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型'];
+const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '搭乗型'];
 
 // 所属特典の詳細（バランス調整済み）
 const AFFILIATION_INFO = {
@@ -100,7 +100,7 @@ const SUB_AFFILIATIONS = {
 const AWAKENING_INFO = {
     '先天覚醒型': { effect: '術または魂がランクCでスタート（背景とは別枠）', extra: null },
     'ショック覚醒型': { effect: '恨み/喪失に対する判定+1。初期信念ポイント+1', extra: null },
-    '実験覚醒型': { effect: '怪異の気配に対する察判定+1。初期侵食率+10%', extra: 'erosion' },
+    '実験覚醒型': { effect: '怪異の気配に対する察判定+1', extra: null },
     '接触覚醒型': { effect: '察判定に常時+1（怪異の気配への鋭敏さ）', extra: null },
 };
 
@@ -112,14 +112,6 @@ const GIFTS = [
     { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
     { id: '怪異の残響', desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
     { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
-];
-
-const EROSION_STAGES = [
-    { max: 25, name: '正常', color: '#88cc44', desc: '影響なし' },
-    { max: 50, name: '変容の兆し', color: '#ffcc00', desc: '外見に軽微な変化。怪異の「声」が断片的に聞こえ始める' },
-    { max: 75, name: '半化の影', color: '#ff8800', desc: '目に見える異形化。怪異の一部の能力が扱えるようになる' },
-    { max: 99, name: '臨界', color: '#ff4444', desc: '重度の異形化。強力な異能が使用可能' },
-    { max: 100, name: '怪異化', color: '#ff0000', desc: 'キャラクター終了。PCはGMが管理する怪異になる' },
 ];
 
 // 初期値
@@ -135,8 +127,8 @@ const INITIAL = {
     proficient_languages: [], weak_languages: [],
     // 装備
     equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '',
-    // 侵食率・信念
-    erosion_rate: 0, belief_points: 5,
+    // 信念
+    belief_points: 5,
     // ストーリー
     fate: '', backstory: '',
     related_anomalies: '', related_characters: '', related_factions: '',
@@ -214,10 +206,6 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             return { ...prev, [key]: [...current, langId] };
         });
     }, []);
-
-    // 侵食段階
-    const getErosionStage = (rate) => EROSION_STAGES.find(s => rate <= s.max) || EROSION_STAGES[4];
-    const erosionStage = getErosionStage(form.erosion_rate);
 
     // 投稿処理
     const handleSubmit = async (e) => {
@@ -352,10 +340,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '6px' }}>{form.awakening}</div>
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>{awkInfo.effect}</div>
-                        {awkInfo.extra === 'erosion' && (
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', marginTop: '4px' }}>⚠ 初期侵食率+10%</div>
-                        )}
-                    </div>
+                        </div>
                 </div>
 
                 {/* SEC 2: 背景 */}
@@ -623,7 +608,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 7.5 — CYBERNETICS</div>
                     <h2 style={S.sectionHeading}>サイバネティクス（身体改造）</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だが侵食リスクが増す。</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だがリスクが増す。</p>
                     <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ff6666' }}>⚠ 装備と違い、サイバネティクスは一度施術すると取り外せません。慎重に選択してください。</div>
                     <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
                     {form.cyber_grade !== 'none' && (() => {
@@ -643,7 +628,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                             <>
                                 <div style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                        {grade.label} — 基礎侵食 +{grade.erosion}%
+                                        {grade.label}
                                     </span>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: usedCP > grade.cpLimit ? 'var(--accent-danger)' : 'var(--accent-gold)' }}>
                                         {usedCP} / {grade.cpLimit} CP
@@ -684,30 +669,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     })()}
                 </div>
 
-                {/* SEC 8: 侵食率 */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 8 — EROSION</div>
-                    <h2 style={S.sectionHeading}>侵食率</h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)', marginBottom: 'var(--space-md)' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: erosionStage.color }}>{form.erosion_rate}%</span>
-                        <div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: erosionStage.color, fontWeight: 700 }}>{erosionStage.name}</div>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', maxWidth: '400px' }}>{erosionStage.desc}</div>
-                        </div>
-                    </div>
-                    <input type="range" min={0} max={100} value={form.erosion_rate} onChange={e => set('erosion_rate', parseInt(e.target.value))}
-                        style={{ width: '100%', accentColor: erosionStage.color }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
-                    </div>
-                    {form.awakening === '実験覚醒型' && (
-                        <div style={{ padding: '8px 12px', background: 'rgba(230, 57, 70, 0.08)', border: '1px solid rgba(230, 57, 70, 0.25)', marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)' }}>
-                            ⚠ 実験覚醒型: 初期侵食率+10%（10%以上でスタートしてください）
-                        </div>
-                    )}
-                </div>
-
-                {/* SEC 9: 因縁・バックストーリー */}
+                {/* SEC 8: 因縁・バックストーリー */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 9 — STORY</div>
                     <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>

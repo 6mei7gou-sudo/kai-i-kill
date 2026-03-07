@@ -8,13 +8,6 @@ import Link from 'next/link';
 
 const AFF_COLOR = { '祓部': '#4488ff', '傭兵': '#ffaa00', '無所属': '#ff6644' };
 const LANG_COLORS = { 'P': '#888', 'Igniscript': '#ff4444', 'Lupis Surf': '#4488ff', 'Ivyo': '#44cc44', 'NGT': '#ffcc00', 'Monyx': '#aaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
-const EROSION_STAGES = [
-    { max: 25, name: '正常', color: '#88cc44' },
-    { max: 50, name: '変容の兆し', color: '#ffcc00' },
-    { max: 75, name: '半化の影', color: '#ff8800' },
-    { max: 99, name: '臨界', color: '#ff4444' },
-    { max: 100, name: '怪異化', color: '#ff0000' },
-];
 
 const ATTRS = [
     { key: 'attr_shiya', name: '察', reading: 'さつ' },
@@ -62,7 +55,6 @@ export default function CharacterDetail({ id }) {
     if (loading) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--text-muted)' }}>読み込み中...</div>;
     if (!e) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--text-muted)' }}>シートが見つかりませんでした。</div>;
 
-    const erosion = EROSION_STAGES.find(s => e.erosion_rate <= s.max) || EROSION_STAGES[4];
     const maxAttr = Math.max(...ATTRS.map(a => e[a.key] || 0));
     const affColor = AFF_COLOR[e.affiliation] || '#888';
     const statusBadge = STATUS_BADGE[e.approved_status || 'pending'];
@@ -225,19 +217,6 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
-            {/* ===== 侵食率 ===== */}
-            <div style={SS.section}>
-                <div style={SS.sTitle}>EROSION</div>
-                <h2 style={SS.sHead}>侵食率</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: erosion.color }}>{e.erosion_rate}%</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: erosion.color, fontWeight: 700 }}>{erosion.name}</span>
-                </div>
-                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', marginTop: 'var(--space-md)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${e.erosion_rate}%`, background: `linear-gradient(90deg, ${affColor}, ${erosion.color})`, transition: 'width 0.5s' }} />
-                </div>
-                {e.erosion_memory && <Field label="怪異の記憶" value={e.erosion_memory} />}
-            </div>
 
             {/* ===== 因縁・バックストーリー ===== */}
             {(e.fate || e.backstory) && (
