@@ -84,7 +84,7 @@ export default function IntroAnomaliesPage() {
                 <div className="callout">
                     <div className="callout__label">討伐の原則：</div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                        調査して、解明して、討伐する。この三段階が基本だ。戦闘力だけで解決できる怪異は存在しない——雑魚を除いて。
+                        雑魚を狩って満足しているうちはいい。だが本物の怪異は、調べて、暴いて、弱点を突かなければ殺せない。
                     </p>
                 </div>
             </div>
