@@ -358,8 +358,56 @@ export default function CharacterDetail({ id }) {
                         <Field label="メーカー" value={e.equipment_maker} />
                     </div>
                     <Field label="詳細" value={e.equipment_detail} />
-                    {e.linked_gear_id && (
-                        <Link href={`/community/gear/${e.linked_gear_id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', textDecoration: 'underline' }}>→ 装備詳細ページを見る</Link>
+
+                    {/* CP予算 */}
+                    {(() => {
+                        let cpBudget = 10;
+                        if (e.background === '技術畑') cpBudget += 2;
+                        if (e.sub_affiliation === '技術屋') cpBudget += 2;
+                        const bonuses = [];
+                        if (e.background === '技術畑') bonuses.push('技術畑+2');
+                        if (e.sub_affiliation === '技術屋') bonuses.push('技術屋+2');
+                        return (
+                            <div style={{
+                                marginTop: 'var(--space-md)', padding: '10px 14px',
+                                background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            }}>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                    装備CP予算{bonuses.length > 0 ? `（基本10 + ${bonuses.join(' + ')}）` : ''}
+                                </span>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>
+                                    {cpBudget}CP
+                                </span>
+                            </div>
+                        );
+                    })()}
+
+                    {/* 連携武器リンク */}
+                    {e.linked_gear_id ? (
+                        <Link href={`/community/gear/${e.linked_gear_id}/`} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            marginTop: 'var(--space-md)', padding: '8px 16px',
+                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)',
+                            background: 'rgba(212, 175, 55, 0.08)',
+                            border: '1px solid var(--accent-gold-border)',
+                            color: 'var(--accent-gold)', borderRadius: 'var(--radius-md)',
+                            textDecoration: 'none', transition: 'all 0.2s',
+                        }}>
+                            ⚔ 連携装備の詳細を見る
+                        </Link>
+                    ) : isOwner && (
+                        <Link href={`/create/character/${e.id}/`} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                            marginTop: 'var(--space-md)', padding: '8px 16px',
+                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: 'var(--border-subtle)',
+                            color: 'var(--text-muted)', borderRadius: 'var(--radius-md)',
+                            textDecoration: 'none',
+                        }}>
+                            ⚔ 投稿済み装備を連携する（編集）
+                        </Link>
                     )}
                 </div>
             )}
