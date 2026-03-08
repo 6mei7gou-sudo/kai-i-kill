@@ -7,17 +7,26 @@
   "reward": "信念ポイント+1",
   "tags": ["五級", "都市型", "初心者向け"],
   "battle": {
-    "max_rounds": 5,
+    "max_rounds": 4,
     "core": {
       "name": "迷い家の核「忘却の門扉」",
-      "hp": 6,
-      "defense": 0
+      "hp": 8,
+      "defense": 1
     },
     "guardians": [
       {
         "id": "g1",
         "name": "影人形",
-        "hp": 4,
+        "hp": 6,
+        "attack": 2,
+        "defense": 0,
+        "traits": [],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g2",
+        "name": "影人形・小",
+        "hp": 3,
         "attack": 1,
         "defense": 0,
         "traits": [],

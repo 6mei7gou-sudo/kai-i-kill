@@ -1,24 +1,24 @@
 {
   "id": "mission_grade4_mirror",
   "name": "合わせ鏡の回廊",
-  "description": "廃ビルの一室に出現した合わせ鏡の怪異。鏡の中から「もう一人の自分」が現れ、侵入者を襲う。四級怪異。護衛が複数おり、連携が必要。",
+  "description": "廃ビルの一室に出現した合わせ鏡の怪異。鏡の中から「もう一人の自分」が現れ、侵入者を襲う。四級怪異。護衛が強力で、装備なしでは苦戦必至。",
   "difficulty": "D",
   "client": "傭兵ギルド「灰狼」",
   "reward": "信念ポイント+2、報酬金",
-  "tags": ["四級", "廃墟型", "護衛複数"],
+  "tags": ["四級", "廃墟型", "装備推奨"],
   "battle": {
-    "max_rounds": 6,
+    "max_rounds": 5,
     "core": {
       "name": "鏡核「永劫反射」",
-      "hp": 10,
-      "defense": 1
+      "hp": 14,
+      "defense": 2
     },
     "guardians": [
       {
         "id": "g1",
         "name": "鏡像・剣士型",
-        "hp": 5,
-        "attack": 2,
+        "hp": 8,
+        "attack": 3,
         "defense": 1,
         "traits": ["反射"],
         "ai": "aggressive"
@@ -26,11 +26,20 @@
       {
         "id": "g2",
         "name": "鏡像・術師型",
-        "hp": 3,
+        "hp": 5,
         "attack": 3,
         "defense": 0,
         "traits": ["魔法攻撃"],
         "ai": "aggressive"
+      },
+      {
+        "id": "g3",
+        "name": "鏡像・影",
+        "hp": 4,
+        "attack": 2,
+        "defense": 0,
+        "traits": [],
+        "ai": "defensive"
       }
     ]
   },

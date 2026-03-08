@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   createBattleState, startRound, playerAttack, playerMagic,
-  playerEvade, processEnemyTurn, endRound, getBattleResult, PHASE
+  playerEvade, playerHeal, processEnemyTurn, endRound, getBattleResult, PHASE
 } from '@/lib/gameEngine';
 
 // HPバー
@@ -87,6 +87,7 @@ export default function BattlePage() {
       case 'attack': result = playerAttack(state, targetId); break;
       case 'magic': result = playerMagic(state, targetId); break;
       case 'evade': result = playerEvade(state); break;
+      case 'heal': result = playerHeal(state); break;
       default: return;
     }
 
@@ -169,6 +170,9 @@ export default function BattlePage() {
             <HPBar current={state.player.hp} max={state.player.maxHp} label="HP" color="var(--accent-blue)" />
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
               {state.player.class} | 体{state.player.rank_tai} 疾{state.player.rank_haya} 識{state.player.rank_shiki} 術{state.player.rank_jutsu}
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
+              武器+{state.player.weaponMod} | 防御{state.player.defense} | 信念{state.player.beliefPoints}
             </div>
           </div>
 
@@ -262,12 +266,22 @@ export default function BattlePage() {
             )}
           </div>
 
-          <button
-            onClick={() => handleAction('evade')}
-            style={actionBtnStyle('var(--text-secondary)')}
-          >
-            ↺ 回避態勢
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+            <button
+              onClick={() => handleAction('evade')}
+              style={actionBtnStyle('var(--text-secondary)')}
+            >
+              ↺ 回避態勢
+            </button>
+            {state.player.beliefPoints > 0 && state.player.healUsesLeft > 0 && (
+              <button
+                onClick={() => handleAction('heal')}
+                style={actionBtnStyle('var(--resonance-purge)')}
+              >
+                ♥ 回復（信念-1 / HP+{3 + (state.player.bgBonus?.healBonus || 0)}）
+              </button>
+            )}
+          </div>
         </div>
       )}
 
