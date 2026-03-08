@@ -5,6 +5,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
+import ImageUploader from '@/components/ImageUploader';
+import '@/components/ImageUploader.css';
 import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, findWeapon } from '@/data/weaponData';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
 
@@ -147,6 +149,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
+    const [myGear, setMyGear] = useState([]);
 
     // 編集モード
     useEffect(() => {
@@ -159,6 +162,15 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             setForm(prev => ({ ...prev, author_name: `@${user.username || user.firstName || 'user'}` }));
         }
     }, [user, isEdit]);
+
+    // 自分の投稿済み武器を取得
+    useEffect(() => {
+        if (!user) return;
+        fetch(`/api/posts?table=gear_posts&user_id=${user.id}`)
+            .then(r => r.json())
+            .then(res => { if (res.ok) setMyGear(res.data || []); })
+            .catch(() => {});
+    }, [user]);
 
     const set = useCallback((key, val) => setForm(prev => ({ ...prev, [key]: val })), []);
 
@@ -224,6 +236,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             const payload = { ...form };
             ABILITIES.forEach(a => { payload[a.key] = getEffectiveRank(a.key); });
             payload.belief_points = calcBeliefPoints();
+            // 空文字のlinked_gear_idはnullに変換（DB制約対応）
+            if (!payload.linked_gear_id) payload.linked_gear_id = null;
             delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id;
 
             const method = isEdit ? 'PATCH' : 'POST';
@@ -274,13 +288,15 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.row}>
                         <FormInput label="投稿者名" value={form.author_name} onChange={v => set('author_name', v)} placeholder="@ユーザー名" />
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
-                        <FormInput label="サムネイルURL" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} placeholder="サムネイル画像 URL" />
-                        <FormInput label="アイコンURL" value={form.icon_url} onChange={v => set('icon_url', v)} placeholder="アイコン画像 URL" />
                     </div>
                     <div style={S.row}>
-                        <FormInput label="画像1 URL" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} placeholder="https://..." />
-                        <FormInput label="画像2 URL" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} placeholder="https://..." />
-                        <FormInput label="画像3 URL" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="characters" />
+                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="characters" compact />
+                    </div>
+                    <div style={S.row}>
+                        <ImageUploader label="画像1" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} folder="characters" />
+                        <ImageUploader label="画像2" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} folder="characters" />
+                        <ImageUploader label="画像3" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} folder="characters" />
                     </div>
                 </div>
 
@@ -340,7 +356,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '6px' }}>{form.awakening}</div>
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>{awkInfo.effect}</div>
-                        </div>
+                    </div>
                 </div>
 
                 {/* SEC 2: 背景 */}
@@ -582,13 +598,102 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
                     {/* 投稿済み装備の紐づけ */}
-                    <div style={{ marginTop: 'var(--space-lg)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '8px' }}>装備投稿との連携</div>
-                        <FormInput label="投稿済み装備ID（任意）" value={form.linked_gear_id || ''} onChange={v => set('linked_gear_id', v)} placeholder="gear_postsのUUIDを貼り付け" />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                            <a href="/create/weapon" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', textDecoration: 'underline' }}>→ 装備を新規投稿する</a>
-                            <a href="/community/gear" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', textDecoration: 'underline' }}>→ コミュニティ装備一覧</a>
+                    <div style={{
+                        marginTop: 'var(--space-lg)', padding: '16px',
+                        background: 'rgba(212, 175, 55, 0.04)',
+                        border: '1px solid rgba(212, 175, 55, 0.2)',
+                        borderRadius: 'var(--radius-md)',
+                    }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
+                            ⚔ 投稿済み装備を連携
                         </div>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.6 }}>
+                            武器・装備投稿で作成した装備をこのキャラクターに紐づけると、キャラ詳細ページから装備詳細へ直接アクセスできます。
+                        </p>
+
+                        {myGear.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {myGear.map(g => {
+                                    const isLinked = form.linked_gear_id === g.id;
+                                    return (
+                                        <div
+                                            key={g.id}
+                                            onClick={() => set('linked_gear_id', isLinked ? '' : g.id)}
+                                            style={{
+                                                padding: '10px 14px',
+                                                background: isLinked ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
+                                                border: isLinked ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
+                                                borderRadius: 'var(--radius-md)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                            }}
+                                        >
+                                            <div>
+                                                <span style={{ fontWeight: 700, color: 'var(--text-heading)', fontSize: 'var(--font-size-sm)' }}>
+                                                    {g.gear_name}
+                                                </span>
+                                                <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                                    {g.category || ''} {g.manufacturer ? `/ ${g.manufacturer}` : ''}
+                                                </span>
+                                            </div>
+                                            {isLinked && (
+                                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', fontWeight: 700 }}>
+                                                    連携中
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                {form.linked_gear_id && (
+                                    <button
+                                        type="button"
+                                        onClick={() => set('linked_gear_id', '')}
+                                        style={{
+                                            padding: '6px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)',
+                                            background: 'transparent', border: '1px solid rgba(255,77,77,0.3)', color: '#ff6666',
+                                            borderRadius: 'var(--radius-md)', cursor: 'pointer', alignSelf: 'flex-start',
+                                        }}
+                                    >
+                                        連携を解除
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <div style={{ padding: '16px', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                                    まだ装備を投稿していません
+                                </p>
+                                <a
+                                    href="/create/weapon/"
+                                    target="_blank"
+                                    style={{
+                                        display: 'inline-block',
+                                        padding: '8px 20px',
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: 'var(--font-size-sm)',
+                                        fontWeight: 700,
+                                        background: 'rgba(212, 175, 55, 0.1)',
+                                        border: '1px solid var(--accent-gold-border)',
+                                        color: 'var(--accent-gold)',
+                                        borderRadius: 'var(--radius-md)',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    ⚔ 装備を新規投稿する
+                                </a>
+                            </div>
+                        )}
+
+                        {myGear.length > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                                <a href="/create/weapon/" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', textDecoration: 'underline' }}>
+                                    + 新しい装備を投稿する
+                                </a>
+                            </div>
+                        )}
                     </div>
                     {/* CP予算の目安 */}
                     {(() => {
