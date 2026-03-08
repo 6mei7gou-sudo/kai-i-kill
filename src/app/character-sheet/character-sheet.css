@@ -1,0 +1,824 @@
+/* KAI-I//KILL キャラクターシート — HUD Terminal スタイル */
+
+/* ─── 全体レイアウト ─────────────────────────────────── */
+.character-sheet {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.character-sheet__header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.character-sheet__header-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--accent-gold);
+  letter-spacing: 0.3em;
+  margin-bottom: var(--space-sm);
+}
+
+.character-sheet__title {
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0;
+}
+
+.character-sheet__cp {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-sm);
+}
+
+.cp-over {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* ─── セクション共通 ─────────────────────────────────── */
+.sheet-section {
+  margin-bottom: var(--space-xl);
+}
+
+.sheet-section__title {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--accent-gold);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sheet-section__icon {
+  font-size: 0.8em;
+}
+
+.sheet-section__title-en {
+  font-size: 0.65em;
+  color: var(--text-secondary);
+  margin-left: auto;
+  letter-spacing: 0.15em;
+}
+
+/* ─── プロフィール ────────────────────────────────────── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.profile-field--wide {
+  grid-column: 1 / -1;
+}
+
+.profile-field__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.profile-field__input,
+.profile-field__select,
+.profile-field__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.profile-field__input:focus,
+.profile-field__select:focus,
+.profile-field__textarea:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+}
+
+.profile-field__textarea--tall {
+  min-height: 120px;
+}
+
+/* ─── 能力値グリッド ──────────────────────────────────── */
+.ability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-sm);
+}
+
+.ability-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--space-sm);
+  transition: border-color 0.2s;
+}
+
+.ability-card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.ability-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.ability-card__name {
+  font-weight: 700;
+  color: #fff;
+}
+
+.ability-card__dice {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--accent-gold);
+}
+
+.ability-card__desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.ability-card__select {
+  width: 100%;
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* ─── 感情メーター ────────────────────────────────────── */
+.emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-sm);
+}
+
+.emotion-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--space-sm);
+}
+
+.emotion-card__label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.emotion-card__bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: var(--space-sm);
+  overflow: hidden;
+}
+
+.emotion-card__bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.emotion-card__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.emotion-card__btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+
+.emotion-card__btn:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+}
+
+.emotion-card__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.emotion-card__value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ─── 侵食率ゲージ ────────────────────────────────────── */
+.erosion-panel {
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.erosion-panel__gauge-track {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: var(--space-sm);
+  overflow: hidden;
+}
+
+.erosion-panel__gauge-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.erosion-normal .erosion-panel__gauge-fill {
+  background: #2ecc71;
+}
+
+.erosion-warning .erosion-panel__gauge-fill {
+  background: #f39c12;
+}
+
+.erosion-danger .erosion-panel__gauge-fill {
+  background: #e67e22;
+}
+
+.erosion-critical .erosion-panel__gauge-fill {
+  background: #e74c3c;
+}
+
+.erosion-kaiki .erosion-panel__gauge-fill {
+  background: #9b59b6;
+}
+
+.erosion-panel__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.erosion-panel__value {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.erosion-normal .erosion-panel__value {
+  color: #2ecc71;
+}
+
+.erosion-warning .erosion-panel__value {
+  color: #f39c12;
+}
+
+.erosion-danger .erosion-panel__value {
+  color: #e67e22;
+}
+
+.erosion-critical .erosion-panel__value {
+  color: #e74c3c;
+}
+
+.erosion-kaiki .erosion-panel__value {
+  color: #9b59b6;
+}
+
+.erosion-panel__label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.erosion-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.erosion-panel__btn {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.erosion-panel__btn:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+}
+
+.erosion-panel__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.erosion-panel__input {
+  width: 60px;
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* ─── ダイスローラー ──────────────────────────────────── */
+.dice-roller__controls {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.dice-roller__select {
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.dice-roller__btn {
+  padding: 8px 20px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dice-roller__btn:hover {
+  background: rgba(212, 175, 55, 0.3);
+}
+
+.dice-roller__result {
+  padding: var(--space-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: dice-flash 0.3s ease;
+}
+
+@keyframes dice-flash {
+  0% {
+    background: rgba(212, 175, 55, 0.2);
+  }
+
+  100% {
+    background: transparent;
+  }
+}
+
+.dice-roller__result-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 4px;
+}
+
+.dice-roller__result-icon {
+  font-size: 1.2rem;
+}
+
+.dice-roller__result-label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.result-fumble .dice-roller__result-label {
+  color: #e74c3c;
+}
+
+.result-fail .dice-roller__result-label {
+  color: var(--text-secondary);
+}
+
+.result-partial .dice-roller__result-label {
+  color: #f39c12;
+}
+
+.result-success .dice-roller__result-label {
+  color: #2ecc71;
+}
+
+.result-critical .dice-roller__result-label {
+  color: var(--accent-gold);
+}
+
+.dice-roller__result-detail {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* ─── 保存/読込パネル ─────────────────────────────────── */
+.save-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.save-panel__btn {
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-panel__btn:hover {
+  border-color: var(--accent-gold);
+}
+
+.save-panel__btn--primary {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.save-panel__btn--upload {
+  cursor: pointer;
+}
+
+.save-panel__btn--danger {
+  color: #e74c3c;
+}
+
+.save-panel__btn--danger:hover {
+  border-color: #e74c3c;
+}
+
+.save-panel__list-title {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.save-panel__entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.save-panel__entry-name {
+  color: #fff;
+  font-weight: 600;
+}
+
+.save-panel__entry-date {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-left: var(--space-sm);
+}
+
+.save-panel__entry-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.save-panel__btn--sm {
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.save-panel__btn--sm:hover {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+/* ─── レスポンシブ ────────────────────────────────────── */
+@media (max-width: 600px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ability-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .emotion-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dice-roller__controls {
+    flex-direction: column;
+  }
+
+  .save-panel__actions {
+    flex-direction: column;
+  }
+}
+
+/* ─── エクスポートパネル ──────────────────────────────── */
+.export-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.export-panel__btn {
+  padding: 10px 18px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--accent-gold);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-panel__btn:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--accent-gold);
+}
+
+.export-panel__btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.export-panel__card-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.1em;
+}
+
+/* ─── キャラカード（SNS共有用） ───────────────────────── */
+.char-card {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, #0a0c10 0%, #111520 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.char-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+}
+
+.char-card__left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.char-card__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.char-card__system {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-gold);
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+}
+
+.char-card__name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.char-card__meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.char-card__belief {
+  font-size: var(--font-size-sm);
+  color: var(--accent-gold);
+  font-style: italic;
+  margin-top: auto;
+}
+
+.char-card__erosion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-sm);
+}
+
+.char-card__erosion-label {
+  color: var(--text-secondary);
+}
+
+.char-card__erosion-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.char-card__erosion-status {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.erosion-normal .char-card__erosion-value {
+  color: #2ecc71;
+}
+
+.erosion-warning .char-card__erosion-value {
+  color: #f39c12;
+}
+
+.erosion-danger .char-card__erosion-value {
+  color: #e67e22;
+}
+
+.erosion-critical .char-card__erosion-value {
+  color: #e74c3c;
+}
+
+.erosion-kaiki .char-card__erosion-value {
+  color: #9b59b6;
+}
+
+.char-card__abilities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+}
+
+.char-card__ability {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 0;
+}
+
+.char-card__ability-name {
+  color: var(--text-secondary);
+  min-width: 28px;
+}
+
+.char-card__ability-rank {
+  color: #fff;
+  font-weight: 700;
+  min-width: 14px;
+}
+
+.char-card__ability-dice {
+  color: var(--accent-gold);
+  font-size: 10px;
+}
+
+.char-card__emotions {
+  display: flex;
+  gap: 3px;
+  margin-top: auto;
+}
+
+.char-card__emo-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.char-card__emo-fill {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+/* ─── 印刷用レイアウト ────────────────────────────────── */
+@media print {
+
+  /* サイドバーとヘッダーを非表示 */
+  .site-sidebar,
+  .site-sidebar__header,
+  .mobile-menu-btn,
+  .site-footer,
+  .dice-roller,
+  .save-panel,
+  .export-panel {
+    display: none !important;
+  }
+
+  /* メインコンテンツをフル幅に */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .character-sheet {
+    max-width: 100%;
+    padding: 10mm;
+  }
+
+  /* 背景を白、テキストを黒に */
+  body,
+  .character-sheet,
+  .sheet-section,
+  .ability-card,
+  .emotion-card,
+  .erosion-panel {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #ccc !important;
+  }
+
+  .character-sheet__title,
+  .ability-card__name {
+    color: #000 !important;
+  }
+
+  .sheet-section__title,
+  .character-sheet__header-label,
+  .ability-card__dice {
+    color: #333 !important;
+  }
+
+  .profile-field__input,
+  .profile-field__select,
+  .profile-field__textarea {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid #999 !important;
+  }
+
+  /* 侵食率ゲージを印刷用に */
+  .erosion-panel__gauge-track {
+    background: #eee !important;
+  }
+
+  .erosion-panel__gauge-fill {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* 感情バーも印刷用に */
+  .emotion-card__bar-track {
+    background: #eee !important;
+  }
+
+  .emotion-card__bar-fill {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* ページ区切り */
+  .sheet-section {
+    break-inside: avoid;
+  }
+}
