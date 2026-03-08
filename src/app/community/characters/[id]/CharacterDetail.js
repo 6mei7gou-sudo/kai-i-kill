@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import IdBadge from '@/components/IdBadge';
 
 const AFF_COLOR = { '祓部': '#4488ff', '傭兵': '#ffaa00', '無所属': '#ff6644' };
 const LANG_COLORS = { 'P': '#888', 'Igniscript': '#ff4444', 'Lupis Surf': '#4488ff', 'Ivyo': '#44cc44', 'NGT': '#ffcc00', 'Monyx': '#aaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
@@ -244,14 +245,14 @@ export default function CharacterDetail({ id }) {
                         </div>
                     )}
 
-                    {/* 称号選択の説明（オーナーのみ） */}
+                    {/* 称号選択の説明 */}
                     {isOwner && achievements.length > 0 && (
                         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-lg)', fontFamily: 'var(--font-mono)' }}>
                             実績をクリックすると称号として名前の横に表示されます。もう一度クリックで解除。
                         </div>
                     )}
 
-                    {/* シリアルコード入力（オーナーのみ） */}
+                    {/* シリアルコード入力（ログインユーザーかつオーナー） */}
                     {isOwner && (
                         <div style={{ padding: 'var(--space-md)', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
                             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
@@ -388,15 +389,10 @@ export default function CharacterDetail({ id }) {
             )}
 
             {/* ===== フッター ===== */}
-            <div style={{ padding: 'var(--space-xl)', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', marginBottom: 'var(--space-2xl)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                    ID: {id?.slice(0, 8)}... · 作成: {new Date(e.created_at).toLocaleDateString('ja-JP')}
-                    {e.updated_at && ` · 更新: ${new Date(e.updated_at).toLocaleDateString('ja-JP')}`}
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    {isOwner && <Link href={`/create/character/${id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', padding: '4px 12px', border: '1px solid rgba(255,170,0,0.3)', textDecoration: 'none' }}>✏ 編集</Link>}
-                    <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', padding: '4px 12px', border: 'var(--border-subtle)', textDecoration: 'none' }}>← 一覧</Link>
-                </div>
+            <IdBadge id={id} label="CHARACTER ID" created_at={e.created_at} updated_at={e.updated_at} />
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginBottom: 'var(--space-2xl)' }}>
+                {isOwner && <Link href={`/create/character/${id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', padding: '4px 12px', border: '1px solid rgba(255,170,0,0.3)', textDecoration: 'none' }}>✏ 編集</Link>}
+                <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', padding: '4px 12px', border: 'var(--border-subtle)', textDecoration: 'none' }}>← 一覧</Link>
             </div>
         </div>
     );

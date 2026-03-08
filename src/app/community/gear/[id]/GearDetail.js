@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import IdBadge from '@/components/IdBadge';
 
 const CAT_COLOR = { '武装型': '#4488ff', '独立型': '#88cc44', '半装身型': '#ffaa00', '搭乗型': '#8844ff' };
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
@@ -73,6 +74,8 @@ export default function GearDetail({ id }) {
                     )}
                 </div>
             </section>
+
+            <IdBadge id={id} label="GEAR ID" created_at={entry.created_at} updated_at={entry.updated_at} />
 
             {/* 概要 */}
             <div style={S.section}>

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import IdBadge from '@/components/IdBadge';
 
 const GRADE_COLOR = {
     '特級': '#ff4444', '一級': '#ffaa00', '二級': '#4488ff',
@@ -99,6 +100,8 @@ export default function AnomalyDetail({ id }) {
                         }}>✏ 編集する</Link>
                     )}
                 </div>
+
+                <IdBadge id={id} label="ANOMALY ID" created_at={entry.created_at} updated_at={entry.updated_at} />
 
                 <div className="callout" style={{ marginTop: 'var(--space-lg)' }}>
                     <div className="callout__label">注意：</div>
