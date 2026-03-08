@@ -18,9 +18,12 @@ export default function MissionDetailPage() {
   const { user, isLoaded } = useUser();
   const [characters, setCharacters] = useState([]);
   const [selectedChar, setSelectedChar] = useState(null);
+  const [selectedParty, setSelectedParty] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const mission = getMissionById(missionId);
+  const isCoop = mission?.type === 'coop';
+  const partySize = mission?.party_size || 1;
 
   useEffect(() => {
     if (!isLoaded || !user) { setLoading(false); return; }
@@ -45,11 +48,25 @@ export default function MissionDetailPage() {
   }
 
   const handleSortie = () => {
-    if (!selectedChar) return;
-    // キャラデータをsessionStorageに保存して戦闘画面へ
-    sessionStorage.setItem('battle_character', JSON.stringify(selectedChar));
+    if (isCoop) {
+      if (selectedParty.length !== partySize) return;
+      sessionStorage.setItem('battle_party', JSON.stringify(selectedParty));
+      sessionStorage.setItem('battle_character', JSON.stringify(selectedParty[0]));
+    } else {
+      if (!selectedChar) return;
+      sessionStorage.setItem('battle_character', JSON.stringify(selectedChar));
+    }
     sessionStorage.setItem('battle_mission', JSON.stringify(mission));
     router.push(`/games/mission/${missionId}/play/`);
+  };
+
+  const togglePartyMember = (c) => {
+    setSelectedParty(prev => {
+      const exists = prev.find(p => p.id === c.id);
+      if (exists) return prev.filter(p => p.id !== c.id);
+      if (prev.length >= partySize) return prev;
+      return [...prev, c];
+    });
   };
 
   return (
@@ -70,6 +87,7 @@ export default function MissionDetailPage() {
             {[
               ['依頼元', mission.client],
               ['報酬', mission.reward],
+              ...(isCoop ? [['形式', `協力（${partySize}人用）`]] : []),
               ['ラウンド制限', `${mission.battle.max_rounds}ラウンド`],
               ['核', `${mission.battle.core.name} (HP${mission.battle.core.hp} / 防御${mission.battle.core.defense})`],
             ].map(([label, value]) => (
@@ -110,7 +128,9 @@ export default function MissionDetailPage() {
 
       {/* キャラクター選択 */}
       <div className="section" style={{ marginTop: 'var(--space-xl)' }}>
-        <h2 className="section__title">出撃キャラクター選択</h2>
+        <h2 className="section__title">
+          {isCoop ? `出撃パーティ編成（${selectedParty.length}/${partySize}人選択）` : '出撃キャラクター選択'}
+        </h2>
 
         {!isLoaded || loading ? (
           <p style={{ color: 'var(--text-muted)' }}>読み込み中...</p>
@@ -127,53 +147,66 @@ export default function MissionDetailPage() {
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-              {characters.map(c => (
-                <div
-                  key={c.id}
-                  onClick={() => setSelectedChar(c)}
-                  style={{
-                    padding: 'var(--space-md)',
-                    border: selectedChar?.id === c.id ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
-                    background: selectedChar?.id === c.id ? 'var(--accent-gold-subtle)' : 'var(--bg-card)',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>{c.character_name}</span>
-                      <span style={{ color: 'var(--text-secondary)', marginLeft: 'var(--space-md)', fontSize: 'var(--font-size-sm)' }}>
-                        {c.class} / {c.affiliation}
-                      </span>
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                      HP {calculateHP(c.rank_tai)} | 体{c.rank_tai} 疾{c.rank_haya} 識{c.rank_shiki} 判{c.rank_han} 察{c.rank_shiya} 術{c.rank_jutsu} 魂{c.rank_kon}
+              {characters.map(c => {
+                const isInParty = selectedParty.find(p => p.id === c.id);
+                const isSelected = isCoop ? isInParty : selectedChar?.id === c.id;
+                const partyIndex = isCoop ? selectedParty.findIndex(p => p.id === c.id) + 1 : 0;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => isCoop ? togglePartyMember(c) : setSelectedChar(c)}
+                    style={{
+                      padding: 'var(--space-md)',
+                      border: isSelected ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
+                      background: isSelected ? 'var(--accent-gold-subtle)' : 'var(--bg-card)',
+                      borderRadius: 'var(--radius-md)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        {isCoop && isSelected && (
+                          <span style={{
+                            fontFamily: 'var(--font-mono)', fontWeight: 900, fontSize: 'var(--font-size-sm)',
+                            color: 'var(--accent-gold)', marginRight: 'var(--space-sm)',
+                          }}>
+                            [{partyIndex}]
+                          </span>
+                        )}
+                        <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>{c.character_name}</span>
+                        <span style={{ color: 'var(--text-secondary)', marginLeft: 'var(--space-md)', fontSize: 'var(--font-size-sm)' }}>
+                          {c.class} / {c.affiliation}
+                        </span>
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+                        HP {calculateHP(c.rank_tai)} | 体{c.rank_tai} 疾{c.rank_haya} 識{c.rank_shiki} 判{c.rank_han} 察{c.rank_shiya} 術{c.rank_jutsu} 魂{c.rank_kon}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <button
               onClick={handleSortie}
-              disabled={!selectedChar}
+              disabled={isCoop ? selectedParty.length !== partySize : !selectedChar}
               style={{
                 marginTop: 'var(--space-lg)',
                 padding: 'var(--space-md) var(--space-xl)',
                 fontFamily: 'var(--font-mono)',
                 fontSize: 'var(--font-size-lg)',
                 fontWeight: 700,
-                background: selectedChar ? 'var(--accent-gold)' : 'var(--bg-tertiary)',
-                color: selectedChar ? 'var(--bg-primary)' : 'var(--text-muted)',
+                background: (isCoop ? selectedParty.length === partySize : selectedChar) ? 'var(--accent-gold)' : 'var(--bg-tertiary)',
+                color: (isCoop ? selectedParty.length === partySize : selectedChar) ? 'var(--bg-primary)' : 'var(--text-muted)',
                 border: 'none',
                 borderRadius: 'var(--radius-md)',
-                cursor: selectedChar ? 'pointer' : 'not-allowed',
+                cursor: (isCoop ? selectedParty.length === partySize : selectedChar) ? 'pointer' : 'not-allowed',
                 transition: 'all 0.2s',
                 width: '100%',
               }}
             >
-              ▶ 出撃
+              ▶ {isCoop ? '出撃（協力）' : '出撃'}
             </button>
           </>
         )}

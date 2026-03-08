@@ -19,6 +19,22 @@ const gameCards = [
     icon: '◈',
     features: ['選択肢分岐', 'ダイス判定あり', 'マルチエンディング', '1キャラ1回限り'],
   },
+  {
+    title: 'DISPATCH',
+    subtitle: '派遣クエスト',
+    description: 'キャラクターを任務に派遣し、時間経過で報酬を獲得する放置型コンテンツ。',
+    href: '/games/dispatch/',
+    icon: '◇',
+    features: ['放置型', '1〜12時間', '成功率判定', '実績獲得'],
+  },
+  {
+    title: 'CO-OP',
+    subtitle: '協力クエスト',
+    description: '複数キャラでパーティを組み、高難度ミッションに挑む。役割分担がカギ。',
+    href: '/games/mission/',
+    icon: '⊕',
+    features: ['3人パーティ', '高難度', 'ヘイト制', '連携実績'],
+  },
 ];
 
 export default function GamesHubPage() {

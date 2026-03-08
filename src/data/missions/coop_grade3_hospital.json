@@ -1,0 +1,70 @@
+{
+  "id": "coop_grade3_hospital",
+  "name": "廃病院の主",
+  "type": "coop",
+  "party_size": 3,
+  "description": "閉鎖された総合病院の地下から、異常な怪異反応が検出された。単独での突入は自殺行為——三人一組の討伐チームが編成される。地下には、かつての患者と医療者の残留思念が蠢いている。",
+  "difficulty": "C",
+  "client": "祓部 関東管区",
+  "reward": "信念ポイント+3、連携実績解放",
+  "tags": ["三級", "協力", "3人用", "医療型"],
+  "battle": {
+    "max_rounds": 8,
+    "core": {
+      "name": "病院核「永遠の診察室」",
+      "hp": 30,
+      "defense": 4
+    },
+    "guardians": [
+      {
+        "id": "g1",
+        "name": "看護師の影A",
+        "hp": 8,
+        "attack": 3,
+        "defense": 1,
+        "traits": ["回復支援"],
+        "ai": "support"
+      },
+      {
+        "id": "g2",
+        "name": "看護師の影B",
+        "hp": 8,
+        "attack": 3,
+        "defense": 1,
+        "traits": ["回復支援"],
+        "ai": "support"
+      },
+      {
+        "id": "g3",
+        "name": "患者の亡霊A",
+        "hp": 10,
+        "attack": 4,
+        "defense": 1,
+        "traits": ["怨嗟", "群れ"],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g4",
+        "name": "患者の亡霊B",
+        "hp": 10,
+        "attack": 4,
+        "defense": 1,
+        "traits": ["怨嗟", "群れ"],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g5",
+        "name": "院長の残滓",
+        "hp": 14,
+        "attack": 5,
+        "defense": 3,
+        "traits": ["不可視", "強打", "指揮"],
+        "ai": "defensive"
+      }
+    ]
+  },
+  "achievements": [
+    { "id": "coop_hospital_clear", "name": "連携討伐者", "type": "mission" },
+    { "id": "coop_hospital_master", "name": "廃病院踏破", "type": "mission" }
+  ]
+}

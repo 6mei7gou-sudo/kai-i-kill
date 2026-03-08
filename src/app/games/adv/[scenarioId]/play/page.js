@@ -54,6 +54,8 @@ export default function AdvPlayPage() {
         return character.class === condition.value;
       case 'affiliation':
         return character.affiliation === condition.value;
+      case 'flag':
+        return choicesMade.some(c => c.nodeId === condition.flag);
       default:
         return true;
     }

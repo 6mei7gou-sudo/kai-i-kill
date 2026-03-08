@@ -67,6 +67,8 @@ export default function MyPage() {
     const [missionResults, setMissionResults] = useState([]);
     const [advCompletions, setAdvCompletions] = useState([]);
     const [achievements, setAchievements] = useState([]);
+    const [dispatchHistory, setDispatchHistory] = useState([]);
+    const [activeDispatches, setActiveDispatches] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -90,17 +92,21 @@ export default function MyPage() {
 
                 // ゲーム戦績取得（テーブル未作成でもエラーにしない）
                 try {
-                    const [missionRes, advRes, achRes] = await Promise.all([
+                    const [missionRes, advRes, achRes, dispatchRes] = await Promise.all([
                         fetch(`/api/games?table=mission_results&user_id=${user.id}`),
                         fetch(`/api/games?table=adv_completions&user_id=${user.id}`),
                         fetch(`/api/games?table=character_achievements&user_id=${user.id}`),
+                        fetch(`/api/games/dispatch?user_id=${user.id}`),
                     ]);
-                    const [missionJson, advJson, achJson] = await Promise.all([
-                        missionRes.json(), advRes.json(), achRes.json(),
+                    const [missionJson, advJson, achJson, dispatchJson] = await Promise.all([
+                        missionRes.json(), advRes.json(), achRes.json(), dispatchRes.json(),
                     ]);
                     setMissionResults(missionJson.data || []);
                     setAdvCompletions(advJson.data || []);
                     setAchievements(achJson.data || []);
+                    const allDispatches = dispatchJson.data || [];
+                    setActiveDispatches(allDispatches.filter(d => !d.completed_at));
+                    setDispatchHistory(allDispatches.filter(d => d.completed_at));
                 } catch (_) { /* ゲームテーブル未作成時は無視 */ }
             } catch (err) {
                 console.error('マイページ取得エラー:', err);
@@ -214,6 +220,36 @@ export default function MyPage() {
                                 </div>
                             )}
 
+                            {/* 派遣状況 */}
+                            <SectionHeader icon="◇" title="派遣クエスト" count={activeDispatches.length + dispatchHistory.length} />
+                            {activeDispatches.length === 0 && dispatchHistory.length === 0 ? (
+                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>まだ派遣に出していません。 <Link href="/games/dispatch/" style={{ color: 'var(--accent-gold)' }}>派遣クエスト →</Link></p>
+                            ) : (
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {activeDispatches.map(d => (
+                                        <div key={d.id} style={{ ...cardStyle, cursor: 'default', borderColor: 'rgba(212,175,55,0.3)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{d.quest_name}</span>
+                                                <span className="badge--gold" style={{ fontSize: 'var(--font-size-xs)' }}>派遣中</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {dispatchHistory.slice(0, 5).map(d => {
+                                        const isSuccess = d.result === '成功';
+                                        return (
+                                            <div key={d.id} style={{ ...cardStyle, cursor: 'default' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{d.quest_name}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: isSuccess ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>
+                                                        {d.result}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
                             {/* 実績 */}
                             {achievements.length > 0 && (
                                 <>
@@ -243,6 +279,10 @@ export default function MyPage() {
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{advCompletions.length}</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>ADV CLEARED</div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{dispatchHistory.filter(d => d.result === '成功').length}</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>DISPATCHES</div>
                                 </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--text-primary)' }}>{achievements.length}</div>

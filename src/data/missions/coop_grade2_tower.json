@@ -1,0 +1,79 @@
+{
+  "id": "coop_grade2_tower",
+  "name": "呪塔の守護者",
+  "type": "coop",
+  "party_size": 3,
+  "description": "都心の電波塔が怪異に侵食され、周囲一帯に呪詛電波を放射している。塔内部に巣食う二級怪異を討伐せよ。護衛は強力で、連携なくして勝利はない。",
+  "difficulty": "B",
+  "client": "雷禽重工 特務課",
+  "reward": "信念ポイント+5、高級装備素材",
+  "tags": ["二級", "協力", "3人用", "電波型", "高難度"],
+  "battle": {
+    "max_rounds": 10,
+    "core": {
+      "name": "塔核「呪詛放送局」",
+      "hp": 40,
+      "defense": 5
+    },
+    "guardians": [
+      {
+        "id": "g1",
+        "name": "電波の使い魔A",
+        "hp": 10,
+        "attack": 4,
+        "defense": 2,
+        "traits": ["電撃", "再生"],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g2",
+        "name": "電波の使い魔B",
+        "hp": 10,
+        "attack": 4,
+        "defense": 2,
+        "traits": ["電撃", "再生"],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g3",
+        "name": "中継器の守衛",
+        "hp": 16,
+        "attack": 5,
+        "defense": 3,
+        "traits": ["強打", "鉄壁"],
+        "ai": "defensive"
+      },
+      {
+        "id": "g4",
+        "name": "ノイズの亡霊",
+        "hp": 7,
+        "attack": 3,
+        "defense": 0,
+        "traits": ["妨害", "不可視"],
+        "ai": "support"
+      },
+      {
+        "id": "g5",
+        "name": "放送塔の番人",
+        "hp": 18,
+        "attack": 6,
+        "defense": 3,
+        "traits": ["呪詛", "強打", "不可視"],
+        "ai": "aggressive"
+      },
+      {
+        "id": "g6",
+        "name": "電磁障壁",
+        "hp": 12,
+        "attack": 2,
+        "defense": 4,
+        "traits": ["鉄壁", "反撃"],
+        "ai": "support"
+      }
+    ]
+  },
+  "achievements": [
+    { "id": "coop_tower_clear", "name": "呪塔突破者", "type": "mission" },
+    { "id": "coop_tower_perfect", "name": "電波浄化", "type": "mission" }
+  ]
+}

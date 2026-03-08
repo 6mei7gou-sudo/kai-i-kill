@@ -535,4 +535,459 @@ export function getBattleResult(state) {
   };
 }
 
+// ===== 協力戦闘（Coop）用関数 =====
+
+// 複数キャラの初期状態を生成
+export function createCoopBattleState(characters, mission) {
+  // 各キャラのステータスを計算
+  const players = characters.map((character, idx) => {
+    const classBonus = getClassBonus(character.class);
+    const bgBonus = getBackgroundBonus(character.background);
+    const cyberBonus = getCyberBonus(character.cybernetics);
+    const weaponMod = (EQUIPMENT_MOD[character.equipment_type] || 0)
+      + (bgBonus.weaponModBonus || 0)
+      + (cyberBonus.attackMod || 0);
+
+    const baseHP = calculateHP(character.rank_tai);
+    const totalHP = baseHP + (bgBonus.hpBonus || 0) + (cyberBonus.hpBonus || 0);
+    const beliefPoints = character.belief_points || 5;
+
+    return {
+      id: character.id || `player_${idx}`,
+      name: character.character_name,
+      hp: totalHP,
+      maxHp: totalHP,
+      rank_tai: character.rank_tai,
+      rank_haya: character.rank_haya,
+      rank_shiki: character.rank_shiki,
+      rank_han: character.rank_han,
+      rank_shiya: character.rank_shiya,
+      rank_jutsu: character.rank_jutsu,
+      rank_kon: character.rank_kon,
+      class: character.class,
+      background: character.background,
+      equipment_type: character.equipment_type,
+      weaponMod,
+      classBonus,
+      bgBonus,
+      cyberBonus,
+      beliefPoints,
+      maxHealUses: 2,
+      healUsesLeft: 2,
+      defense: cyberBonus.defenseMod || 0,
+      firstAttackDone: false,
+      alive: true,
+      hate: 0,
+    };
+  });
+
+  // イニシアチブ順にソート（疾ランクが高い順）
+  const RANK_VAL = { D: 0, C: 1, B: 2, A: 3, S: 4 };
+  players.sort((a, b) => (RANK_VAL[b.rank_haya] || 0) - (RANK_VAL[a.rank_haya] || 0));
+
+  const maxRoundsBonus = players.reduce((bonus, p) => {
+    return bonus + (p.classBonus.extraRounds || 0);
+  }, 0);
+  const maxRounds = mission.battle.max_rounds + Math.min(maxRoundsBonus, 1);
+
+  const enemies = mission.battle.guardians.map(g => ({
+    ...g,
+    maxHp: g.hp,
+    alive: true,
+  }));
+
+  const core = {
+    ...mission.battle.core,
+    maxHp: mission.battle.core.hp,
+    exposed: false,
+  };
+
+  return {
+    phase: PHASE.INIT,
+    mode: 'coop',
+    round: 1,
+    maxRounds,
+    players,
+    activePlayerIndex: 0,
+    enemies,
+    core,
+    log: [{ type: 'system', message: `協力戦闘 — ${players.length}人パーティ` }],
+    totalDamageDealt: 0,
+    totalDamageTaken: 0,
+    resonance: {
+      fear: 0, rage: 0, sorrow: 0, haste: 0, thirst: 0, purge: 0,
+    },
+  };
+}
+
+// 協力戦闘: ラウンド開始
+export function startCoopRound(state) {
+  const logs = [{
+    type: 'round_start',
+    round: state.round,
+    message: `──── ラウンド${state.round} / ${state.maxRounds} ────`,
+  }];
+
+  if (state.round === state.maxRounds) {
+    logs.push({ type: 'system', message: '⚠ 最終ラウンド — 焦燥+1' });
+  }
+
+  const aliveGuardians = state.enemies.filter(e => e.hp > 0);
+  const exposed = aliveGuardians.length === 0;
+
+  // 最初の生存プレイヤーのターン
+  const firstAlive = state.players.findIndex(p => p.alive);
+
+  let newState = {
+    ...state,
+    phase: PHASE.PLAYER_TURN,
+    activePlayerIndex: firstAlive >= 0 ? firstAlive : 0,
+    core: { ...state.core, exposed },
+    log: [...state.log, ...logs],
+  };
+
+  if (state.round === state.maxRounds) {
+    newState = addResonance(newState, 'haste', 1);
+  }
+
+  return newState;
+}
+
+// 協力戦闘: プレイヤー攻撃
+export function coopPlayerAttack(state, targetId) {
+  const player = state.players[state.activePlayerIndex];
+  if (!player || !player.alive) return { state, result: { success: false, message: '行動不能' } };
+
+  let target;
+  let isCore = false;
+
+  if (targetId === 'core' && state.core.exposed) {
+    target = state.core;
+    isCore = true;
+  } else {
+    target = state.enemies.find(e => e.id === targetId && e.hp > 0);
+  }
+
+  if (!target) {
+    return { state, result: { success: false, message: '対象が見つからない' } };
+  }
+
+  let attackMod = player.weaponMod;
+  if (!player.firstAttackDone && player.bgBonus.firstAttackMod) {
+    attackMod += player.bgBonus.firstAttackMod;
+  }
+  if (isCore && player.classBonus.coreAttackMod) {
+    attackMod += player.classBonus.coreAttackMod;
+  }
+
+  const guardianDmgBonus = (!isCore && player.classBonus.guardianDamageMod) || 0;
+  const defIgnore = isCore ? (player.bgBonus.coreDefIgnore || 0) : 0;
+  const effectiveDefense = Math.max((target.defense || 0) - defIgnore, 0);
+
+  const check = resolveCheck(player.rank_shiki, attackMod, effectiveDefense + 4);
+  let damage = 0;
+  let message = '';
+
+  if (check.isFumble) {
+    message = `ファンブル！ ${player.name}の攻撃は大きく外れた`;
+    state = addResonance(state, 'haste', 1);
+  } else if (check.success) {
+    damage = calculateDamage(check.maxDie, guardianDmgBonus, effectiveDefense);
+    if (check.isSpecial) {
+      damage = Math.floor(damage * 1.5);
+      state = addResonance(state, 'purge', 1);
+      message = `スペシャル！ ${player.name}の攻撃が${target.name}に${damage}ダメージ！`;
+    } else {
+      message = `${player.name}の攻撃が${target.name}に${damage}ダメージ`;
+    }
+    state = addResonance(state, 'rage', 1);
+  } else {
+    message = `${player.name}の攻撃は${target.name}に避けられた`;
+  }
+
+  // プレイヤー更新
+  let newPlayers = state.players.map((p, i) =>
+    i === state.activePlayerIndex ? { ...p, firstAttackDone: true, hate: p.hate + (damage > 0 ? 2 : 0) } : p
+  );
+
+  let newState = { ...state, players: newPlayers };
+
+  if (damage > 0) {
+    newState = applyDamageToTarget(newState, targetId, isCore, damage);
+  }
+
+  const log = { type: 'player_attack', player: player.name, target: target.name, check, damage, message };
+  newState = { ...newState, log: [...newState.log, log] };
+
+  if (isCore && newState.core.hp <= 0) {
+    newState = { ...newState, phase: PHASE.VICTORY };
+    newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 協力討伐成功！' }];
+    return { state: newState, result: { success: check.success, damage, check, message } };
+  }
+
+  // 次のプレイヤーへ
+  newState = advanceCoopTurn(newState);
+  return { state: newState, result: { success: check.success, damage, check, message } };
+}
+
+// 協力戦闘: プレイヤー魔法攻撃
+export function coopPlayerMagic(state, targetId) {
+  const player = state.players[state.activePlayerIndex];
+  if (!player || !player.alive) return { state, result: { success: false, message: '行動不能' } };
+
+  let target;
+  let isCore = false;
+
+  if (targetId === 'core' && state.core.exposed) {
+    target = state.core;
+    isCore = true;
+  } else {
+    target = state.enemies.find(e => e.id === targetId && e.hp > 0);
+  }
+
+  if (!target) {
+    return { state, result: { success: false, message: '対象が見つからない' } };
+  }
+
+  let magicMod = 0;
+  if (isCore && player.classBonus.coreAttackMod) {
+    magicMod += player.classBonus.coreAttackMod;
+  }
+
+  const defIgnore = isCore ? (player.bgBonus.coreDefIgnore || 0) : 0;
+  const effectiveDefense = Math.max((target.defense || 0) - defIgnore, 0);
+
+  const check = resolveCheck(player.rank_jutsu, magicMod, effectiveDefense + 3);
+  let damage = 0;
+  let message = '';
+
+  if (check.isFumble) {
+    message = `ファンブル！ ${player.name}の魔法が暴走 — 自傷2`;
+    const selfDmg = 2;
+    state = {
+      ...state,
+      players: state.players.map((p, i) =>
+        i === state.activePlayerIndex ? { ...p, hp: Math.max(p.hp - selfDmg, 0), alive: Math.max(p.hp - selfDmg, 0) > 0 } : p
+      ),
+      totalDamageTaken: state.totalDamageTaken + selfDmg,
+    };
+    state = addResonance(state, 'fear', 1);
+  } else if (check.success) {
+    damage = calculateDamage(check.maxDie, 1, effectiveDefense);
+    const mult = player.classBonus.magicMultiplier || 1;
+    damage = Math.floor(damage * mult);
+    if (check.isSpecial) {
+      damage = Math.floor(damage * 1.5);
+      state = addResonance(state, 'purge', 1);
+      message = `スペシャル！ ${player.name}の魔法が${target.name}に${damage}ダメージ！`;
+    } else {
+      message = `${player.name}の魔法が${target.name}に${damage}ダメージ`;
+    }
+    state = addResonance(state, 'thirst', 1);
+  } else {
+    message = `${player.name}の魔法は${target.name}に効かなかった`;
+  }
+
+  let newPlayers = state.players.map((p, i) =>
+    i === state.activePlayerIndex ? { ...p, hate: p.hate + (damage > 0 ? 1 : 0) } : p
+  );
+
+  let newState = { ...state, players: newPlayers };
+  if (damage > 0) {
+    newState = applyDamageToTarget(newState, targetId, isCore, damage);
+  }
+
+  const log = { type: 'player_magic', player: player.name, target: target.name, check, damage, message };
+  newState = { ...newState, log: [...newState.log, log] };
+
+  if (isCore && newState.core.hp <= 0) {
+    newState = { ...newState, phase: PHASE.VICTORY };
+    newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 協力討伐成功！' }];
+    return { state: newState, result: { success: check.success, damage, check, message } };
+  }
+
+  newState = advanceCoopTurn(newState);
+  return { state: newState, result: { success: check.success, damage, check, message } };
+}
+
+// 協力戦闘: プレイヤー回避
+export function coopPlayerEvade(state) {
+  const player = state.players[state.activePlayerIndex];
+  if (!player || !player.alive) return { state };
+
+  const evadeBonus = 2 + (player.bgBonus.evadeMod || 0) + (player.cyberBonus.evadeBonus || 0);
+  const log = {
+    type: 'player_evade',
+    message: `${player.name}は回避態勢をとった（回避+${evadeBonus}）`,
+  };
+
+  let newPlayers = state.players.map((p, i) =>
+    i === state.activePlayerIndex ? { ...p, _evadeBonus: evadeBonus } : p
+  );
+
+  let newState = { ...state, players: newPlayers, log: [...state.log, log] };
+  newState = advanceCoopTurn(newState);
+  return { state: newState };
+}
+
+// 協力戦闘: プレイヤー回復
+export function coopPlayerHeal(state) {
+  const player = state.players[state.activePlayerIndex];
+  if (!player || !player.alive) return { state, result: { success: false, message: '行動不能' } };
+
+  if (player.beliefPoints <= 0) {
+    return { state, result: { success: false, message: '信念ポイントが足りない' } };
+  }
+  if (player.healUsesLeft <= 0) {
+    return { state, result: { success: false, message: '回復回数の上限に達した' } };
+  }
+
+  const healAmount = 3 + (player.bgBonus.healBonus || 0);
+  const newHp = Math.min(player.hp + healAmount, player.maxHp);
+  const actualHeal = newHp - player.hp;
+
+  const log = {
+    type: 'player_heal',
+    message: `${player.name}が信念を燃やしてHP${actualHeal}回復`,
+  };
+
+  let newPlayers = state.players.map((p, i) =>
+    i === state.activePlayerIndex ? {
+      ...p,
+      hp: newHp,
+      beliefPoints: p.beliefPoints - 1,
+      healUsesLeft: p.healUsesLeft - 1,
+    } : p
+  );
+
+  let newState = { ...state, players: newPlayers, log: [...state.log, log] };
+  newState = advanceCoopTurn(newState);
+  return { state: newState, result: { success: true, message: log.message } };
+}
+
+// 協力戦闘: 敵ターン処理
+export function processCoopEnemyTurn(state) {
+  let newState = { ...state };
+
+  for (const enemy of newState.enemies) {
+    if (enemy.hp <= 0) continue;
+
+    const action = selectEnemyAction(enemy, newState);
+
+    if (action.type === 'attack') {
+      // ヘイト制でターゲット選択（ヘイト高い＋ランダム）
+      const alivePlayers = newState.players.filter(p => p.alive);
+      if (alivePlayers.length === 0) break;
+
+      let target;
+      const useHate = Math.random() < 0.6;
+      if (useHate) {
+        target = alivePlayers.reduce((max, p) => p.hate > max.hate ? p : max, alivePlayers[0]);
+      } else {
+        target = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
+      }
+
+      const targetIdx = newState.players.findIndex(p => p.id === target.id);
+      const evadeBonus = target._evadeBonus || 0;
+      const playerDef = target.defense || 0;
+
+      const enemyDice = enemy.attack >= 4 ? 2 : 1;
+      const rolls = [];
+      for (let i = 0; i < enemyDice; i++) rolls.push(Math.floor(Math.random() * 6) + 1);
+      const attackRoll = Math.max(...rolls) + enemy.attack;
+
+      const defenseRoll = resolveCheck(target.rank_haya, evadeBonus, attackRoll);
+
+      if (defenseRoll.success) {
+        const log = { type: 'enemy_attack_miss', enemy: enemy.name, message: `${target.name}が${enemy.name}の攻撃を回避した` };
+        newState = { ...newState, log: [...newState.log, log] };
+      } else {
+        const rawDamage = Math.max(enemy.attack + 1 - playerDef, 1);
+        const damage = evadeBonus > 0 ? Math.max(Math.ceil(rawDamage / 2), 1) : rawDamage;
+        const newHp = Math.max(target.hp - damage, 0);
+
+        const log = {
+          type: 'enemy_attack_hit',
+          enemy: enemy.name,
+          damage,
+          message: `${enemy.name}の攻撃が${target.name}に命中！ ${damage}ダメージ`,
+        };
+
+        let newPlayers = newState.players.map((p, i) =>
+          i === targetIdx ? { ...p, hp: newHp, alive: newHp > 0 } : p
+        );
+
+        newState = {
+          ...newState,
+          players: newPlayers,
+          totalDamageTaken: newState.totalDamageTaken + damage,
+          log: [...newState.log, log],
+        };
+
+        if (newHp <= 0) {
+          newState.log = [...newState.log, { type: 'system', message: `${target.name}が戦闘不能になった！` }];
+        } else if (newHp <= target.maxHp * 0.3) {
+          newState = addResonance(newState, 'fear', 1);
+        }
+        newState = addResonance(newState, 'rage', 1);
+      }
+    } else if (action.type === 'defend') {
+      const log = { type: 'enemy_defend', enemy: enemy.name, message: `${enemy.name}は防御態勢をとった` };
+      newState = { ...newState, log: [...newState.log, log] };
+    } else if (action.type === 'guard') {
+      const log = { type: 'enemy_guard', enemy: enemy.name, message: `${enemy.name}は核を守っている` };
+      newState = { ...newState, log: [...newState.log, log] };
+    }
+  }
+
+  // 回避ボーナスをリセット
+  let newPlayers = newState.players.map(p => {
+    const { _evadeBonus, ...rest } = p;
+    return rest;
+  });
+  newState = { ...newState, players: newPlayers };
+
+  // 全滅チェック
+  const allDead = newState.players.every(p => !p.alive);
+  if (allDead) {
+    newState = { ...newState, phase: PHASE.DEFEAT };
+    newState.log = [...newState.log, { type: 'result', message: '全員が戦闘不能…… 討伐失敗' }];
+    return newState;
+  }
+
+  newState = { ...newState, phase: PHASE.ROUND_END };
+  return newState;
+}
+
+// 協力戦闘: ターン送り
+function advanceCoopTurn(state) {
+  // 次の生存プレイヤーを探す
+  let nextIdx = state.activePlayerIndex + 1;
+  while (nextIdx < state.players.length && !state.players[nextIdx].alive) {
+    nextIdx++;
+  }
+
+  if (nextIdx >= state.players.length) {
+    // 全プレイヤーが行動完了 → 敵ターン
+    return { ...state, phase: PHASE.ENEMY_TURN, activePlayerIndex: 0 };
+  }
+
+  return { ...state, activePlayerIndex: nextIdx };
+}
+
+// 協力戦闘: ラウンド終了
+export function endCoopRound(state) {
+  const nextRound = state.round + 1;
+
+  if (nextRound > state.maxRounds) {
+    return {
+      ...state,
+      phase: PHASE.TIMEOUT,
+      log: [...state.log, { type: 'result', message: `ラウンド${state.maxRounds}超過 — 時間切れで撤退` }],
+    };
+  }
+
+  return { ...state, round: nextRound, phase: PHASE.INIT };
+}
+
 export { PHASE };

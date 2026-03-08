@@ -1,0 +1,67 @@
+[
+  {
+    "id": "patrol_city",
+    "name": "市街巡回任務",
+    "description": "担当区域を巡回し、怪異の兆候を報告する日常任務。低リスクだが、地道な活動が評価される。",
+    "duration_hours": 1,
+    "recommended_rank": "D",
+    "rewards": {
+      "achievements": [
+        { "id": "dispatch_patrol", "name": "巡回者", "type": "dispatch" }
+      ]
+    },
+    "tags": ["日常", "低リスク"]
+  },
+  {
+    "id": "explore_ruins",
+    "name": "廃区域調査",
+    "description": "封鎖された旧市街区域の怪異残留物を調査する。崩落した建物内の探索が必要。",
+    "duration_hours": 3,
+    "recommended_rank": "C",
+    "rewards": {
+      "achievements": [
+        { "id": "dispatch_explorer", "name": "探索者", "type": "dispatch" }
+      ]
+    },
+    "tags": ["調査", "中リスク"]
+  },
+  {
+    "id": "night_watch",
+    "name": "深夜警戒任務",
+    "description": "怪異出現率が高まる深夜帯に、指定エリアの警戒にあたる。長時間の集中力が求められる。",
+    "duration_hours": 5,
+    "recommended_rank": "B",
+    "rewards": {
+      "achievements": [
+        { "id": "dispatch_nightwatch", "name": "夜番", "type": "dispatch" }
+      ]
+    },
+    "tags": ["警戒", "高リスク"]
+  },
+  {
+    "id": "recon_forbidden",
+    "name": "禁域偵察",
+    "description": "立入禁止区域に単独潜入し、怪異核の位置情報を収集する。帰還が保証されない危険任務。",
+    "duration_hours": 8,
+    "recommended_rank": "A",
+    "rewards": {
+      "achievements": [
+        { "id": "dispatch_forbidden", "name": "禁域踏破者", "type": "dispatch" }
+      ]
+    },
+    "tags": ["潜入", "極高リスク"]
+  },
+  {
+    "id": "infiltration_long",
+    "name": "長期潜入作戦",
+    "description": "怪異汚染地帯に長期潜入し、核の分布図を作成する。生還率は低いが、成功すれば多くの命が救われる。",
+    "duration_hours": 12,
+    "recommended_rank": "S",
+    "rewards": {
+      "achievements": [
+        { "id": "dispatch_shadow", "name": "影の功労者", "type": "dispatch" }
+      ]
+    },
+    "tags": ["長期", "最高リスク"]
+  }
+]

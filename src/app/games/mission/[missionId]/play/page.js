@@ -6,7 +6,9 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   createBattleState, startRound, playerAttack, playerMagic,
-  playerEvade, playerHeal, processEnemyTurn, endRound, getBattleResult, PHASE
+  playerEvade, playerHeal, processEnemyTurn, endRound, getBattleResult, PHASE,
+  createCoopBattleState, startCoopRound, coopPlayerAttack, coopPlayerMagic,
+  coopPlayerEvade, coopPlayerHeal, processCoopEnemyTurn, endCoopRound,
 } from '@/lib/gameEngine';
 
 // HPバー
@@ -60,19 +62,32 @@ export default function BattlePage() {
   const [state, setState] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isCoop, setIsCoop] = useState(false);
 
   // 初期化
   useEffect(() => {
-    const charJson = sessionStorage.getItem('battle_character');
     const missionJson = sessionStorage.getItem('battle_mission');
-    if (!charJson || !missionJson) {
+    if (!missionJson) {
       router.push(`/games/mission/${missionId}/`);
       return;
     }
-    const character = JSON.parse(charJson);
     const mission = JSON.parse(missionJson);
-    const initial = createBattleState(character, mission);
-    setState(startRound(initial));
+    const coopMode = mission.type === 'coop';
+    setIsCoop(coopMode);
+
+    if (coopMode) {
+      const partyJson = sessionStorage.getItem('battle_party');
+      if (!partyJson) { router.push(`/games/mission/${missionId}/`); return; }
+      const party = JSON.parse(partyJson);
+      const initial = createCoopBattleState(party, mission);
+      setState(startCoopRound(initial));
+    } else {
+      const charJson = sessionStorage.getItem('battle_character');
+      if (!charJson) { router.push(`/games/mission/${missionId}/`); return; }
+      const character = JSON.parse(charJson);
+      const initial = createBattleState(character, mission);
+      setState(startRound(initial));
+    }
   }, [missionId, router]);
 
   if (!state) return <div style={{ color: 'var(--text-muted)', padding: 'var(--space-xl)' }}>読み込み中...</div>;
@@ -80,28 +95,41 @@ export default function BattlePage() {
   const isFinished = [PHASE.VICTORY, PHASE.DEFEAT, PHASE.TIMEOUT].includes(state.phase);
   const aliveEnemies = state.enemies.filter(e => e.hp > 0);
 
+  // 協力戦闘のアクティブプレイヤー
+  const activePlayer = isCoop ? state.players?.[state.activePlayerIndex] : null;
+
   // 行動ハンドラ
   const handleAction = (action, targetId) => {
     let result;
-    switch (action) {
-      case 'attack': result = playerAttack(state, targetId); break;
-      case 'magic': result = playerMagic(state, targetId); break;
-      case 'evade': result = playerEvade(state); break;
-      case 'heal': result = playerHeal(state); break;
-      default: return;
+    if (isCoop) {
+      switch (action) {
+        case 'attack': result = coopPlayerAttack(state, targetId); break;
+        case 'magic': result = coopPlayerMagic(state, targetId); break;
+        case 'evade': result = coopPlayerEvade(state); break;
+        case 'heal': result = coopPlayerHeal(state); break;
+        default: return;
+      }
+    } else {
+      switch (action) {
+        case 'attack': result = playerAttack(state, targetId); break;
+        case 'magic': result = playerMagic(state, targetId); break;
+        case 'evade': result = playerEvade(state); break;
+        case 'heal': result = playerHeal(state); break;
+        default: return;
+      }
     }
 
     let newState = result.state || result;
 
     // 敵ターン自動処理
     if (newState.phase === PHASE.ENEMY_TURN) {
-      newState = processEnemyTurn(newState);
+      newState = isCoop ? processCoopEnemyTurn(newState) : processEnemyTurn(newState);
     }
     // ラウンド終了自動処理
     if (newState.phase === PHASE.ROUND_END) {
-      newState = endRound(newState);
+      newState = isCoop ? endCoopRound(newState) : endRound(newState);
       if (newState.phase === PHASE.INIT) {
-        newState = startRound(newState);
+        newState = isCoop ? startCoopRound(newState) : startRound(newState);
       }
     }
 
@@ -114,7 +142,16 @@ export default function BattlePage() {
     setSaving(true);
     const charJson = sessionStorage.getItem('battle_character');
     const character = JSON.parse(charJson);
-    const result = getBattleResult(state);
+    // coop用: ソロと同じフォーマットで保存（代表キャラ）
+    const result = isCoop ? {
+      result: state.phase === PHASE.VICTORY ? '勝利' : state.phase === PHASE.DEFEAT ? '敗北' : '撤退',
+      roundsTaken: state.round,
+      totalDamageDealt: state.totalDamageDealt,
+      totalDamageTaken: state.totalDamageTaken,
+      remainingHp: state.players.filter(p => p.alive).reduce((sum, p) => sum + p.hp, 0),
+      resonanceSnapshot: { ...state.resonance },
+      battleLog: state.log,
+    } : getBattleResult(state);
 
     try {
       await fetch('/api/games', {
@@ -156,25 +193,58 @@ export default function BattlePage() {
           ROUND {state.round} / {state.maxRounds}
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-          {state.phase === PHASE.PLAYER_TURN ? '▶ あなたのターン' : isFinished ? '戦闘終了' : '処理中...'}
+          {state.phase === PHASE.PLAYER_TURN
+            ? (isCoop && activePlayer ? `▶ ${activePlayer.name}のターン` : '▶ あなたのターン')
+            : isFinished ? '戦闘終了' : '処理中...'}
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-xl)' }}>
         {/* 左: プレイヤー */}
         <div>
-          <div className="card" style={{ marginBottom: 'var(--space-md)' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-sm)' }}>
-              {state.player.name}
+          {isCoop ? (
+            // 協力モード: パーティメンバー表示
+            <>
+              {state.players.map((p, idx) => (
+                <div key={p.id} className="card" style={{
+                  marginBottom: 'var(--space-sm)',
+                  border: state.phase === PHASE.PLAYER_TURN && idx === state.activePlayerIndex
+                    ? '2px solid var(--accent-gold)' : undefined,
+                  opacity: p.alive ? 1 : 0.4,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: p.alive ? 'var(--accent-blue)' : 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>
+                      {p.name} {!p.alive && '(戦闘不能)'}
+                      {state.phase === PHASE.PLAYER_TURN && idx === state.activePlayerIndex && (
+                        <span style={{ color: 'var(--accent-gold)', marginLeft: 'var(--space-sm)' }}>▶</span>
+                      )}
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                      {p.class}
+                    </span>
+                  </div>
+                  <HPBar current={Math.max(p.hp, 0)} max={p.maxHp} label="HP" color="var(--accent-blue)" />
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                    武器+{p.weaponMod} | 防御{p.defense} | 信念{p.beliefPoints}
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            // ソロモード: 既存表示
+            <div className="card" style={{ marginBottom: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-blue)', marginBottom: 'var(--space-sm)' }}>
+                {state.player.name}
+              </div>
+              <HPBar current={state.player.hp} max={state.player.maxHp} label="HP" color="var(--accent-blue)" />
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                {state.player.class} | 体{state.player.rank_tai} 疾{state.player.rank_haya} 識{state.player.rank_shiki} 術{state.player.rank_jutsu}
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
+                武器+{state.player.weaponMod} | 防御{state.player.defense} | 信念{state.player.beliefPoints}
+              </div>
             </div>
-            <HPBar current={state.player.hp} max={state.player.maxHp} label="HP" color="var(--accent-blue)" />
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-              {state.player.class} | 体{state.player.rank_tai} 疾{state.player.rank_haya} 識{state.player.rank_shiki} 術{state.player.rank_jutsu}
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
-              武器+{state.player.weaponMod} | 防御{state.player.defense} | 信念{state.player.beliefPoints}
-            </div>
-          </div>
+          )}
 
           {/* 感情共鳴 */}
           <div className="card" style={{ padding: 'var(--space-sm) var(--space-md)' }}>
@@ -224,7 +294,7 @@ export default function BattlePage() {
       {state.phase === PHASE.PLAYER_TURN && !isFinished && (
         <div style={{ marginTop: 'var(--space-xl)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', marginBottom: 'var(--space-md)' }}>
-            ▶ 行動を選択
+            ▶ {isCoop && activePlayer ? `${activePlayer.name}の行動を選択` : '行動を選択'}
           </div>
 
           {/* 対象選択可能な敵 */}
@@ -273,14 +343,17 @@ export default function BattlePage() {
             >
               ↺ 回避態勢
             </button>
-            {state.player.beliefPoints > 0 && state.player.healUsesLeft > 0 && (
-              <button
-                onClick={() => handleAction('heal')}
-                style={actionBtnStyle('var(--resonance-purge)')}
-              >
-                ♥ 回復（信念-1 / HP+{3 + (state.player.bgBonus?.healBonus || 0)}）
-              </button>
-            )}
+            {(() => {
+              const p = isCoop ? activePlayer : state.player;
+              return p && p.beliefPoints > 0 && p.healUsesLeft > 0 && (
+                <button
+                  onClick={() => handleAction('heal')}
+                  style={actionBtnStyle('var(--resonance-purge)')}
+                >
+                  ♥ 回復（信念-1 / HP+{3 + (p.bgBonus?.healBonus || 0)}）
+                </button>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -308,7 +381,11 @@ export default function BattlePage() {
               {state.phase === PHASE.VICTORY ? '討伐成功' : state.phase === PHASE.DEFEAT ? '討伐失敗' : '時間切れ — 撤退'}
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
-              {state.round}ラウンド | 与ダメージ {state.totalDamageDealt} | 被ダメージ {state.totalDamageTaken} | 残HP {state.player.hp}
+              {state.round}ラウンド | 与ダメージ {state.totalDamageDealt} | 被ダメージ {state.totalDamageTaken}
+              {isCoop
+                ? ` | 生存 ${state.players.filter(p => p.alive).length}/${state.players.length}`
+                : ` | 残HP ${state.player.hp}`
+              }
             </div>
 
             <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-xl)' }}>
