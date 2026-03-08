@@ -114,6 +114,7 @@ export const JUDGMENT_RESULTS = {
 // キャラクターの初期状態
 export const INITIAL_STATE = {
     name: '',
+    characterImage: '',
     awakening: '',
     affiliation: '',
     belief: '',

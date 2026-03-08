@@ -5,6 +5,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
+import ImageUploader from '@/components/ImageUploader';
+import '@/components/ImageUploader.css';
 import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findWeapon, findOption } from '@/data/weaponData';
 
 // フォームの初期値
@@ -174,13 +176,13 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
                     </div>
                     <div style={S.row}>
-                        <FormInput label="サムネイルURL" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} placeholder="サムネイル画像 URL" />
-                        <FormInput label="アイコンURL" value={form.icon_url} onChange={v => set('icon_url', v)} placeholder="アイコン画像 URL" />
+                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="gear" />
+                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="gear" compact />
                     </div>
                     <div style={S.row}>
-                        <FormInput label="画像1 URL" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} placeholder="https://..." />
-                        <FormInput label="画像2 URL" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} placeholder="https://..." />
-                        <FormInput label="画像3 URL" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} placeholder="https://..." />
+                        <ImageUploader label="画像1" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} folder="gear" />
+                        <ImageUploader label="画像2" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} folder="gear" />
+                        <ImageUploader label="画像3" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} folder="gear" />
                     </div>
                     <div style={S.row}>
                         <FormInput label="動画URL（任意）" value={form.video_url} onChange={v => set('video_url', v)} placeholder="https://..." />

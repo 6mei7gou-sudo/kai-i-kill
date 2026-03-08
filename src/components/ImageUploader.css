@@ -1,0 +1,161 @@
+/* 画像アップローダー — 共通スタイル */
+
+.image-uploader {
+    margin-bottom: var(--space-md);
+}
+
+.image-uploader__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.image-uploader__label {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.image-uploader__mode-toggle {
+    display: flex;
+    gap: 0;
+}
+
+.image-uploader__mode-btn {
+    padding: 2px 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.image-uploader__mode-btn:first-child {
+    border-right: none;
+}
+
+.image-uploader__mode-btn.active {
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--accent-gold);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+/* ドロップゾーン */
+.image-uploader__dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    padding: var(--space-lg);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-uploader__dropzone:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.image-uploader__dropzone--active {
+    border-color: var(--accent-gold);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.image-uploader__dropzone--uploading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.image-uploader__placeholder {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.image-uploader__placeholder small {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.image-uploader__status {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--accent-gold);
+}
+
+/* プレビュー */
+.image-uploader__preview-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.image-uploader__preview {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.image-uploader__preview--url {
+    margin-top: var(--space-sm);
+    max-height: 150px;
+}
+
+.image-uploader__clear {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: rgba(0, 0, 0, 0.7);
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-uploader__clear:hover {
+    background: rgba(231, 76, 60, 0.3);
+}
+
+/* URL入力モード */
+.image-uploader__url-input {
+    width: 100%;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.image-uploader__url-input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+}
+
+/* エラー */
+.image-uploader__error {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: #e74c3c;
+    margin-top: 4px;
+}
+
+/* コンパクトモード（キャラシ用） */
+.image-uploader--compact .image-uploader__dropzone {
+    min-height: 80px;
+    padding: var(--space-sm);
+}
+
+.image-uploader--compact .image-uploader__preview {
+    max-height: 120px;
+}

@@ -12,6 +12,8 @@ import ErosionGauge from './components/ErosionGauge';
 import DiceRoller from './components/DiceRoller';
 import ExportPanel from './components/ExportPanel';
 import SaveLoadPanel from './components/SaveLoadPanel';
+import ImageUploader from '@/components/ImageUploader';
+import '@/components/ImageUploader.css';
 import './character-sheet.css';
 
 export default function CharacterSheetPage() {
@@ -49,6 +51,14 @@ export default function CharacterSheetPage() {
                     <span className="sheet-section__title-en">PROFILE</span>
                 </h3>
                 <div className="profile-grid">
+                    <div className="profile-field">
+                        <ImageUploader
+                            label="キャラクター画像"
+                            value={state.characterImage}
+                            onChange={v => setField('characterImage', v)}
+                            folder="sheet-characters"
+                        />
+                    </div>
                     <div className="profile-field">
                         <label className="profile-field__label">キャラクター名</label>
                         <input

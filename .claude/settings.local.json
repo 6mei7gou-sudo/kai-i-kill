@@ -10,7 +10,8 @@
       "Bash(python:*)",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "Bash(node:*)"
     ]
   }
 }
