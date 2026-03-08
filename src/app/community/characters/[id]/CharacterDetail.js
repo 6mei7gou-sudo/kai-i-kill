@@ -48,12 +48,22 @@ export default function CharacterDetail({ id }) {
     const [serialCode, setSerialCode] = useState('');
     const [serialMsg, setSerialMsg] = useState(null);
     const [serialLoading, setSerialLoading] = useState(false);
+    const [linkedGear, setLinkedGear] = useState(null);
     const isOwner = user && e?.user_id && user.id === e.user_id;
 
     useEffect(() => {
         (async () => {
             const { data } = await supabase.from('character_sheets').select('*').eq('id', id).single();
-            if (data) setE(data);
+            if (data) {
+                setE(data);
+                // 連携武器のCPを取得
+                if (data.linked_gear_id) {
+                    try {
+                        const { data: gearData } = await supabase.from('gear_posts').select('gear_name, total_cp, category, manufacturer').eq('id', data.linked_gear_id).single();
+                        if (gearData) setLinkedGear(gearData);
+                    } catch (_) {}
+                }
+            }
             // 実績を取得（テーブルが未作成でもエラーにしない）
             try {
                 const { data: achData } = await supabase.from('character_achievements').select('*').eq('character_id', id);
@@ -367,18 +377,40 @@ export default function CharacterDetail({ id }) {
                         const bonuses = [];
                         if (e.background === '技術畑') bonuses.push('技術畑+2');
                         if (e.sub_affiliation === '技術屋') bonuses.push('技術屋+2');
+
+                        const usedCp = linkedGear ? Number(linkedGear.total_cp || 0) : 0;
+                        const remaining = cpBudget - usedCp;
+                        const pct = cpBudget > 0 ? Math.min(100, Math.max(0, (usedCp / cpBudget) * 100)) : 0;
+                        const barColor = remaining < 0 ? 'var(--accent-danger)' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
+
                         return (
                             <div style={{
-                                marginTop: 'var(--space-md)', padding: '10px 14px',
+                                marginTop: 'var(--space-md)', padding: '12px 14px',
                                 background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)',
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             }}>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                    装備CP予算{bonuses.length > 0 ? `（基本10 + ${bonuses.join(' + ')}）` : ''}
-                                </span>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>
-                                    {cpBudget}CP
-                                </span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: usedCp > 0 ? '8px' : 0 }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                        装備CP予算{bonuses.length > 0 ? `（基本10 + ${bonuses.join(' + ')}）` : ''}
+                                    </span>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>
+                                        {cpBudget}CP
+                                    </span>
+                                </div>
+                                {usedCp > 0 && (
+                                    <>
+                                        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: '6px' }}>
+                                            <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width 0.3s' }} />
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                                {linkedGear.gear_name}: {usedCp}CP使用
+                                            </span>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
+                                                {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過`}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         );
                     })()}

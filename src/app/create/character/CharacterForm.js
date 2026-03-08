@@ -700,10 +700,58 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         let cpBudget = 10;
                         if (form.background === '技術畑') cpBudget += 2;
                         if (form.sub_affiliation === '技術屋') cpBudget += 2;
+
+                        // 使用CPを計算
+                        let usedCp = 0;
+                        let cpSource = '';
+                        // 連携武器がある場合はそのtotal_cpを使用
+                        const linkedGear = form.linked_gear_id ? myGear.find(g => g.id === form.linked_gear_id) : null;
+                        if (linkedGear && linkedGear.total_cp != null) {
+                            usedCp = Number(linkedGear.total_cp);
+                            cpSource = linkedGear.gear_name;
+                        } else {
+                            // 装備リストから選択した場合はベースCPを参照
+                            const selectedWeapon = form.equipment_name && form.equipment_name !== '_custom' ? findWeapon(form.equipment_name) : null;
+                            if (selectedWeapon) {
+                                usedCp = Number(selectedWeapon.cp || 0);
+                                cpSource = selectedWeapon.name;
+                            }
+                        }
+
+                        const remaining = cpBudget - usedCp;
+                        const pct = cpBudget > 0 ? Math.min(100, Math.max(0, (usedCp / cpBudget) * 100)) : 0;
+                        const barColor = remaining < 0 ? 'var(--accent-danger)' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
+
                         return (
-                            <div style={{ marginTop: 'var(--space-sm)', padding: '10px 12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>このキャラの装備CP予算</span>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
+                            <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: usedCp > 0 ? '8px' : 0 }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                        装備CP予算
+                                        {(form.background === '技術畑' || form.sub_affiliation === '技術屋') && (
+                                            <span style={{ color: 'var(--accent-gold)', marginLeft: '4px' }}>
+                                                (基本10{form.background === '技術畑' ? ' +技術畑2' : ''}{form.sub_affiliation === '技術屋' ? ' +技術屋2' : ''})
+                                            </span>
+                                        )}
+                                    </span>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
+                                </div>
+
+                                {usedCp > 0 && (
+                                    <>
+                                        {/* プログレスバー */}
+                                        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: '6px' }}>
+                                            <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width 0.3s' }} />
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                                {cpSource}: {usedCp}CP使用
+                                            </span>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
+                                                {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過`}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         );
                     })()}
