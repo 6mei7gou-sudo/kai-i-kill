@@ -1,26 +1,47 @@
 {
   "system_name": "電脳怪異譚 KAI-I//KILL",
-  "version": "3.0",
+  "version": "4.0",
   "edition": "《共鳴記録》統合エディション",
   "concept": "知識が命を救う。無知が人を殺す。調査なしの討伐は自殺行為。",
 
   "core_mechanic": {
     "dice_system": "ランク制ダイスプール",
-    "description": "能力値ランクに応じた数のd6を振り、1個を達成値ダイス・残りから1個を共鳴ダイスとして選択する",
+    "description": "能力値ランクに応じた数のd6を振り、1個を達成値ダイス・残りから1個を共鳴ダイスとして選択する。段階（＋/−）により達成値に±1修正",
     "success_threshold": 4,
     "ranks": [
       { "rank": "D", "dice": "1d6", "resonance_dice": 0, "note": "共鳴なし" },
       { "rank": "C", "dice": "2d6", "resonance_dice": 1, "note": "余り1個→共鳴へ" },
       { "rank": "B", "dice": "3d6", "resonance_dice": 2, "note": "余り2個→共鳴へ" },
       { "rank": "A", "dice": "4d6", "resonance_dice": 3, "note": "余り3個→共鳴へ" },
-      { "rank": "S", "dice": "4d6+固有特典", "resonance_dice": 3, "note": "余り3個→共鳴へ＋追加効果" }
+      { "rank": "S", "dice": "4d6+固有特典", "resonance_dice": 3, "note": "余り3個→共鳴へ＋追加効果。段階なし" }
     ],
+    "sub_rank_system": {
+      "description": "各ランク（D〜A）には−/無印/+の3段階がある。ダイス数は変わらず、達成値に±1修正を与える",
+      "steps": ["D-", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S"],
+      "total_steps": 13,
+      "effects": {
+        "minus": "達成値−1",
+        "neutral": "修正なし",
+        "plus": "達成値+1"
+      },
+      "rules": [
+        "ファンブル（出目1）とスペシャル（出目6）は段階修正の影響を受けない",
+        "段階修正はスキル修正の上限（+4）とは別枠で計算される",
+        "Sランクに段階は存在しない。A+の次はS",
+        "+段階にさらに+1段階を適用すると次のランクの−段階に上昇（例：D+→C-）"
+      ]
+    },
     "outcomes": {
-      "special": { "roll": 6, "effect": "自動成功＋追加効果" },
-      "success": { "roll": "4-5", "effect": "成功" },
-      "failure": { "roll": "2-3", "effect": "失敗" },
-      "fumble": { "roll": 1, "effect": "自動失敗＋ファンブル表を参照" }
-    }
+      "special": { "roll": 6, "effect": "自動成功＋追加効果（出目で判定、段階修正の影響なし）" },
+      "success": { "roll": "4-5", "effect": "成功（段階修正後の達成値で判定）" },
+      "failure": { "roll": "2-3", "effect": "失敗（+段階なら出目3でも成功になりうる）" },
+      "fumble": { "roll": 1, "effect": "自動失敗＋ファンブル表を参照（出目で判定、段階修正の影響なし）" }
+    },
+    "modifier_types": [
+      { "type": "段階修正", "source": "能力値ランクの＋/−", "limit": "±1（固定）" },
+      { "type": "スキル修正", "source": "スキル・ギフト・装備など", "limit": "合計+4まで" },
+      { "type": "状況修正", "source": "GM判断", "limit": "通常±1〜±2" }
+    ]
   },
 
   "attributes": [
@@ -36,12 +57,15 @@
   "character_creation": {
     "flow": [
       "全能力値をランクDからスタート（7能力値すべてD）",
-      "背景を1つ選ぶ（2能力値がランクCへ昇格・初期効果あり）",
-      "クラスを1つ選ぶ（1能力値がランクBへ昇格 or 特定効果）",
+      "背景を1つ選ぶ（2能力値がランクCへ昇格＋背景スキル自動取得）",
       "所属を選ぶ（祓部・傭兵・無所属）",
+      "配属を選ぶ（1能力値がランクBへ昇格＋配属スキル解放）",
       "覚醒パターンを選ぶ（先天型・ショック型・実験型・接触型）",
       "ギフトを初期ギフトの中から1つ選ぶ",
-      "装備をCPの範囲内で選択",
+      "武器型を選ぶ（斬撃・打撃・射撃・魔導・体術）",
+      "スキルを2つ選択（解放された軸＋共通から）",
+      "段階調整：任意の能力値2つに+段階を付与する（同じ能力値に2回は不可）",
+      "装備をCP予算（Lv1: 10CP）の範囲内で選択",
       "信念を設定（最大5点からスタート）",
       "怪異予兆カードをGMから受け取る"
     ],
@@ -58,12 +82,31 @@
       { "name": "ハッカー上がり", "rank_up": ["識", "疾"], "effect": "NGT魔法判定に+1。独立型装備のCP+3" },
       { "name": "魔法資格持ち", "rank_up": ["術", "識"], "effect": "選択した魔法言語の+1修正が2状況に拡張。怪異誘発判定の確率が1ランク改善" }
     ],
-    "classes": [
-      { "name": "祓士", "rank_up": "魂→B", "ability": "浄化ギフトを1ランク低い覚醒段階から使用可能" },
-      { "name": "機甲士", "rank_up": "体→B", "ability": "護衛への連鎖ダメージ条件が「耐久値以上」→「耐久値−2以上」に緩和" },
-      { "name": "異能者", "rank_up": "魂→B（または異能ランク+1）", "ability": "侵食ロールのファンブル時の侵食率上昇を+10%に軽減", "expansion": "禁域解放" },
-      { "name": "解明師", "rank_up": "判→B", "ability": "解明完了宣言時に討伐クロック追加−1" },
-      { "name": "情報屋", "rank_up": "識→B", "ability": "怪異予兆カードの公開条件を1回だけ「任意のタイミング」に変更可" }
+    "assignments": {
+      "description": "所属に応じて配属班（祓部）・専門（傭兵）・流儀（無所属）を選ぶ。1能力値のB昇格と専用スキル解放を決定する",
+      "haraebe": [
+        { "name": "古怪班", "rank_up": "識→B", "focus": "古い怪異の調査・解明特化" },
+        { "name": "新怪班", "rank_up": "察→B", "focus": "現代型怪異の追跡・分析" },
+        { "name": "封印班", "rank_up": "魂→B", "focus": "禁足地管理と特級怪異の封印" },
+        { "name": "機動班", "rank_up": "体→B", "focus": "前線投入の実働部隊" }
+      ],
+      "mercenary": [
+        { "name": "突撃型", "rank_up": "体→B", "focus": "火力と耐久の前衛" },
+        { "name": "偵察型", "rank_up": "察→B", "focus": "情報収集と戦場分析" },
+        { "name": "技術型", "rank_up": "術→B", "focus": "装備改造と魔法技術" }
+      ],
+      "unaffiliated": [
+        { "name": "野良討伐者", "rank_up": "体→B", "focus": "組織に頼らず腕一本で戦う" },
+        { "name": "裏社会の住人", "rank_up": "判→B", "focus": "情報網と人脈で勝負" },
+        { "name": "在野研究者", "rank_up": "識→B", "focus": "独自に怪異を研究する学者肌" }
+      ]
+    },
+    "weapon_types": [
+      { "id": "slash", "name": "斬撃型", "weapons": "刀・剣・斧・薙刀", "focus": "切れ味と手数" },
+      { "id": "strike", "name": "打撃型", "weapons": "槌・棍棒・鈍器", "focus": "一撃の破壊力" },
+      { "id": "ranged", "name": "射撃型", "weapons": "銃器・弓・投擲武器", "focus": "距離と精度" },
+      { "id": "arcane", "name": "魔導型", "weapons": "杖・魔導書・符術具", "focus": "魔法との連携" },
+      { "id": "martial", "name": "体術型", "weapons": "格闘・武道・肉体強化", "focus": "素手の技巧" }
     ],
     "awakening_patterns": [
       { "id": "innate", "name": "先天覚醒型", "description": "生まれつき素養を持ち訓練で開花", "mechanic": "術または魂のランクがCでスタート（背景の昇格とは別）" },
@@ -134,15 +177,15 @@
         "id": "revelation",
         "name": "解明完了宣言",
         "effects_by_keys": {
-          "4_keys": "討伐クロック−1先行＋浄化メーター+1＋制限ラウンド+1延長権",
+          "4_keys": "核防御力半減＋浄化メーター+1＋制限ラウンド+1延長権",
           "3_keys": "通常戦闘開始",
-          "2_keys_or_less": "全判定に−1修正＋護衛の防御値+2"
+          "2_keys_or_less": "全判定に−1修正＋護衛の防御力+2"
         }
       },
       {
         "id": "combat",
         "name": "討伐プロセス《核護衛戦》",
-        "description": "護衛を突破し核にダメージを与えて討伐クロックを消化する"
+        "description": "護衛を突破し核のHPを0にして討伐を完了する"
       }
     ],
     "grade_requirements": [
@@ -154,27 +197,207 @@
 
   "combat_system": {
     "name": "核護衛戦",
-    "initiative": "疾ランク順（高→低→護衛→核）",
-    "actions": [
-      { "name": "攻撃", "english": "ATTACK", "attribute": "体/疾", "description": "護衛または核へのダメージ行動" },
-      { "name": "魔法攻撃", "english": "SPELL", "attribute": "術", "description": "魔法を使った攻撃または支援" },
-      { "name": "援護", "english": "COVER", "attribute": "体", "description": "別のPCへの攻撃を肩代わりする" },
-      { "name": "解明", "english": "DECODE", "attribute": "識/察", "description": "戦闘中に解明鍵を進める" },
-      { "name": "干渉", "english": "DISTURB", "attribute": "判", "description": "護衛の特性を一時的に無効化" },
-      { "name": "回避専念", "english": "EVADE", "attribute": "疾", "description": "攻撃不可だがダメージ無効" },
-      { "name": "浄化", "english": "CLEANSE", "attribute": "魂", "description": "成功で共鳴メーター1種を−2点" },
-      { "name": "異能発動", "english": "ABILITY", "attribute": "魂", "description": "異能を使用" }
+    "description": "護衛を排除し、核のHPを0にすることで討伐を完了するHP制戦闘",
+    "initiative": "疾ランク順（高→低）。PCと護衛を混合で並べる。同値はPC優先",
+    "action_economy": {
+      "main_action": "メイン行動×1（攻撃、魔法、スキル、解明など）",
+      "sub_action": "サブ行動×1（移動、アイテム使用、サブスキルなど）",
+      "reaction": "リアクション×1（自分のターン外。回避・援護など。1ラウンド1回）"
+    },
+    "basic_actions": {
+      "main": [
+        { "name": "攻撃", "english": "ATTACK", "attribute": "体/疾", "description": "護衛または核への物理ダメージ" },
+        { "name": "魔法行使", "english": "SPELL", "attribute": "術", "description": "魔法による攻撃・支援" },
+        { "name": "解明", "english": "DECODE", "attribute": "識/察", "description": "戦闘中に解明鍵を進める" },
+        { "name": "干渉", "english": "DISTURB", "attribute": "判", "description": "護衛の特性を1ラウンド無効化" },
+        { "name": "浄化", "english": "CLEANSE", "attribute": "魂", "description": "共鳴メーター1種を−2" },
+        { "name": "異能発動", "english": "ABILITY", "attribute": "魂", "description": "異能を使用" }
+      ],
+      "sub": [
+        { "name": "移動", "english": "MOVE", "description": "射程・位置の調整" },
+        { "name": "アイテム使用", "english": "ITEM", "description": "回復アイテム等の使用" },
+        { "name": "情報確認", "english": "SCAN", "description": "護衛1体のHPを確認（判定不要）" },
+        { "name": "構え変更", "english": "STANCE", "description": "次のリアクションに+1修正" }
+      ],
+      "reaction": [
+        { "name": "回避", "english": "EVADE", "attribute": "疾", "description": "成功でダメージ無効" },
+        { "name": "援護", "english": "COVER", "attribute": "体", "description": "味方へのダメージを肩代わり。成功でダメージ半減" },
+        { "name": "カウンター", "english": "COUNTER", "attribute": "体/疾", "description": "回避成功時に反撃。ダメージ=達成値のみ（武器修正なし）" }
+      ]
+    },
+    "damage_formula": "達成値 + 武器修正 − 対象の防御力（護衛は最低1保証、核は最低0）",
+    "special_bonus": "スペシャル（出目6）時：ダメージ+1＋対象の防御力をこのターンのみ0として扱う",
+    "core_data": {
+      "description": "核は等級に応じたHP・防御力を持つ。護衛が全滅するまで直接攻撃不可（例外あり）",
+      "by_grade": [
+        { "grade": "五級", "core_hp": 8, "core_defense": 0, "guardians": 0, "rounds": 3, "revelation_effect": "—" },
+        { "grade": "四級", "core_hp": 12, "core_defense": 1, "guardians": 1, "rounds": 3, "revelation_effect": "—" },
+        { "grade": "三級", "core_hp": 20, "core_defense": 2, "guardians": 2, "rounds": "4（+1延長可）", "revelation_effect": "核防御力−1" },
+        { "grade": "二級", "core_hp": 30, "core_defense": "4（解明必須）", "guardians": "2-3", "rounds": 5, "revelation_effect": "核防御力半減" },
+        { "grade": "一級", "core_hp": 40, "core_defense": "6（解明必須）", "guardians": 3, "rounds": "6（+1延長可）", "revelation_effect": "核防御力半減" },
+        { "grade": "特級", "core_hp": "封印HP", "core_defense": "封印ルール", "guardians": "多数＋ギミック", "rounds": "特殊", "revelation_effect": "必須" }
+      ]
+    },
+    "guardian_stats": {
+      "description": "護衛はHP・攻撃力・防御力・行動値・特性を持つ",
+      "fields": ["HP", "攻撃力", "防御力", "行動値", "特性"],
+      "traits": [
+        { "name": "盾役（GUARD）", "effect": "この護衛が生存している間、核の防御力+2" },
+        { "name": "連結（CHAIN）", "effect": "この護衛が撃破されると、他の護衛1体のHP 5回復" },
+        { "name": "反射（REFLECT）", "effect": "ダメージの半分（切り捨て）が攻撃者に跳ね返る" },
+        { "name": "再生（REGEN）", "effect": "ラウンド開始時にHP 3回復（最大HPを超えない）" },
+        { "name": "感染（INFECT）", "effect": "この護衛からダメージを受けたPCの恐怖メーター+1" },
+        { "name": "猛攻（FURY）", "effect": "HP半分以下で攻撃力+2" },
+        { "name": "妨害（HINDER）", "effect": "生存中、全PCの判定に−1修正" },
+        { "name": "自爆（BURST）", "effect": "撃破時に全PCに攻撃力分のダメージ" }
+      ]
+    },
+    "guardian_actions": [
+      { "name": "攻撃", "effect": "任意のPCに攻撃力分のダメージ" },
+      { "name": "妨害", "effect": "任意のPCの次の判定に−1修正" },
+      { "name": "庇い", "effect": "核への攻撃を自分で受ける（1ラウンド1回）" },
+      { "name": "強化", "effect": "別の護衛のHPを3回復" },
+      { "name": "突撃", "effect": "最もHPの低いPCに攻撃力×1.5のダメージ。次ラウンドまで自分の防御力0" }
     ],
-    "damage_formula": "達成値 + 武器修正 − 対象の防御値",
-    "chain_damage": "1ラウンド内で護衛の耐久値以上のダメージ→護衛行動不能＋核に同点ダメージ伝播",
-    "time_limits": [
-      { "grade": "五級", "rounds": 3, "guardians": 0, "clock": 4 },
-      { "grade": "四級", "rounds": 3, "guardians": 1, "clock": 6 },
-      { "grade": "三級", "rounds": "3（+1回延長可）", "guardians": 2, "clock": 8 },
-      { "grade": "二級", "rounds": 4, "guardians": "2-3", "clock": 10 },
-      { "grade": "一級", "rounds": "4（+1回延長可）", "guardians": 3, "clock": 12 },
-      { "grade": "特級", "rounds": "封印クロック方式", "guardians": "多数＋特殊ギミック", "clock": "別途設定" }
-    ]
+    "victory_condition": "核のHPが0で討伐成功",
+    "time_over": "制限ラウンド超過で怪異は一時霧散。護衛HPは全回復、核HPは前回残りを引き継ぐ"
+  },
+
+  "skill_system": {
+    "description": "スキルは6つの軸（共通・所属・配属・覚醒・背景・武器技能）から提供される。キャラクターは該当する軸のスキルのみ取得可能",
+    "axes": ["共通", "所属", "配属", "覚醒", "背景", "武器技能"],
+    "rules": [
+      "スキルはスキル枠を消費して取得する。スキル枠はレベルに応じて増加する",
+      "背景スキルは自動取得（スキル枠を消費しない）",
+      "各スキルには名称・カテゴリ・必要能力値・必要レベル・行動種別・効果が設定されている",
+      "パッシブスキルは常時効果を発揮し、行動枠を消費しない",
+      "同じ軸から何個でも取得可能。6軸を均等に取る必要はない"
+    ],
+    "categories": ["戦闘", "探索", "支援", "異能"],
+    "action_types": ["メイン", "サブ", "リアクション", "パッシブ"],
+    "common_skills": [
+      { "name": "応急処置", "category": "支援", "attribute": "識", "level": 1, "type": "サブ", "effect": "味方1人のHP 2回復" },
+      { "name": "鼓舞", "category": "支援", "attribute": "魂", "level": 2, "type": "サブ", "effect": "味方1人の次の判定に+1" },
+      { "name": "高速移動", "category": "戦闘", "attribute": "疾", "level": 3, "type": "サブ", "effect": "このラウンドのリアクション判定に+2" },
+      { "name": "看破", "category": "探索", "attribute": "察", "level": 4, "type": "サブ", "effect": "護衛の特性1つを自動判明" },
+      { "name": "窮地の一撃", "category": "戦闘", "attribute": "体", "level": 5, "type": "メイン", "effect": "HP半分以下時に使用可。ダメージ+4" },
+      { "name": "戦場鑑定", "category": "探索", "attribute": "識", "level": 5, "type": "サブ", "effect": "核の残りHPを±2の精度で把握" }
+    ],
+    "faction_skills": {
+      "祓部": [
+        { "name": "公文書照会", "level": 1, "effect": "調査判定+2（1シナリオ3回）" },
+        { "name": "援軍通信", "level": 3, "effect": "NPC祓士1名を2ラウンド召喚" },
+        { "name": "組織命令", "level": 5, "effect": "味方全員の次の判定+1" }
+      ],
+      "傭兵": [
+        { "name": "コネクション", "level": 1, "effect": "情報収集判定+2（1シナリオ3回）" },
+        { "name": "二つ名の威圧", "level": 3, "effect": "護衛1体の行動値−3" },
+        { "name": "傭兵の矜持", "level": 5, "effect": "HP半分以下で攻撃判定+1（パッシブ）" }
+      ],
+      "無所属": [
+        { "name": "裏ルート", "level": 1, "effect": "非正規情報・装備にアクセス（1シナリオ2回）" },
+        { "name": "独立生存術", "level": 3, "effect": "HP半分以下で防御修正+1（パッシブ）" },
+        { "name": "偽装工作", "level": 5, "effect": "他所属のスキル1つを1シナリオ1回借用" }
+      ]
+    },
+    "assignment_skills_note": "配属スキルは所属×配属の組み合わせで決定。祓部4班×3スキル＋傭兵3専門×3スキル＋無所属3流儀×3スキル＝計30スキル。詳細はrules_unified.md CH5-4〜5-6を参照",
+    "awakening_skills": {
+      "先天覚醒型": [
+        { "name": "霊障結界", "level": 1, "effect": "魔法ダメージを魂ランク値分軽減（リアクション）" },
+        { "name": "制御された力", "level": 5, "effect": "怪異誘発判定の確率が1ランク改善（パッシブ）" }
+      ],
+      "ショック覚醒型": [
+        { "name": "喪失の怒り", "level": 1, "effect": "怒りメーター4以上で攻撃ダメージ+1（パッシブ）" },
+        { "name": "因縁の力", "level": 5, "effect": "信念1消費。因縁の相手にダメージ+4" }
+      ],
+      "実験覚醒型": [
+        { "name": "異能制御", "level": 1, "effect": "異能ファンブル時の渇望上昇を+1に軽減（パッシブ）" },
+        { "name": "過負荷発動", "level": 5, "effect": "異能の効果を2倍化。渇望+3" }
+      ],
+      "接触覚醒型": [
+        { "name": "共鳴読み", "level": 1, "effect": "怪異の感情状態を感知（GMからヒント）" },
+        { "name": "怪異共振", "level": 5, "effect": "護衛1体を1ラウンド味方化（失敗で渇望+3）" }
+      ]
+    },
+    "background_skills_note": "背景スキルは自動取得（スキル枠消費なし）。6背景×1スキル。詳細はrules_unified.md CH5-8を参照",
+    "weapon_skills": {
+      "斬撃型": [
+        { "name": "連斬", "level": 1, "effect": "2回攻撃判定、高い方の達成値を採用" },
+        { "name": "兜割り", "level": 3, "effect": "防御力無視攻撃" },
+        { "name": "居合い", "level": 5, "effect": "護衛の攻撃に先制反撃（リアクション）" }
+      ],
+      "打撃型": [
+        { "name": "重撃", "level": 1, "effect": "攻撃ダメージ+2" },
+        { "name": "叩き伏せ", "level": 3, "effect": "護衛を1ラウンド行動遅延" },
+        { "name": "粉砕", "level": 5, "effect": "護衛撃破時、余剰ダメージが核に伝播（パッシブ）" }
+      ],
+      "射撃型": [
+        { "name": "精密射撃", "level": 1, "effect": "攻撃判定+1。射程制限なし" },
+        { "name": "制圧射撃", "level": 3, "effect": "護衛2体に同時攻撃（各ダメージ−1）" },
+        { "name": "狙撃", "level": 5, "effect": "1ラウンド準備後、ダメージ+3＋防御力無視" }
+      ],
+      "魔導型": [
+        { "name": "魔力装填", "level": 1, "effect": "次の魔法行使の達成値+1（サブ）" },
+        { "name": "広域術式", "level": 3, "effect": "魔法攻撃を全護衛に適用（各ダメージ−2）" },
+        { "name": "大術式", "level": 5, "effect": "全護衛に防御力無視ダメージ。渇望+2" }
+      ],
+      "体術型": [
+        { "name": "連撃", "level": 1, "effect": "2回攻撃（各ダメージ−1、武器修正なし）" },
+        { "name": "崩し", "level": 3, "effect": "護衛1体の防御力を次ラウンドまで−2（サブ）" },
+        { "name": "奥義", "level": 5, "effect": "HP半分以下で使用可。ダメージ×2。失敗で反動3" }
+      ]
+    }
+  },
+
+  "level_system": {
+    "description": "討伐者の成長はレベルで表される。Lv1（新米）からLv10（伝説級）まで",
+    "level_up_conditions": [
+      { "scenario_grade": "五級〜四級", "level_gain": "+1" },
+      { "scenario_grade": "三級", "level_gain": "+1〜+2" },
+      { "scenario_grade": "二級以上", "level_gain": "+2" },
+      { "special": "大浄化発動・4鍵解明討伐", "level_gain": "追加+1" }
+    ],
+    "max_per_scenario": 2,
+    "level_table": [
+      { "level": 1, "hp_bonus": 0, "skill_slots": 2, "cp_budget": 10, "growth": "—", "unlocks": "初期装備・共通スキル" },
+      { "level": 2, "hp_bonus": 1, "skill_slots": 3, "cp_budget": 10, "growth": "+1段階", "unlocks": "—" },
+      { "level": 3, "hp_bonus": 1, "skill_slots": 4, "cp_budget": 12, "growth": "1ランク上昇", "unlocks": "半装身型・中級カスタム" },
+      { "level": 4, "hp_bonus": 2, "skill_slots": 5, "cp_budget": 12, "growth": "+1段階", "unlocks": "—" },
+      { "level": 5, "hp_bonus": 2, "skill_slots": 6, "cp_budget": 15, "growth": "1ランク上昇", "unlocks": "全装身型（GM許可）・Lv5スキル" },
+      { "level": 6, "hp_bonus": 3, "skill_slots": 7, "cp_budget": 15, "growth": "+1段階", "unlocks": "—" },
+      { "level": 7, "hp_bonus": 3, "skill_slots": 8, "cp_budget": 18, "growth": "1ランク上昇", "unlocks": "戦闘用搭乗型（GM許可）・Lv7スキル" },
+      { "level": 8, "hp_bonus": 4, "skill_slots": 9, "cp_budget": 18, "growth": "+1段階", "unlocks": "—" },
+      { "level": 9, "hp_bonus": 4, "skill_slots": 10, "cp_budget": 22, "growth": "+1段階", "unlocks": "—" },
+      { "level": 10, "hp_bonus": 5, "skill_slots": 12, "cp_budget": 25, "growth": "1ランク上昇", "unlocks": "特殊素材解禁・最終スキル" }
+    ],
+    "growth_types": {
+      "rank_up": "1ランク上昇（Lv3,5,7,10）：任意の能力値1つを丸ごと1ランク上昇。段階はリセットされ無印になる。最大A",
+      "step_up": "+1段階（Lv2,4,6,8,9）：任意の能力値1つの段階を1ステップ上げる。+段階にさらに+1で次ランクの−段階に上昇"
+    },
+    "urban_legend_risk": {
+      "description": "高レベル討伐者は自身が都市伝説化するリスクを負う",
+      "lv5_7": "シナリオ開始時に恐怖メーター+1",
+      "lv8_10": "シナリオ開始時に恐怖メーター+2"
+    },
+    "belief_degradation": [
+      { "level": "1-4", "max_belief": 5 },
+      { "level": "5-6", "max_belief": 4 },
+      { "level": "7-8", "max_belief": 3 },
+      { "level": "9-10", "max_belief": 2 }
+    ],
+    "downtime": {
+      "description": "シナリオ間の休息期間。2つまで選択可能",
+      "actions": [
+        { "name": "休息", "effect": "HP全回復。負傷・重傷解除（−段階ペナルティも解除）" },
+        { "name": "訓練", "effect": "次のレベルアップ時にスキル枠+1（ボーナス）" },
+        { "name": "集中鍛錬", "effect": "任意の能力値1つの段階を+1する（ダウンタイム2回分を消費。連続2回の休息期間で選択すること）" },
+        { "name": "装備整備", "effect": "破損装備の修復" },
+        { "name": "サイバネティクス施術", "effect": "新しいサイバネティクス追加" },
+        { "name": "情報収集", "effect": "次シナリオのヒント1つ" },
+        { "name": "人脈構築", "effect": "NPC関係を1段階深める" },
+        { "name": "闇市場アクセス", "effect": "非正規の装備・素材入手（リスクあり）" }
+      ]
+    }
   },
 
   "magic_system": {
@@ -222,6 +445,34 @@
     { "id": "maneuver", "name": "搭乗型", "modifier": "機動力+2", "risk": "中", "note": "移動・輸送向き" },
     { "id": "combat_maneuver", "name": "戦闘用搭乗型", "modifier": "三級以下に+5", "risk": "非常に高", "note": "個人運用は違法" }
   ],
+
+  "equipment_cp": {
+    "description": "装備はCP（カスタマイズポイント）予算の範囲内で選択。CPはレベルに応じて増加する",
+    "by_level": [
+      { "level": 1, "cp": 10, "unlocked": "武装型・独立型" },
+      { "level": 3, "cp": 12, "unlocked": "半装身型" },
+      { "level": 5, "cp": 15, "unlocked": "全装身型（GM許可制）" },
+      { "level": 7, "cp": 18, "unlocked": "戦闘用搭乗型（GM許可制）" },
+      { "level": 10, "cp": 25, "unlocked": "特殊素材装備解禁" }
+    ],
+    "customization_options": [
+      { "name": "出力増幅", "cp": 4, "level": 3, "effect": "武器修正+2", "resonance": "渇望+1" },
+      { "name": "霊的出力", "cp": 4, "level": 3, "effect": "怪異耐性型への命中+2", "resonance": "浄化+1" },
+      { "name": "特殊素材組込み", "cp": 8, "level": 7, "effect": "武器修正+4", "resonance": "渇望+2・恐怖+1" },
+      { "name": "ルール干渉型", "cp": 5, "level": 5, "effect": "護衛の特性1つ無効化（1戦闘1回）", "resonance": "渇望+1" },
+      { "name": "P:封印型", "cp": 4, "level": 3, "effect": "怪異封印判定+2", "resonance": "浄化+1" },
+      { "name": "軽量化", "cp": 2, "level": 1, "effect": "回避判定+1", "resonance": "—" },
+      { "name": "追加弾倉", "cp": 2, "level": 1, "effect": "1戦闘中に武器修正+1を2回使用可", "resonance": "—" },
+      { "name": "霊素探知器", "cp": 3, "level": 1, "effect": "察判定+1（怪異関連のみ）", "resonance": "—" }
+    ],
+    "manufacturer_modifiers": [
+      { "name": "蒼鉄機工（官製）", "effect": "怒りメーターが上昇しにくい（+1→+0になる確率50%）" },
+      { "name": "雷禽重工（独立系）", "effect": "攻撃スペシャル時の怒りメーター+3（通常+2のところ）" },
+      { "name": "銀鎚精機（カスタム）", "effect": "武器修正+1（全種）。納期6ヶ月〜1年" },
+      { "name": "闇市場品", "effect": "使用のたびに恐怖メーター+1" },
+      { "name": "出自不明品（闇市場流通）", "effect": "使用のたびに渇望メーター+2・恐怖メーター+1" }
+    ]
+  },
 
   "factions": [
     {
@@ -296,35 +547,6 @@
       { "type": "物理耐性型", "description": "魔法・魔導具は有効だが物理攻撃がほぼ通じない" },
       { "type": "霊的耐性型", "description": "物理・魔導具は有効だが魔法や霊的手段が通じない" },
       { "type": "ルール依存型", "description": "怪異のルールに則った手段でしか攻撃が通らない" }
-    ]
-  },
-
-  "growth_system": {
-    "ep_sources": [
-      { "condition": "シナリオ完了", "ep": 3 },
-      { "condition": "解明完了討伐（4鍵達成）", "ep": 2 },
-      { "condition": "臨界を生き延びた", "ep": 1 },
-      { "condition": "浄化の大浄化を発動した", "ep": 2 },
-      { "condition": "因縁ロールプレイ（GM判断）", "ep": 1 },
-      { "condition": "信念ポイント全消費", "ep": 1 },
-      { "condition": "新怪異を初討伐", "ep": 1 }
-    ],
-    "ep_costs": [
-      { "use": "能力値ランク+1（最大A）", "cost": 5 },
-      { "use": "技能習熟", "cost": 3 },
-      { "use": "技能熟達", "cost": 7 },
-      { "use": "技能極意（ドラマ必要）", "cost": 15 },
-      { "use": "クラス特技", "cost": 8 },
-      { "use": "装備CP+2", "cost": 4 },
-      { "use": "新ギフト（初級）", "cost": 6 },
-      { "use": "新ギフト（中級）", "cost": 10 },
-      { "use": "新ギフト（上級）", "cost": 16 }
-    ],
-    "belief_degradation": [
-      { "ep_total": "0-40", "max_belief": 5 },
-      { "ep_total": "41-60", "max_belief": 4 },
-      { "ep_total": "61-80", "max_belief": 3 },
-      { "ep_total": "81+", "max_belief": 2 }
     ]
   },
 
