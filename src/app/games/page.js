@@ -35,6 +35,14 @@ const gameCards = [
     icon: '⊕',
     features: ['3人パーティ', '高難度', 'ヘイト制', '連携実績'],
   },
+  {
+    title: 'MIRRORLINE',
+    subtitle: '二重構造SNS',
+    description: '一般人の日常と、討伐者だけが見る裏の世界。隠しコマンドで切り替わる二重構造のSNS。',
+    href: '/sns/',
+    icon: '◎',
+    features: ['タイムライン', 'PBWスレッド', 'ミッションチャット', '隠しコマンド'],
+  },
 ];
 
 export default function GamesHubPage() {

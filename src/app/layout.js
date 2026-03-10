@@ -62,6 +62,14 @@ const navGroups = [
     ],
   },
   {
+    label: 'SNS',
+    items: [
+      { href: '/sns/', icon: '◎', text: 'MirrorLine' },
+      { href: '/sns/?tab=threads', icon: '▤', text: 'スレッド' },
+      { href: '/sns/?tab=chat', icon: '◈', text: 'チャット' },
+    ],
+  },
+  {
     label: 'コミュニティDB',
     items: [
       { href: '/mypage/', icon: '◆', text: 'マイページ' },

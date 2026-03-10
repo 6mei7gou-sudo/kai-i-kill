@@ -1,0 +1,824 @@
+/* ============================================================
+   MirrorLine / HUNTER//NET — SNS専用スタイル
+   ============================================================ */
+
+/* --- SNSカスタムプロパティ --- */
+.sns-page {
+  --sns-accent: var(--accent-gold);
+  --sns-accent-glow: var(--accent-gold-glow);
+  --sns-accent-subtle: var(--accent-gold-subtle);
+  --sns-accent-border: var(--accent-gold-border);
+  --sns-banner-text: 'MirrorLine';
+}
+
+.sns-page.hunter-mode {
+  --sns-accent: #b040a0;
+  --sns-accent-glow: rgba(176, 64, 160, 0.3);
+  --sns-accent-subtle: rgba(176, 64, 160, 0.1);
+  --sns-accent-border: rgba(176, 64, 160, 0.35);
+  --sns-banner-text: 'HUNTER//NET — SECURE CHANNEL';
+}
+
+/* --- 3カラムレイアウト --- */
+.sns-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr 260px;
+  gap: var(--space-md);
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 120px);
+}
+
+.sns-nav {
+  position: sticky;
+  top: var(--space-xl);
+  align-self: flex-start;
+  padding: var(--space-md) 0;
+}
+
+.sns-nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.sns-nav__item:hover {
+  color: var(--text-heading);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sns-nav__item--active {
+  color: var(--sns-accent);
+  border-left: 3px solid var(--sns-accent);
+  background: var(--sns-accent-subtle);
+}
+
+.sns-nav__icon {
+  width: 20px;
+  text-align: center;
+  font-size: var(--font-size-md);
+}
+
+.sns-main {
+  border-left: var(--border-subtle);
+  border-right: var(--border-subtle);
+  min-height: 100%;
+}
+
+.sns-sidebar {
+  position: sticky;
+  top: var(--space-xl);
+  align-self: flex-start;
+  padding: var(--space-md);
+}
+
+/* --- SNSバナー --- */
+.sns-banner {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+}
+
+.sns-banner__title {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--sns-accent);
+  letter-spacing: 0.08em;
+}
+
+.sns-banner__subtitle {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* --- HUNTER//NETバナー --- */
+.hunter-banner {
+  display: none;
+  padding: 6px var(--space-lg);
+  background: rgba(176, 64, 160, 0.08);
+  border-bottom: 1px solid rgba(176, 64, 160, 0.25);
+  text-align: center;
+}
+
+.hunter-mode .hunter-banner {
+  display: block;
+}
+
+.hunter-banner__text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: #b040a0;
+  letter-spacing: 0.15em;
+  animation: hunterPulse 3s ease-in-out infinite;
+}
+
+@keyframes hunterPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* --- 投稿コンポーザー --- */
+.post-composer {
+  padding: var(--space-lg);
+  border-bottom: var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.post-composer__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.post-composer__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--sns-accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  color: var(--sns-accent);
+  overflow: hidden;
+}
+
+.post-composer__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-composer__textarea {
+  width: 100%;
+  min-height: 80px;
+  background: var(--bg-primary);
+  border: var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--font-size-md);
+  padding: var(--space-md);
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.post-composer__textarea:focus {
+  outline: none;
+  border-color: var(--sns-accent-border);
+  box-shadow: 0 0 8px var(--sns-accent-glow);
+}
+
+.post-composer__textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.post-composer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-md);
+}
+
+.post-composer__char-count {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.post-composer__char-count--over {
+  color: var(--accent-danger);
+}
+
+.post-composer__submit {
+  padding: 8px 24px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  background: var(--sns-accent-subtle);
+  border: 1px solid var(--sns-accent-border);
+  color: var(--sns-accent);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.post-composer__submit:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 8px var(--sns-accent-glow);
+}
+
+.post-composer__submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- 投稿カード --- */
+.post-card {
+  padding: var(--space-lg);
+  border-bottom: var(--border-subtle);
+  transition: background var(--transition-fast);
+}
+
+.post-card:hover {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.post-card--reply {
+  padding-left: calc(var(--space-lg) + 48px);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.post-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.post-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  overflow: hidden;
+}
+
+.post-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-card__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.post-card__name {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.post-card__affiliation {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.post-card__time {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.post-card__content {
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+  line-height: 1.8;
+  margin-bottom: var(--space-md);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-card__hashtag {
+  color: var(--sns-accent);
+  font-weight: 500;
+}
+
+.post-card__actions {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.post-card__action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color var(--transition-fast);
+}
+
+.post-card__action:hover {
+  color: var(--sns-accent);
+}
+
+.post-card__action--liked {
+  color: var(--accent-danger);
+}
+
+/* --- Botバッジ --- */
+.bot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  background: rgba(58, 110, 165, 0.12);
+  border: 1px solid rgba(58, 110, 165, 0.25);
+  color: var(--accent-blue);
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+}
+
+.hunter-mode .bot-badge {
+  background: rgba(176, 64, 160, 0.12);
+  border-color: rgba(176, 64, 160, 0.25);
+  color: #b040a0;
+}
+
+/* --- 投稿タイプバッジ --- */
+.post-type-badge {
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+}
+
+.post-type-badge--rumor {
+  background: rgba(112, 48, 160, 0.12);
+  border: 1px solid rgba(112, 48, 160, 0.3);
+  color: var(--resonance-thirst);
+}
+
+.post-type-badge--intel {
+  background: rgba(58, 110, 165, 0.12);
+  border: 1px solid rgba(58, 110, 165, 0.3);
+  color: var(--accent-blue);
+}
+
+.post-type-badge--alert {
+  background: var(--accent-danger-subtle);
+  border: 1px solid var(--accent-danger-border);
+  color: var(--accent-danger);
+}
+
+.post-type-badge--npc_chatter {
+  background: rgba(255, 255, 255, 0.04);
+  border: var(--border-subtle);
+  color: var(--text-muted);
+}
+
+/* --- キャラ選択 --- */
+.char-selector {
+  position: relative;
+}
+
+.char-selector__button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 12px;
+  background: var(--bg-tertiary);
+  border: var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  min-width: 160px;
+}
+
+.char-selector__button:hover {
+  border-color: var(--sns-accent-border);
+}
+
+.char-selector__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--sns-accent-border);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-card);
+}
+
+.char-selector__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+}
+
+.char-selector__option:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.char-selector__option--selected {
+  background: var(--sns-accent-subtle);
+  color: var(--sns-accent);
+}
+
+/* --- スレッド一覧 --- */
+.thread-list__item {
+  display: block;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-subtle);
+  transition: background var(--transition-fast);
+  color: inherit;
+  text-decoration: none;
+}
+
+.thread-list__item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.thread-list__title {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  color: var(--text-heading);
+  margin-bottom: var(--space-xs);
+}
+
+.thread-list__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.thread-list__category {
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  background: var(--sns-accent-subtle);
+  border: 1px solid var(--sns-accent-border);
+  color: var(--sns-accent);
+  letter-spacing: 0.05em;
+}
+
+.thread-list__pinned {
+  color: var(--accent-gold);
+}
+
+/* --- スレッド詳細 --- */
+.thread-detail__header {
+  padding: var(--space-lg);
+  border-bottom: var(--border-subtle);
+}
+
+.thread-detail__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.thread-detail__body {
+  padding: var(--space-lg);
+  border-bottom: var(--border-subtle);
+  color: var(--text-primary);
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.thread-reply {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-subtle);
+}
+
+.thread-reply__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.thread-reply__content {
+  color: var(--text-primary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* --- チャットルーム --- */
+.chat-room-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-subtle);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  color: inherit;
+  text-decoration: none;
+}
+
+.chat-room-list__item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chat-room__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.chat-message {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.chat-message__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  overflow: hidden;
+}
+
+.chat-message__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-message__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-message__name {
+  font-weight: 700;
+  font-size: var(--font-size-xs);
+  color: var(--sns-accent);
+  margin-bottom: 2px;
+}
+
+.chat-message__text {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.chat-message__time {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.chat-input {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-top: var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.chat-input__field {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border: var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+}
+
+.chat-input__field:focus {
+  outline: none;
+  border-color: var(--sns-accent-border);
+}
+
+.chat-input__send {
+  padding: 8px 16px;
+  background: var(--sns-accent-subtle);
+  border: 1px solid var(--sns-accent-border);
+  color: var(--sns-accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chat-input__send:hover {
+  background: rgba(212, 175, 55, 0.2);
+}
+
+/* --- トレンドサイドバー --- */
+.trending-section {
+  margin-bottom: var(--space-xl);
+}
+
+.trending-section__title {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-subtle);
+  margin-bottom: var(--space-md);
+}
+
+.trending-item {
+  padding: var(--space-sm) 0;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.trending-item:hover {
+  color: var(--sns-accent);
+}
+
+.trending-item__tag {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--text-heading);
+}
+
+.trending-item__count {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* --- グリッチ演出（HUNTERモード切替時） --- */
+@keyframes glitchIn {
+  0% { filter: hue-rotate(0deg) invert(0); transform: translate(0); }
+  20% { filter: hue-rotate(90deg) invert(0.8); transform: translate(-2px, 1px); }
+  40% { filter: hue-rotate(180deg) invert(0.3); transform: translate(2px, -1px); }
+  60% { filter: hue-rotate(270deg) invert(0.6); transform: translate(-1px, 2px); }
+  80% { filter: hue-rotate(360deg) invert(0.1); transform: translate(1px, -2px); }
+  100% { filter: hue-rotate(0deg) invert(0); transform: translate(0); }
+}
+
+.sns-page--glitch {
+  animation: glitchIn 0.6s ease-out;
+}
+
+/* --- 新着通知 --- */
+.sns-new-posts-banner {
+  padding: 8px var(--space-lg);
+  text-align: center;
+  background: var(--sns-accent-subtle);
+  border-bottom: 1px solid var(--sns-accent-border);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.sns-new-posts-banner:hover {
+  background: rgba(212, 175, 55, 0.15);
+}
+
+.sns-new-posts-banner__text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--sns-accent);
+  letter-spacing: 0.05em;
+}
+
+/* --- 空状態 --- */
+.sns-empty {
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.sns-empty__icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-md);
+  opacity: 0.3;
+}
+
+.sns-empty__text {
+  font-size: var(--font-size-sm);
+}
+
+/* --- ローディング --- */
+.sns-loading {
+  padding: var(--space-xl);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* --- タブ切り替え --- */
+.sns-tabs {
+  display: flex;
+  border-bottom: var(--border-subtle);
+}
+
+.sns-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.sns-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.sns-tab--active {
+  color: var(--sns-accent);
+  border-bottom-color: var(--sns-accent);
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 1024px) {
+  .sns-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sns-nav {
+    position: static;
+    display: flex;
+    overflow-x: auto;
+    border-bottom: var(--border-subtle);
+    padding: 0;
+  }
+
+  .sns-nav__item {
+    white-space: nowrap;
+    padding: 10px var(--space-md);
+    border-left: none;
+  }
+
+  .sns-nav__item--active {
+    border-left: none;
+    border-bottom: 2px solid var(--sns-accent);
+  }
+
+  .sns-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .post-composer__header {
+    flex-wrap: wrap;
+  }
+
+  .post-card__actions {
+    gap: var(--space-md);
+  }
+}
