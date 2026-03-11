@@ -1,7 +1,7 @@
-// キャラクターシート投稿フォーム — 新ルールブック対応 v2
+// キャラクターシート投稿フォーム — v4.0 6軸スキルシステム対応
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
@@ -9,16 +9,16 @@ import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
 import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, findWeapon } from '@/data/weaponData';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
+import { getAvailableSkills, getBackgroundSkill, getSkillTypeColor, getAxisColor } from '@/data/skillData';
 
 // ===== 定数定義 =====
 
 const RANKS = ['D', 'C', 'B', 'A', 'S'];
 const RANK_DICE = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6+特典' };
 
-// 7能力値
 const ABILITIES = [
     { key: 'rank_tai', name: '体', reading: 'たい', desc: '格闘・突破・物理耐久' },
-    { key: 'rank_haya', name: '疾', reading: 'はや', desc: '先手・回避・追跡（イニシアチブ）' },
+    { key: 'rank_haya', name: '疾', reading: 'はや', desc: '先手・回避・追跡' },
     { key: 'rank_shiki', name: '識', reading: 'しき', desc: '調査・知識・文献・解明' },
     { key: 'rank_han', name: '判', reading: 'はん', desc: '解明宣言・看破・戦術判断' },
     { key: 'rank_shiya', name: '察', reading: 'さつ', desc: '怪異感知・観察・証言聴取' },
@@ -26,26 +26,73 @@ const ABILITIES = [
     { key: 'rank_kon', name: '魂', reading: 'こん', desc: '信念維持・精神防御・異能発動' },
 ];
 
-// 背景（5種）— 選択で2能力値がC昇格+初期効果
+// 背景（6種）— 2能力値がC昇格 + 背景スキル自動取得
 const BACKGROUNDS = [
-    { id: '鋼の肉体', upgrades: ['rank_tai', 'rank_haya'], effect: '護衛への初回攻撃に+1修正。戦術的な離脱判定+1' },
-    { id: '学者肌', upgrades: ['rank_shiki', 'rank_han'], effect: '調査スペシャル時に解明鍵追加入手の可能性。古い文献の識判定+1' },
-    { id: '霊媒体質', upgrades: ['rank_shiya', 'rank_kon'], effect: '怪異の気配感知+1。得意言語を1つ追加選択可（苦手追加なし）' },
-    { id: '技術畑', upgrades: ['rank_jutsu', 'rank_shiki'], effect: '装備CP+2。魔導具の調整・修理判定+1' },
-    { id: 'ストリート上がり', upgrades: ['rank_haya', 'rank_kon'], effect: 'NGT魔法判定に+1。闇市場での入手判定+2' },
-    { id: '信仰者', upgrades: ['rank_kon', 'rank_han'], effect: '初期信念ポイント+1。浄化メーター上昇時に追加+1' },
+    { id: '神社育ち', upgrades: ['rank_shiya', 'rank_kon'], desc: '禁足地のデータベースへのアクセス権。古い怪異の解明鍵①の難易度-1' },
+    { id: '元傭兵', upgrades: ['rank_tai', 'rank_haya'], desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
+    { id: '都市伝説研究者', upgrades: ['rank_shiki', 'rank_han'], desc: '調査スペシャル時に解明鍵追加入手の可能性' },
+    { id: '元実験体', upgrades: ['rank_kon'], extraUpgrade: 'innate_+1', desc: '魂C昇格＋異能ランク+1。渇望の覚醒ギフトを1段階低コストで使用可能' },
+    { id: 'ハッカー上がり', upgrades: ['rank_shiki', 'rank_haya'], desc: 'NGT魔法判定+1。独立型装備のCP+3' },
+    { id: '魔法資格持ち', upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
 ];
 
-// クラス（5種）— 選択で1能力値がB昇格+クラス特技
-const CLASSES = [
-    { id: '祓士', upgrade: 'rank_kon', effect: '浄化ギフトを1ランク低い覚醒段階から使用可能' },
-    { id: '機甲士', upgrade: 'rank_tai', effect: '護衛への連鎖ダメージ条件が「耐久値以上」→「耐久値−2以上」に緩和' },
-    { id: '魂使い', upgrade: 'rank_kon', effect: '魂判定+1。異能使用時のコスト軽減' },
-    { id: '解明師', upgrade: 'rank_han', effect: '解明完了宣言時に討伐クロック追加−1' },
-    { id: '情報屋', upgrade: 'rank_shiki', effect: '怪異予兆カードの公開条件を1回だけ「任意のタイミング」に変更可' },
+// 配属（所属に連動）— 1能力値がB昇格 + 配属スキル解放
+const ASSIGNMENTS = {
+    '祓部': [
+        { id: '古怪班', upgrade: 'rank_shiki', desc: '古い怪異の調査・解明特化。伝承・禁足地の知識' },
+        { id: '新怪班', upgrade: 'rank_shiya', desc: '現代型怪異の追跡・分析。SNS・デジタルメディア' },
+        { id: '封印班', upgrade: 'rank_kon', desc: '禁足地の管理と特級怪異の封印。浄化の専門家' },
+        { id: '機動班', upgrade: 'rank_tai', desc: '前線投入の実働部隊。直轄即応隊・広域機動班' },
+    ],
+    '傭兵': [
+        { id: '突撃型', upgrade: 'rank_tai', desc: '火力と耐久の前衛。傭兵の花形' },
+        { id: '偵察型', upgrade: 'rank_shiya', desc: '情報収集と戦場分析。目と耳の専門家' },
+        { id: '技術型', upgrade: 'rank_jutsu', desc: '装備改造と魔法技術。後方支援' },
+    ],
+    '無所属': [
+        { id: '野良討伐者', upgrade: 'rank_tai', desc: '組織に頼らず腕一本で戦う。生存特化' },
+        { id: '裏社会の住人', upgrade: 'rank_han', desc: '情報網と人脈で勝負。交渉と策略' },
+        { id: '在野研究者', upgrade: 'rank_shiki', desc: '独自に怪異を研究する学者肌' },
+    ],
+};
+
+// 覚醒パターン
+const AWAKENINGS = [
+    { id: '先天覚醒型', desc: '生まれつき素養を持ち訓練で開花', effect: '術または魂がCでスタート（背景とは別枠）' },
+    { id: 'ショック覚醒型', desc: '怪異に関わる強烈な体験が引き金', effect: '恨み/喪失に対する判定+1。初期信念+1' },
+    { id: '実験覚醒型', desc: '人体実験で強制覚醒', effect: '異能ランク+1。察判定+1（怪異への過敏さ）' },
+    { id: '接触覚醒型', desc: '怪異の核や特殊素材への長期接触', effect: '察判定に常時+1（怪異の気配への鋭敏さ）' },
 ];
 
-// 魔法言語（得意/苦手の対象7言語。Pは全員使用可能なので選択対象外）
+// 武器型
+const WEAPON_TYPES = [
+    { id: '斬撃型', desc: '切れ味と手数', weapons: '刀・剣・斧・薙刀' },
+    { id: '打撃型', desc: '一撃の破壊力', weapons: '槌・棍棒・鈍器' },
+    { id: '射撃型', desc: '距離と精度', weapons: '銃器・弓・投擲武器' },
+    { id: '魔導型', desc: '魔法との連携', weapons: '杖・魔導書・符術具' },
+    { id: '体術型', desc: '素手の技巧', weapons: '格闘・武道・肉体強化' },
+];
+
+const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
+const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '搭乗型'];
+
+const AFFILIATION_INFO = {
+    '祓部': { bonus: '識の調査+2（3回/セッション）＋援軍要請1回', constraint: '任務命令への服従が義務。装備・行動に法的制限' },
+    '傭兵': { bonus: '装備1ランクUP、二つ名+1（常時）', constraint: '収益がないと活動困難。バック企業の方針に縛られる' },
+    '無所属': { bonus: '察+1常時、裏ルート（1回/セッション）', constraint: '法的保護なし。全組織から警戒。補給ルート不安定' },
+};
+
+// ギフト
+const GIFTS = [
+    { id: '鍵の直感', desc: '調査フェイズで1日1回、解明鍵のヒントをGMに求められる' },
+    { id: '生還の意地', desc: 'HP0時、魂判定成功で1HP残して生存（1シナリオ1回）' },
+    { id: '装備の鬼', desc: '武装型・半装身型装備の武器修正+1' },
+    { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
+    { id: '怪異の残響', desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
+    { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
+];
+
+// 魔法言語
 const LANGUAGES = [
     { id: 'Igniscript', color: '赤', desc: '燃やす・爆発・熱変容', hex: '#ff4444' },
     { id: 'Lupis Surf', color: '青', desc: '流す・包む・圧力', hex: '#4488ff' },
@@ -56,88 +103,27 @@ const LANGUAGES = [
     { id: "P'", color: '桃', desc: '回復・強化・修復（P派生）', hex: '#ff88cc' },
 ];
 
-const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
-const AWAKENINGS = ['先天覚醒型', 'ショック覚醒型', '実験覚醒型', '接触覚醒型'];
-const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '搭乗型'];
-
-// 所属特典の詳細（バランス調整済み）
-const AFFILIATION_INFO = {
-    '祓部': {
-        bonus: '識の調査+1（3回/セッション）＋班ボーナス',
-        constraint: '任務命令への服従が義務。装備・行動に法的制限。',
-    },
-    '傭兵': {
-        bonus: '装備1ランクUP、二つ名+1（常時）＋系統ボーナス',
-        constraint: '収益がないと活動困難。バック企業の方針に縛られる。',
-    },
-    '無所属': {
-        bonus: '察+1常時、裏ルート（1回/セッション）、改造センサー（1回/セッション）＋出自ボーナス',
-        constraint: '法的保護なし。全組織から警戒される。補給ルート不安定。',
-    },
-};
-
-// 所属サブカテゴリ
-const SUB_AFFILIATIONS = {
-    '祓部': [
-        { id: '古怪班', desc: '古い怪異の専門部署。文献調査と封印管理', bonus: '一級・二級の古い怪異への識判定+2。禁足地知識判定+1' },
-        { id: '新怪班', desc: '新規発生怪異への初動対応。SNS型・流行型に強い', bonus: 'SNS起源怪異への察判定+1。ルール発動直後に察再判定（1回/セッション）' },
-        { id: '特務班', desc: '少数精鋭の実戦部隊。危険等級の現場に投入', bonus: '甲種怪異戦闘時、体/疾判定+1。援軍要請（1回/セッション）' },
-        { id: '技術班', desc: '魔導具の整備・解析・現場支援', bonus: '装備の応急修理判定+2。味方の装備不具合を無効化（1回/セッション）' },
-    ],
-    '傭兵': [
-        { id: '戦闘屋', desc: '正面火力で解決する。腕が商品', bonus: '護衛への初回攻撃+1。スペシャル時追加ダメージ+1' },
-        { id: '調査屋', desc: '情報に値段をつける。解明が本業', bonus: '調査判定+1（常時）。NPCから追加情報引き出し（1回/セッション）' },
-        { id: '運び屋', desc: '護衛と輸送の専門家。逃走のプロ', bonus: '疾判定+1（逃走・離脱時）。仲間1人へのダメージ1点肩代わり' },
-        { id: '技術屋', desc: '装備のカスタムと現場修理が得意', bonus: '装備CP+2。オプション一時差し替え（1回/セッション）' },
-    ],
-    '無所属': [
-        { id: '路地裏の犬', desc: 'スラムで生き延びた。暴力と飢えが教師', bonus: '体判定+1（素手・逃走）。NPCの嘘看破時、判/察判定+1' },
-        { id: 'はぐれ狼', desc: '流れの用心棒。一人で戦い続けてきた', bonus: '魂判定+1（単独行動時）。先行行動（イニシアチブ無視、1回/セッション）' },
-        { id: '小さな群れ', desc: '仲間と生きる小規模クラン。信頼だけが武器', bonus: '信念ポイント+1。仲間隣接時、全判定+1' },
-        { id: '脱走兵', desc: '祓部か企業の育成施設から逃げた。内部知識がある', bonus: '識+1（セッション2回まで）。企業製装備の弱点判定+1' },
-    ],
-};
-
-// 覚醒パターン情報
-const AWAKENING_INFO = {
-    '先天覚醒型': { effect: '術または魂がランクCでスタート（背景とは別枠）', extra: null },
-    'ショック覚醒型': { effect: '恨み/喪失に対する判定+1。初期信念ポイント+1', extra: null },
-    '実験覚醒型': { effect: '怪異の気配に対する察判定+1', extra: null },
-    '接触覚醒型': { effect: '察判定に常時+1（怪異の気配への鋭敏さ）', extra: null },
-};
-
-// 初期ギフト（6種から1つ選択）
-const GIFTS = [
-    { id: '鍵の直感', desc: '調査フェイズで1日1回、解明鍵のヒントをGMに求められる' },
-    { id: '生還の意地', desc: 'HP0時、魂判定成功で1HP残して生存（1シナリオ1回）' },
-    { id: '装備の鬼', desc: '武装型・半装身型装備の武器修正+1' },
-    { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
-    { id: '怪異の残響', desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
-    { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
-];
-
 // 初期値
 const INITIAL = {
-    author_name: '', visibility: '公開', image_url: '', thumbnail_url: '', icon_url: '', image_urls: ['', '', ''],
+    author_name: '', visibility: '公開', thumbnail_url: '', icon_url: '', image_urls: ['', '', ''],
     character_name: '', title: '', age: '', gender: '',
     affiliation: '祓部', sub_affiliation: '', awakening: '先天覚醒型',
-    background: '', class: '', gift: '',
-    // 7能力値ランク（全てDスタート）
+    background: '', weapon_type: '', gift: '',
     rank_tai: 'D', rank_haya: 'D', rank_shiki: 'D', rank_han: 'D',
     rank_shiya: 'D', rank_jutsu: 'D', rank_kon: 'D',
-    // 得意/苦手言語
+    stage_plus: [],
+    skills: [],
     proficient_languages: [], weak_languages: [],
-    // 装備
     equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '',
-    // 信念
     belief_points: 5,
-    // ストーリー
     fate: '', backstory: '',
     related_anomalies: '', related_characters: '', related_factions: '',
-    // サイバネティクス
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
 };
+
+// 先天覚醒型の追加C昇格選択肢
+const INNATE_CHOICES = ['rank_jutsu', 'rank_kon'];
 
 // ===== コンポーネント =====
 
@@ -150,20 +136,25 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const [myGear, setMyGear] = useState([]);
+    const [innateChoice, setInnateChoice] = useState('rank_jutsu');
 
-    // 編集モード
     useEffect(() => {
-        if (initialData) setForm(prev => ({ ...prev, ...initialData }));
+        if (initialData) {
+            setForm(prev => ({
+                ...prev,
+                ...initialData,
+                skills: initialData.skills || [],
+                stage_plus: initialData.stage_plus || [],
+            }));
+        }
     }, [initialData]);
 
-    // ユーザー名自動セット
     useEffect(() => {
         if (user && !form.author_name && !isEdit) {
             setForm(prev => ({ ...prev, author_name: `@${user.username || user.firstName || 'user'}` }));
         }
     }, [user, isEdit]);
 
-    // 自分の投稿済み武器を取得
     useEffect(() => {
         if (!user) return;
         fetch(`/api/posts?table=gear_posts&user_id=${user.id}`)
@@ -174,71 +165,112 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
     const set = useCallback((key, val) => setForm(prev => ({ ...prev, [key]: val })), []);
 
-    // 背景選択で2能力値をC昇格
+    // --- 選択状態 ---
     const selectedBg = BACKGROUNDS.find(b => b.id === form.background);
-    // クラス選択で1能力値をB昇格
-    const selectedClass = CLASSES.find(c => c.id === form.class);
+    const selectedAssignment = (ASSIGNMENTS[form.affiliation] || []).find(a => a.id === form.sub_affiliation);
 
-    // 計算済みランクを取得（背景・クラスの昇格を反映）
+    // --- ランク計算（背景→C、配属→B、覚醒→C） ---
     const getEffectiveRank = useCallback((abilityKey) => {
-        let rank = form[abilityKey] || 'D';
-        // 背景による昇格（D→C）
+        let rank = 'D';
+        // 背景によるC昇格
         if (selectedBg && selectedBg.upgrades.includes(abilityKey)) {
-            if (rank === 'D') rank = 'C';
+            rank = 'C';
         }
-        // クラスによる昇格（→B）
-        if (selectedClass && selectedClass.upgrade === abilityKey) {
-            const idx = RANKS.indexOf(rank);
-            const bIdx = RANKS.indexOf('B');
-            if (idx < bIdx) rank = 'B';
+        // 先天覚醒型：術or魂がC（背景とは別枠）
+        if (form.awakening === '先天覚醒型' && abilityKey === innateChoice) {
+            if (RANKS.indexOf(rank) < RANKS.indexOf('C')) rank = 'C';
+        }
+        // 配属によるB昇格
+        if (selectedAssignment && selectedAssignment.upgrade === abilityKey) {
+            rank = 'B';
         }
         return rank;
-    }, [form, selectedBg, selectedClass]);
+    }, [form.awakening, innateChoice, selectedBg, selectedAssignment]);
 
-    // 信念ポイント計算（背景・覚醒で+1の場合あり）
+    // --- 段階表示 ---
+    const getStageDisplay = useCallback((abilityKey) => {
+        const rank = getEffectiveRank(abilityKey);
+        const hasPlus = (form.stage_plus || []).includes(abilityKey);
+        if (hasPlus && rank !== 'S') return `${rank}+`;
+        return rank;
+    }, [getEffectiveRank, form.stage_plus]);
+
+    // --- 信念ポイント ---
     const calcBeliefPoints = useCallback(() => {
         let pts = 5;
-        if (form.background === '信仰者') pts += 1;
         if (form.awakening === 'ショック覚醒型') pts += 1;
         return pts;
-    }, [form.background, form.awakening]);
+    }, [form.awakening]);
 
-    // 得意/苦手言語のトグル
+    // --- 得意/苦手言語トグル ---
     const toggleLanguage = useCallback((type, langId) => {
         setForm(prev => {
             const key = type === 'proficient' ? 'proficient_languages' : 'weak_languages';
             const otherKey = type === 'proficient' ? 'weak_languages' : 'proficient_languages';
             const current = [...(prev[key] || [])];
             const other = prev[otherKey] || [];
-            if (current.includes(langId)) {
-                return { ...prev, [key]: current.filter(l => l !== langId) };
-            }
-            if (current.length >= 3) return prev;
-            if (other.includes(langId)) return prev; // 同じ言語を両方に選べない
+            if (current.includes(langId)) return { ...prev, [key]: current.filter(l => l !== langId) };
+            if (current.length >= 3 || other.includes(langId)) return prev;
             return { ...prev, [key]: [...current, langId] };
         });
     }, []);
 
-    // 投稿処理
+    // --- 段階トグル ---
+    const toggleStagePlus = useCallback((abilityKey) => {
+        setForm(prev => {
+            const current = [...(prev.stage_plus || [])];
+            if (current.includes(abilityKey)) {
+                return { ...prev, stage_plus: current.filter(k => k !== abilityKey) };
+            }
+            if (current.length >= 2) return prev;
+            return { ...prev, stage_plus: [...current, abilityKey] };
+        });
+    }, []);
+
+    // --- スキルトグル ---
+    const toggleSkill = useCallback((skillId) => {
+        setForm(prev => {
+            const current = [...(prev.skills || [])];
+            if (current.includes(skillId)) {
+                return { ...prev, skills: current.filter(s => s !== skillId) };
+            }
+            if (current.length >= 2) return prev;
+            return { ...prev, skills: [...current, skillId] };
+        });
+    }, []);
+
+    // --- 取得可能スキル一覧 ---
+    const availableSkills = useMemo(() => getAvailableSkills({
+        affiliation: form.affiliation,
+        assignment: form.sub_affiliation,
+        awakening: form.awakening,
+        weaponType: form.weapon_type,
+    }), [form.affiliation, form.sub_affiliation, form.awakening, form.weapon_type]);
+
+    const bgSkill = useMemo(() => getBackgroundSkill(form.background), [form.background]);
+
+    // --- 投稿処理 ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.character_name.trim()) { setResult({ ok: false, msg: 'キャラ名は必須です' }); return; }
         if (!form.background) { setResult({ ok: false, msg: '背景を選択してください' }); return; }
-        if (!form.class) { setResult({ ok: false, msg: 'クラスを選択してください' }); return; }
+        if (!form.sub_affiliation) { setResult({ ok: false, msg: '配属を選択してください' }); return; }
+        if (!form.weapon_type) { setResult({ ok: false, msg: '武器型を選択してください' }); return; }
 
         const profLen = (form.proficient_languages || []).length;
         const weakLen = (form.weak_languages || []).length;
-        if (profLen !== weakLen) { setResult({ ok: false, msg: `得意言語と苦手言語の数を揃えてください（現在: 得意${profLen} / 苦手${weakLen}）` }); return; }
+        if (profLen !== weakLen) { setResult({ ok: false, msg: `得意言語と苦手言語の数を揃えてください（得意${profLen} / 苦手${weakLen}）` }); return; }
 
         setSubmitting(true); setResult(null);
         try {
-            // 計算済みランクを反映
             const payload = { ...form };
+            // 計算済みランクを反映
             ABILITIES.forEach(a => { payload[a.key] = getEffectiveRank(a.key); });
             payload.belief_points = calcBeliefPoints();
-            // 空文字のlinked_gear_idはnullに変換（DB制約対応）
+            // class列は空文字（後方互換）
+            payload.class = null;
             if (!payload.linked_gear_id) payload.linked_gear_id = null;
-            delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id;
+            delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id; delete payload.image_url;
 
             const method = isEdit ? 'PATCH' : 'POST';
             const body = isEdit
@@ -257,23 +289,35 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         } finally { setSubmitting(false); }
     };
 
-    const affInfo = AFFILIATION_INFO[form.affiliation];
-    const awkInfo = AWAKENING_INFO[form.awakening];
-
-    // ===== ランクバッジのスタイル =====
-    const rankBadgeStyle = (rank, isUpgraded = false) => ({
+    // --- スタイル ---
+    const cardStyle = (selected) => ({
+        padding: '14px', textAlign: 'left', cursor: 'pointer',
+        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
+        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
+        transition: 'all 0.2s',
+    });
+    const cardTitle = (selected) => ({
+        fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)',
+        marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)',
+    });
+    const cardDesc = { fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 };
+    const rankBadgeStyle = (rank, isUpgraded = false, hasPlus = false) => ({
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        width: '36px', height: '36px',
+        minWidth: '40px', height: '36px', padding: '0 6px',
         fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700,
         background: isUpgraded ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.04)',
-        border: isUpgraded ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+        border: isUpgraded ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.3)' : 'var(--border-subtle)',
         color: rank === 'S' ? '#ff4444' : rank === 'A' ? '#ffcc00' : rank === 'B' ? 'var(--accent-gold)' : rank === 'C' ? '#88aacc' : 'var(--text-muted)',
     });
+    const infoBox = { marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' };
+    const gridCards = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' };
+    const sectionNote = { color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' };
 
     return (
         <div className="container">
             <section className="section">
-                <span className="section__title">// {isEdit ? 'EDIT' : 'CREATE'} — CHARACTER SHEET v2</span>
+                <span className="section__title">// {isEdit ? 'EDIT' : 'CREATE'} — CHARACTER SHEET v4</span>
                 <h1 className="section__heading">{isEdit ? 'キャラクターシートを編集' : 'キャラクターシートを作成'}</h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
                     {isEdit ? 'シートの内容を修正できます。' : '討伐者のキャラクターシートを作成してコミュニティに共有しましょう。'}
@@ -281,7 +325,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             </section>
 
             <form onSubmit={handleSubmit}>
-                {/* SEC 0: メタ */}
+                {/* ====== SEC 0: メタ ====== */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 0 — META</div>
                     <h2 style={S.sectionHeading}>メタ情報</h2>
@@ -294,13 +338,13 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="characters" compact />
                     </div>
                     <div style={S.row}>
-                        <ImageUploader label="画像1" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} folder="characters" />
-                        <ImageUploader label="画像2" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} folder="characters" />
-                        <ImageUploader label="画像3" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} folder="characters" />
+                        {form.image_urls.map((url, i) => (
+                            <ImageUploader key={i} label={`画像${i + 1}`} value={url} onChange={v => { const a = [...form.image_urls]; a[i] = v; set('image_urls', a); }} folder="characters" />
+                        ))}
                     </div>
                 </div>
 
-                {/* SEC 1: 基本情報 */}
+                {/* ====== SEC 1: 基本情報 ====== */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 1 — IDENTITY</div>
                     <h2 style={S.sectionHeading}>基本情報</h2>
@@ -311,161 +355,204 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.row}>
                         <FormInput label="年齢" value={form.age} onChange={v => set('age', v)} placeholder="例：24" />
                         <FormInput label="性別" value={form.gender} onChange={v => set('gender', v)} placeholder="自由記述" />
-                        <FormSelect label="所属 *" value={form.affiliation} onChange={v => { set('affiliation', v); set('sub_affiliation', ''); }} options={AFFILIATIONS} />
-                        <FormSelect label="覚醒パターン *" value={form.awakening} onChange={v => set('awakening', v)} options={AWAKENINGS} />
-                    </div>
-                    {/* 所属ボーナス */}
-                    <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '6px' }}>{form.affiliation}の特性</div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>▸ {affInfo.bonus}</div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>▹ {affInfo.constraint}</div>
-                    </div>
-
-                    {/* 所属サブカテゴリ選択 */}
-                    {SUB_AFFILIATIONS[form.affiliation] && (
-                        <div style={{ marginTop: 'var(--space-lg)' }}>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>
-                                {form.affiliation === '祓部' ? '配属班 *' : form.affiliation === '傭兵' ? '系統 *' : '出自 *'}
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px' }}>
-                                {SUB_AFFILIATIONS[form.affiliation].map(sub => {
-                                    const selected = form.sub_affiliation === sub.id;
-                                    return (
-                                        <button key={sub.id} type="button"
-                                            onClick={() => set('sub_affiliation', selected ? '' : sub.id)}
-                                            style={{
-                                                padding: '12px', textAlign: 'left', cursor: 'pointer',
-                                                border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                                background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
-                                                color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                                transition: 'all 0.2s',
-                                            }}>
-                                            <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                                                {sub.id}
-                                            </div>
-                                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', lineHeight: 1.5 }}>{sub.desc}</div>
-                                            <div style={{ fontSize: '10px', color: selected ? 'var(--accent-gold)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>▸ {sub.bonus}</div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 覚醒パターン情報 */}
-                    <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '6px' }}>{form.awakening}</div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>{awkInfo.effect}</div>
                     </div>
                 </div>
 
-                {/* SEC 2: 背景 */}
+                {/* ====== SEC 2: 背景 ====== */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 2 — BACKGROUND</div>
-                    <h2 style={S.sectionHeading}>背景</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' }}>
-                        背景を選ぶと2つの能力値がランクDからCに昇格します。
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
+                    <h2 style={S.sectionHeading}>背景 *</h2>
+                    <p style={sectionNote}>背景を選ぶと2つの能力値がCに昇格し、背景スキルが自動で付きます。</p>
+                    <div style={gridCards}>
                         {BACKGROUNDS.map(bg => {
                             const selected = form.background === bg.id;
                             const upgradeNames = bg.upgrades.map(k => ABILITIES.find(a => a.key === k)?.name).join('・');
+                            const skill = getBackgroundSkill(bg.id);
                             return (
-                                <button key={bg.id} type="button"
-                                    onClick={() => set('background', selected ? '' : bg.id)}
-                                    style={{
-                                        padding: '14px', textAlign: 'left', cursor: 'pointer',
-                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
-                                        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        transition: 'all 0.2s',
-                                    }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-md)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                                        {bg.id}
-                                    </div>
+                                <button key={bg.id} type="button" onClick={() => set('background', selected ? '' : bg.id)} style={cardStyle(selected)}>
+                                    <div style={cardTitle(selected)}>{bg.id}</div>
                                     <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>
-                                        {upgradeNames} → C昇格
+                                        {upgradeNames || '魂'} → C昇格
                                     </div>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>{bg.effect}</div>
+                                    <div style={cardDesc}>{bg.desc}</div>
+                                    {skill && (
+                                        <div style={{ marginTop: '6px', fontSize: '10px', color: '#44cc88', fontFamily: 'var(--font-mono)' }}>
+                                            自動スキル: {skill.id}（{skill.effect}）
+                                        </div>
+                                    )}
                                 </button>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* SEC 3: クラス */}
+                {/* ====== SEC 3: 所属＋配属 ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 3 — CLASS</div>
-                    <h2 style={S.sectionHeading}>クラス</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' }}>
-                        クラスを選ぶと1つの能力値がランクBに昇格し、クラス特技が付与されます。
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
-                        {CLASSES.map(cls => {
-                            const selected = form.class === cls.id;
-                            const upgradeName = ABILITIES.find(a => a.key === cls.upgrade)?.name;
-                            return (
-                                <button key={cls.id} type="button"
-                                    onClick={() => set('class', selected ? '' : cls.id)}
+                    <div style={S.sectionTitle}>SECTION 3 — FACTION &amp; ASSIGNMENT</div>
+                    <h2 style={S.sectionHeading}>所属・配属 *</h2>
+
+                    {/* 所属選択 */}
+                    <div style={{ marginBottom: 'var(--space-xl)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>所属</div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {AFFILIATIONS.map(aff => (
+                                <button key={aff} type="button"
+                                    onClick={() => { set('affiliation', aff); set('sub_affiliation', ''); }}
                                     style={{
-                                        padding: '14px', textAlign: 'left', cursor: 'pointer',
-                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
-                                        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        transition: 'all 0.2s',
+                                        ...cardStyle(form.affiliation === aff),
+                                        flex: '1', minWidth: '140px', textAlign: 'center',
                                     }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-md)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                                        {cls.id}
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-md)', color: form.affiliation === aff ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
+                                        {aff}
                                     </div>
-                                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>
-                                        {upgradeName} → B昇格
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>{cls.effect}</div>
+                                </button>
+                            ))}
+                        </div>
+                        <div style={infoBox}>
+                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>▸ {AFFILIATION_INFO[form.affiliation].bonus}</div>
+                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>▹ {AFFILIATION_INFO[form.affiliation].constraint}</div>
+                        </div>
+                    </div>
+
+                    {/* 配属選択 */}
+                    <div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>
+                            {form.affiliation === '祓部' ? '配属班' : form.affiliation === '傭兵' ? '専門' : '流儀'} *
+                        </div>
+                        <div style={gridCards}>
+                            {(ASSIGNMENTS[form.affiliation] || []).map(asn => {
+                                const selected = form.sub_affiliation === asn.id;
+                                const upgradeName = ABILITIES.find(a => a.key === asn.upgrade)?.name;
+                                return (
+                                    <button key={asn.id} type="button" onClick={() => set('sub_affiliation', selected ? '' : asn.id)} style={cardStyle(selected)}>
+                                        <div style={cardTitle(selected)}>{asn.id}</div>
+                                        <div style={{ fontSize: 'var(--font-size-xs)', color: '#44aaff', marginBottom: '4px' }}>
+                                            {upgradeName} → B昇格
+                                        </div>
+                                        <div style={cardDesc}>{asn.desc}</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ====== SEC 4: 覚醒パターン ====== */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 4 — AWAKENING</div>
+                    <h2 style={S.sectionHeading}>覚醒パターン *</h2>
+                    <p style={sectionNote}>討伐者として覚醒した経緯。覚醒スキルが解放されます。</p>
+                    <div style={gridCards}>
+                        {AWAKENINGS.map(awk => {
+                            const selected = form.awakening === awk.id;
+                            return (
+                                <button key={awk.id} type="button" onClick={() => set('awakening', awk.id)} style={cardStyle(selected)}>
+                                    <div style={cardTitle(selected)}>{awk.id}</div>
+                                    <div style={{ fontSize: 'var(--font-size-xs)', color: '#aa44ff', marginBottom: '4px' }}>{awk.effect}</div>
+                                    <div style={cardDesc}>{awk.desc}</div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {/* 先天覚醒型：術or魂の選択 */}
+                    {form.awakening === '先天覚醒型' && (
+                        <div style={{ ...infoBox, display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)' }}>C昇格する能力値:</span>
+                            {INNATE_CHOICES.map(key => {
+                                const ab = ABILITIES.find(a => a.key === key);
+                                return (
+                                    <button key={key} type="button" onClick={() => setInnateChoice(key)}
+                                        style={{
+                                            padding: '6px 16px', fontFamily: 'var(--font-mono)', fontWeight: 700,
+                                            background: innateChoice === key ? 'rgba(170,68,255,0.15)' : 'rgba(0,0,0,0.3)',
+                                            border: innateChoice === key ? '1px solid rgba(170,68,255,0.4)' : 'var(--border-subtle)',
+                                            color: innateChoice === key ? '#aa44ff' : 'var(--text-muted)', cursor: 'pointer',
+                                        }}>
+                                        {ab?.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* ====== SEC 5: 武器型 ====== */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 5 — WEAPON TYPE</div>
+                    <h2 style={S.sectionHeading}>武器型 *</h2>
+                    <p style={sectionNote}>所属・配属・覚醒とは独立。どの組み合わせでも自由に選択できます。</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                        {WEAPON_TYPES.map(wt => {
+                            const selected = form.weapon_type === wt.id;
+                            return (
+                                <button key={wt.id} type="button" onClick={() => set('weapon_type', selected ? '' : wt.id)} style={cardStyle(selected)}>
+                                    <div style={{ ...cardTitle(selected), color: selected ? '#ff6644' : 'var(--text-primary)' }}>{wt.id}</div>
+                                    <div style={{ fontSize: 'var(--font-size-xs)', color: '#ff6644', marginBottom: '2px' }}>{wt.desc}</div>
+                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{wt.weapons}</div>
                                 </button>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* SEC 4: 能力値一覧（自動計算結果の表示） */}
+                {/* ====== SEC 6: 能力値＋段階調整 ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 4 — ABILITIES</div>
+                    <div style={S.sectionTitle}>SECTION 6 — ABILITIES</div>
                     <h2 style={S.sectionHeading}>能力値ランク</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' }}>
-                        全能力値はDスタート。背景・クラスの選択で自動的に昇格します。
+                    <p style={sectionNote}>
+                        全能力値はDスタート。背景・配属・覚醒で自動昇格。さらに2つの能力値に＋段階を付与できます。
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
                         {ABILITIES.map(ability => {
-                            const baseRank = 'D';
                             const effectiveRank = getEffectiveRank(ability.key);
-                            const isUpgraded = effectiveRank !== baseRank;
+                            const isUpgraded = effectiveRank !== 'D';
+                            const hasPlus = (form.stage_plus || []).includes(ability.key);
+                            const stageDisplay = getStageDisplay(ability.key);
                             const upgradeSource = [];
                             if (selectedBg && selectedBg.upgrades.includes(ability.key)) upgradeSource.push(`背景:${selectedBg.id}`);
-                            if (selectedClass && selectedClass.upgrade === ability.key) upgradeSource.push(`クラス:${selectedClass.id}`);
+                            if (form.awakening === '先天覚醒型' && ability.key === innateChoice) upgradeSource.push('覚醒:先天型');
+                            if (selectedAssignment && selectedAssignment.upgrade === ability.key) upgradeSource.push(`配属:${selectedAssignment.id}`);
+                            if (hasPlus) upgradeSource.push('+段階');
                             return (
-                                <div key={ability.key} style={{ padding: '14px', background: 'rgba(0,0,0,0.2)', border: isUpgraded ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)' }}>
+                                <div key={ability.key} style={{ padding: '14px', background: 'rgba(0,0,0,0.2)', border: isUpgraded ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.2)' : 'var(--border-subtle)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                         <div>
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-md)', fontWeight: 700 }}>{ability.name}</span>
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginLeft: '8px' }}>({ability.reading})</span>
                                         </div>
-                                        <span style={rankBadgeStyle(effectiveRank, isUpgraded)}>{effectiveRank}</span>
+                                        <span style={rankBadgeStyle(effectiveRank, isUpgraded, hasPlus)}>{stageDisplay}</span>
                                     </div>
                                     <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>{ability.desc}</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
-                                        ダイス: {RANK_DICE[effectiveRank]}
+                                        ダイス: {RANK_DICE[effectiveRank]}{hasPlus ? '（達成値+1）' : ''}
                                     </div>
                                     {upgradeSource.length > 0 && (
                                         <div style={{ fontSize: '10px', color: 'var(--accent-gold)', marginTop: '4px' }}>
                                             ▲ {upgradeSource.join(' / ')}
                                         </div>
                                     )}
+                                    {/* 段階トグル */}
+                                    <button type="button" onClick={() => toggleStagePlus(ability.key)}
+                                        style={{
+                                            marginTop: '8px', padding: '3px 10px',
+                                            fontFamily: 'var(--font-mono)', fontSize: '10px',
+                                            background: hasPlus ? 'rgba(100,200,255,0.12)' : 'transparent',
+                                            border: hasPlus ? '1px solid rgba(100,200,255,0.3)' : '1px dashed rgba(255,255,255,0.15)',
+                                            color: hasPlus ? '#64c8ff' : 'var(--text-muted)',
+                                            cursor: 'pointer',
+                                        }}>
+                                        {hasPlus ? '＋段階 ✓' : '＋段階'}
+                                    </button>
                                 </div>
                             );
                         })}
                     </div>
-                    {/* 信念ポイント表示 */}
-                    <div style={{ marginTop: 'var(--space-lg)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.stage_plus || []).length <= 2 ? 'var(--text-muted)' : 'var(--accent-danger)', marginTop: 'var(--space-sm)' }}>
+                        +段階: {(form.stage_plus || []).length} / 2
+                    </div>
+
+                    {/* 信念ポイント */}
+                    <div style={{ ...infoBox, marginTop: 'var(--space-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>信念ポイント (BELIEF)</div>
                             <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>判定を振り直す、シーンに介入するなどの消費リソース</div>
@@ -474,65 +561,123 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
-                {/* SEC 5: ギフト選択 */}
+                {/* ====== SEC 7: スキル選択 ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 5 — GIFT</div>
-                    <h2 style={S.sectionHeading}>初期ギフト</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' }}>
-                        キャラクター作成時に1つ選択。覚醒段階は不要。
+                    <div style={S.sectionTitle}>SECTION 7 — SKILLS</div>
+                    <h2 style={S.sectionHeading}>スキル選択</h2>
+                    <p style={sectionNote}>
+                        Lv1では2スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
                     </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
+
+                    {/* 背景スキル（自動取得） */}
+                    {bgSkill && (
+                        <div style={{ padding: '12px', background: 'rgba(68,204,136,0.06)', border: '1px solid rgba(68,204,136,0.2)', marginBottom: 'var(--space-lg)' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#44cc88', marginBottom: '4px' }}>自動取得（背景: {form.background}）</div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--text-heading)' }}>{bgSkill.id}</div>
+                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>{bgSkill.effect}</div>
+                        </div>
+                    )}
+
+                    {/* スロット残り */}
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= 2 ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
+                        スロット: {(form.skills || []).length} / 2
+                    </div>
+
+                    {/* スキル一覧 */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
+                        {availableSkills.filter(s => s.level <= 1).map(skill => {
+                            const selected = (form.skills || []).includes(skill.id);
+                            const axisColor = getAxisColor(skill.axis);
+                            const typeColor = getSkillTypeColor(skill.type);
+                            return (
+                                <button key={skill.id} type="button" onClick={() => toggleSkill(skill.id)}
+                                    style={{
+                                        ...cardStyle(selected),
+                                        borderColor: selected ? axisColor : undefined,
+                                        background: selected ? `${axisColor}12` : 'rgba(0,0,0,0.2)',
+                                    }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: selected ? axisColor : 'var(--text-primary)' }}>
+                                            {skill.id}
+                                        </span>
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '1px 6px', border: `1px solid ${typeColor}40`, color: typeColor }}>
+                                            {skill.type}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '10px', color: axisColor, marginBottom: '2px', fontFamily: 'var(--font-mono)' }}>
+                                        [{skill.axis}] {skill.attr}判定 Lv{skill.level}
+                                    </div>
+                                    <div style={cardDesc}>{skill.effect}</div>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Lv2以上のスキルは参考表示 */}
+                    {availableSkills.filter(s => s.level > 1).length > 0 && (
+                        <details style={{ marginTop: 'var(--space-lg)' }}>
+                            <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                                Lv2以降で取得可能なスキル（{availableSkills.filter(s => s.level > 1).length}種）
+                            </summary>
+                            <div style={{ ...gridCards, marginTop: 'var(--space-sm)' }}>
+                                {availableSkills.filter(s => s.level > 1).map(skill => (
+                                    <div key={skill.id} style={{ padding: '10px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', opacity: 0.6 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-xs)' }}>{skill.id}</span>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: getSkillTypeColor(skill.type) }}>{skill.type}</span>
+                                        </div>
+                                        <div style={{ fontSize: '10px', color: getAxisColor(skill.axis), fontFamily: 'var(--font-mono)' }}>
+                                            [{skill.axis}] {skill.attr}判定 Lv{skill.level}
+                                        </div>
+                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{skill.effect}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    )}
+                </div>
+
+                {/* ====== SEC 8: ギフト ====== */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 8 — GIFT</div>
+                    <h2 style={S.sectionHeading}>初期ギフト</h2>
+                    <p style={sectionNote}>キャラクター作成時に1つ選択。覚醒段階は不要。</p>
+                    <div style={gridCards}>
                         {GIFTS.map(gift => {
                             const selected = form.gift === gift.id;
                             return (
-                                <button key={gift.id} type="button"
-                                    onClick={() => set('gift', selected ? '' : gift.id)}
-                                    style={{
-                                        padding: '14px', textAlign: 'left', cursor: 'pointer',
-                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
-                                        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        transition: 'all 0.2s',
-                                    }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                                        {gift.id}
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>{gift.desc}</div>
+                                <button key={gift.id} type="button" onClick={() => set('gift', selected ? '' : gift.id)} style={cardStyle(selected)}>
+                                    <div style={cardTitle(selected)}>{gift.id}</div>
+                                    <div style={cardDesc}>{gift.desc}</div>
                                 </button>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* SEC 6: 得意/苦手言語 */}
+                {/* ====== SEC 9: 魔法言語 ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 6 — LANGUAGE</div>
+                    <div style={S.sectionTitle}>SECTION 9 — LANGUAGE</div>
                     <h2 style={S.sectionHeading}>得意言語・苦手言語</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-sm)', fontStyle: 'italic' }}>
-                        得意と苦手は同じ数だけ選んでください（0〜3個ずつ）。P言語は全員が使用可能です。
-                    </p>
+                    <p style={sectionNote}>得意と苦手は同じ数だけ選んでください（0〜3個ずつ）。P言語は全員使用可能。</p>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.proficient_languages || []).length === (form.weak_languages || []).length ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-lg)' }}>
                         得意: {(form.proficient_languages || []).length} / 苦手: {(form.weak_languages || []).length}
-                        {(form.proficient_languages || []).length === (form.weak_languages || []).length ? ' ✓ バランスOK' : ' — 数を揃えてください'}
+                        {(form.proficient_languages || []).length === (form.weak_languages || []).length ? ' ✓' : ' — 数を揃えてください'}
                     </div>
 
-                    {/* 得意言語 */}
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>得意言語（術判定+1）</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: 'var(--space-xl)' }}>
                         {LANGUAGES.map(lang => {
                             const selected = (form.proficient_languages || []).includes(lang.id);
                             const inWeak = (form.weak_languages || []).includes(lang.id);
                             return (
-                                <button key={lang.id} type="button"
-                                    onClick={() => toggleLanguage('proficient', lang.id)}
-                                    disabled={inWeak}
+                                <button key={lang.id} type="button" onClick={() => toggleLanguage('proficient', lang.id)} disabled={inWeak}
                                     style={{
                                         padding: '10px 12px', textAlign: 'left', cursor: inWeak ? 'not-allowed' : 'pointer',
                                         border: selected ? `2px solid ${lang.hex}` : 'var(--border-subtle)',
                                         background: selected ? `${lang.hex}15` : inWeak ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.2)',
                                         color: selected ? lang.hex : inWeak ? 'var(--text-muted)' : 'var(--text-secondary)',
-                                        opacity: inWeak ? 0.4 : 1,
-                                        fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
+                                        opacity: inWeak ? 0.4 : 1, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
                                     }}>
                                     <div style={{ fontWeight: 700 }}>{lang.id} <span style={{ fontWeight: 400, fontSize: 'var(--font-size-xs)', color: lang.hex }}>({lang.color})</span></div>
                                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{lang.desc}</div>
@@ -541,23 +686,19 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         })}
                     </div>
 
-                    {/* 苦手言語 */}
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>苦手言語（術判定−1）</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>苦手言語（術判定-1）</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                         {LANGUAGES.map(lang => {
                             const selected = (form.weak_languages || []).includes(lang.id);
                             const inProf = (form.proficient_languages || []).includes(lang.id);
                             return (
-                                <button key={lang.id} type="button"
-                                    onClick={() => toggleLanguage('weak', lang.id)}
-                                    disabled={inProf}
+                                <button key={lang.id} type="button" onClick={() => toggleLanguage('weak', lang.id)} disabled={inProf}
                                     style={{
                                         padding: '10px 12px', textAlign: 'left', cursor: inProf ? 'not-allowed' : 'pointer',
-                                        border: selected ? `2px solid var(--accent-danger)` : 'var(--border-subtle)',
+                                        border: selected ? '2px solid var(--accent-danger)' : 'var(--border-subtle)',
                                         background: selected ? 'rgba(230, 57, 70, 0.1)' : inProf ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.2)',
                                         color: selected ? 'var(--accent-danger)' : inProf ? 'var(--text-muted)' : 'var(--text-secondary)',
-                                        opacity: inProf ? 0.4 : 1,
-                                        fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
+                                        opacity: inProf ? 0.4 : 1, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
                                     }}>
                                     <div style={{ fontWeight: 700 }}>{lang.id}</div>
                                 </button>
@@ -566,9 +707,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
-                {/* SEC 7: 装備 */}
+                {/* ====== SEC 10: 装備 ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 7 — EQUIPMENT</div>
+                    <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT</div>
                     <h2 style={S.sectionHeading}>主力装備</h2>
                     <div style={S.row}>
                         <FormSelect label="装備種別" value={form.equipment_type} onChange={v => { set('equipment_type', v); set('equipment_name', ''); }} options={EQUIPMENT_TYPES} />
@@ -597,125 +738,66 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <FormInput label="装備名（自由入力）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="装備名" />
                     )}
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
-                    {/* 投稿済み装備の紐づけ */}
-                    <div style={{
-                        marginTop: 'var(--space-lg)', padding: '16px',
-                        background: 'rgba(212, 175, 55, 0.04)',
-                        border: '1px solid rgba(212, 175, 55, 0.2)',
-                        borderRadius: 'var(--radius-md)',
-                    }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
-                            ⚔ 投稿済み装備を連携
-                        </div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: '12px', lineHeight: 1.6 }}>
-                            武器・装備投稿で作成した装備をこのキャラクターに紐づけると、キャラ詳細ページから装備詳細へ直接アクセスできます。
-                        </p>
 
+                    {/* 投稿済み装備の紐づけ */}
+                    <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(212, 175, 55, 0.04)', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
+                            投稿済み装備を連携
+                        </div>
                         {myGear.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {myGear.map(g => {
                                     const isLinked = form.linked_gear_id === g.id;
                                     return (
-                                        <div
-                                            key={g.id}
-                                            onClick={() => set('linked_gear_id', isLinked ? '' : g.id)}
+                                        <div key={g.id} onClick={() => set('linked_gear_id', isLinked ? '' : g.id)}
                                             style={{
-                                                padding: '10px 14px',
+                                                padding: '10px 14px', cursor: 'pointer', transition: 'all 0.2s',
                                                 background: isLinked ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
                                                 border: isLinked ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
-                                                borderRadius: 'var(--radius-md)',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                            }}
-                                        >
+                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            }}>
                                             <div>
-                                                <span style={{ fontWeight: 700, color: 'var(--text-heading)', fontSize: 'var(--font-size-sm)' }}>
-                                                    {g.gear_name}
-                                                </span>
+                                                <span style={{ fontWeight: 700, color: 'var(--text-heading)', fontSize: 'var(--font-size-sm)' }}>{g.gear_name}</span>
                                                 <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                                                     {g.category || ''} {g.manufacturer ? `/ ${g.manufacturer}` : ''}
                                                 </span>
                                             </div>
-                                            {isLinked && (
-                                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', fontWeight: 700 }}>
-                                                    連携中
-                                                </span>
-                                            )}
+                                            {isLinked && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', fontWeight: 700 }}>連携中</span>}
                                         </div>
                                     );
                                 })}
                                 {form.linked_gear_id && (
-                                    <button
-                                        type="button"
-                                        onClick={() => set('linked_gear_id', '')}
-                                        style={{
-                                            padding: '6px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)',
-                                            background: 'transparent', border: '1px solid rgba(255,77,77,0.3)', color: '#ff6666',
-                                            borderRadius: 'var(--radius-md)', cursor: 'pointer', alignSelf: 'flex-start',
-                                        }}
-                                    >
+                                    <button type="button" onClick={() => set('linked_gear_id', '')}
+                                        style={{ padding: '6px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', background: 'transparent', border: '1px solid rgba(255,77,77,0.3)', color: '#ff6666', cursor: 'pointer', alignSelf: 'flex-start' }}>
                                         連携を解除
                                     </button>
                                 )}
                             </div>
                         ) : (
-                            <div style={{ padding: '16px', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-md)' }}>
-                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                                    まだ装備を投稿していません
-                                </p>
-                                <a
-                                    href="/create/weapon/"
-                                    target="_blank"
-                                    style={{
-                                        display: 'inline-block',
-                                        padding: '8px 20px',
-                                        fontFamily: 'var(--font-mono)',
-                                        fontSize: 'var(--font-size-sm)',
-                                        fontWeight: 700,
-                                        background: 'rgba(212, 175, 55, 0.1)',
-                                        border: '1px solid var(--accent-gold-border)',
-                                        color: 'var(--accent-gold)',
-                                        borderRadius: 'var(--radius-md)',
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    ⚔ 装備を新規投稿する
-                                </a>
-                            </div>
-                        )}
-
-                        {myGear.length > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-                                <a href="/create/weapon/" target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', textDecoration: 'underline' }}>
-                                    + 新しい装備を投稿する
+                            <div style={{ padding: '16px', textAlign: 'center', background: 'rgba(0,0,0,0.2)' }}>
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '12px' }}>まだ装備を投稿していません</p>
+                                <a href="/create/weapon/" target="_blank" style={{ display: 'inline-block', padding: '8px 20px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, background: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--accent-gold-border)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                                    装備を新規投稿する
                                 </a>
                             </div>
                         )}
                     </div>
-                    {/* CP予算の目安 */}
+
+                    {/* CP予算 */}
                     {(() => {
                         let cpBudget = 10;
-                        if (form.background === '技術畑') cpBudget += 2;
-                        if (form.sub_affiliation === '技術屋') cpBudget += 2;
+                        if (form.background === '元傭兵' && (form.equipment_type === '武装型' || form.equipment_type === '半装身型')) cpBudget += 4;
+                        if (form.background === 'ハッカー上がり' && form.equipment_type === '独立型') cpBudget += 3;
 
-                        // 使用CPを計算
                         let usedCp = 0;
                         let cpSource = '';
-                        // 連携武器がある場合はそのtotal_cpを使用
                         const linkedGear = form.linked_gear_id ? myGear.find(g => g.id === form.linked_gear_id) : null;
                         if (linkedGear && linkedGear.total_cp != null) {
                             usedCp = Number(linkedGear.total_cp);
                             cpSource = linkedGear.gear_name;
                         } else {
-                            // 装備リストから選択した場合はベースCPを参照
                             const selectedWeapon = form.equipment_name && form.equipment_name !== '_custom' ? findWeapon(form.equipment_name) : null;
-                            if (selectedWeapon) {
-                                usedCp = Number(selectedWeapon.cp || 0);
-                                cpSource = selectedWeapon.name;
-                            }
+                            if (selectedWeapon) { usedCp = Number(selectedWeapon.cp || 0); cpSource = selectedWeapon.name; }
                         }
 
                         const remaining = cpBudget - usedCp;
@@ -723,29 +805,21 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         const barColor = remaining < 0 ? 'var(--accent-danger)' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
 
                         return (
-                            <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', borderRadius: 'var(--radius-sm)' }}>
+                            <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: usedCp > 0 ? '8px' : 0 }}>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                                         装備CP予算
-                                        {(form.background === '技術畑' || form.sub_affiliation === '技術屋') && (
-                                            <span style={{ color: 'var(--accent-gold)', marginLeft: '4px' }}>
-                                                (基本10{form.background === '技術畑' ? ' +技術畑2' : ''}{form.sub_affiliation === '技術屋' ? ' +技術屋2' : ''})
-                                            </span>
-                                        )}
+                                        {cpBudget > 10 && <span style={{ color: 'var(--accent-gold)', marginLeft: '4px' }}>(基本10 +背景{cpBudget - 10})</span>}
                                     </span>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
                                 </div>
-
                                 {usedCp > 0 && (
                                     <>
-                                        {/* プログレスバー */}
                                         <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: '6px' }}>
                                             <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width 0.3s' }} />
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                                {cpSource}: {usedCp}CP使用
-                                            </span>
+                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{cpSource}: {usedCp}CP</span>
                                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
                                                 {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過`}
                                             </span>
@@ -757,17 +831,18 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     })()}
                 </div>
 
-                {/* SEC 7.5: サイバネティクス */}
+                {/* ====== SEC 11: サイバネティクス ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 7.5 — CYBERNETICS</div>
+                    <div style={S.sectionTitle}>SECTION 11 — CYBERNETICS</div>
                     <h2 style={S.sectionHeading}>サイバネティクス（身体改造）</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-md)' }}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だがリスクが増す。</p>
-                    <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ff6666' }}>⚠ 装備と違い、サイバネティクスは一度施術すると取り外せません。慎重に選択してください。</div>
+                    <p style={sectionNote}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だがリスクが増す。</p>
+                    <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ff6666' }}>
+                        一度施術すると取り外せません。慎重に選択してください。
+                    </div>
                     <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
                     {form.cyber_grade !== 'none' && (() => {
                         const grade = CYBER_GRADES.find(g => g.id === form.cyber_grade);
                         const availList = [];
-                        // 等級以下のサイバネティクスを集める
                         const gradeOrder = ['I', 'II', 'III'];
                         const gradeIdx = gradeOrder.indexOf(form.cyber_grade);
                         for (let i = 0; i <= gradeIdx; i++) {
@@ -779,10 +854,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         }, 0);
                         return (
                             <>
-                                <div style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                        {grade.label}
-                                    </span>
+                                <div style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{grade.label}</span>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: usedCP > grade.cpLimit ? 'var(--accent-danger)' : 'var(--accent-gold)' }}>
                                         {usedCP} / {grade.cpLimit} CP
                                     </span>
@@ -790,8 +863,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                                 {form.cybernetics.map((slot, i) => (
                                     <div key={i} style={{ marginBottom: 'var(--space-sm)', padding: '10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
                                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', marginBottom: '6px' }}>スロット {i + 1}</div>
-                                        <select
-                                            value={slot.name}
+                                        <select value={slot.name}
                                             onChange={e => {
                                                 const name = e.target.value;
                                                 const arr = [...form.cybernetics];
@@ -799,21 +871,14 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                                                 arr[i] = { name, part: found ? found.part : '' };
                                                 set('cybernetics', arr);
                                             }}
-                                            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
-                                        >
+                                            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
                                             <option value="">— 選択なし —</option>
-                                            {availList.map(c => (
-                                                <option key={c.name} value={c.name}>{c.name}（{c.cp}CP / {c.part} / {c.maker}）</option>
-                                            ))}
+                                            {availList.map(c => <option key={c.name} value={c.name}>{c.name}（{c.cp}CP / {c.part} / {c.maker}）</option>)}
                                         </select>
                                         {slot.name && (() => {
                                             const c = findCybernetic(slot.name);
                                             if (!c) return null;
-                                            return (
-                                                <div style={{ marginTop: '6px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                                                    効果: {c.effect} · 共鳴: {c.resonance}
-                                                </div>
-                                            );
+                                            return <div style={{ marginTop: '6px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>効果: {c.effect} · 共鳴: {c.resonance}</div>;
                                         })()}
                                     </div>
                                 ))}
@@ -822,17 +887,17 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     })()}
                 </div>
 
-                {/* SEC 8: 因縁・バックストーリー */}
+                {/* ====== SEC 12: 因縁・バックストーリー ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 9 — STORY</div>
+                    <div style={S.sectionTitle}>SECTION 12 — STORY</div>
                     <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>
                     <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
-                    <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." rows={6} />
+                    <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." />
                 </div>
 
-                {/* SEC 10: 関連リンク */}
+                {/* ====== SEC 13: 関連リンク ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 10 — LINKS</div>
+                    <div style={S.sectionTitle}>SECTION 13 — LINKS</div>
                     <h2 style={S.sectionHeading}>関連リンク</h2>
                     <div style={S.row}>
                         <FormInput label="関連怪異" value={form.related_anomalies} onChange={v => set('related_anomalies', v)} placeholder="TMP-??? / KAI-####" />
@@ -841,6 +906,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
+                {/* ====== 結果 + 送信 ====== */}
                 {result && (
                     <div className="callout" style={{ marginBottom: 'var(--space-xl)', borderColor: result.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>
                         <div className="callout__label" style={{ color: result.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>{result.ok ? '投稿完了' : 'エラー'}</div>
