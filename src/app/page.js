@@ -87,6 +87,24 @@ export default function HomePage() {
               怪異調査書・装備・キャラクターシートをプレイヤーが投稿する。投稿された怪異が公認されれば、それは世界の一部になる。
             </p>
           </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', borderTop: '3px solid var(--accent-gold)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              VR GREETING
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>公式キャラに会いに行く</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              祓部の隊員、傭兵のエージェント、裏社会の情報屋——物語の登場人物たちがVRChatワールドに常駐。話しかければ世界の裏話が聞けるかもしれない。
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', borderTop: '3px solid #aa44ff' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#aa44ff', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              VR EVENT & TITLE
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>イベントで称号を得る</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              定期VRイベントに参加すると<span className="text-gold">限定称号</span>を獲得できる。称号はキャラクターシートに刻まれ、Webサイト上にも表示される——あなたがそこにいた証。
+            </p>
+          </div>
         </div>
 
         {/* TRPG ↔ Webゲーム コンバート */}
@@ -185,34 +203,6 @@ export default function HomePage() {
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
             background: 'linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.15), transparent)',
           }} />
-        </div>
-
-        {/* VRグリーティング＆イベント */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-          <div style={{
-            background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)',
-            borderTop: '3px solid var(--accent-gold)',
-          }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-              VR GREETING
-            </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>公式キャラに会いに行く</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              祓部の隊員、傭兵のエージェント、裏社会の情報屋——物語の登場人物たちがVRChat上のワールドに常駐。話しかければ世界の裏話が聞けるかもしれない。
-            </p>
-          </div>
-          <div style={{
-            background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)',
-            borderTop: '3px solid #aa44ff',
-          }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#aa44ff', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
-              VR EVENT
-            </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>イベントに参加する</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              怪異の出現演出や合同討伐ミッションを体験できる定期イベントを開催予定。参加者には<span className="text-gold">限定称号</span>が付与され、キャラクターシートとWebサイトに刻まれる。
-            </p>
-          </div>
         </div>
 
         <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
