@@ -24,7 +24,7 @@ function formatRelativeTime(dateStr) {
   return `${Math.floor(diffHour / 24)}d`;
 }
 
-export default function ThreadList({ layer }) {
+export default function ThreadList({ layer, basePath }) {
   const { user, isSignedIn } = useUser();
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -176,7 +176,7 @@ export default function ThreadList({ layer }) {
         sorted.map((thread) => (
           <a
             key={thread.id}
-            href={`/sns/thread/${thread.id}`}
+            href={`${basePath}${thread.id}`}
             className="thread-list__item"
           >
             <div className="thread-list__title">

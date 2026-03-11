@@ -24,7 +24,7 @@ function formatRelativeTime(dateStr) {
   return `${Math.floor(diffHour / 24)}d`;
 }
 
-export default function ThreadDetail({ threadId, layer }) {
+export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
   const { user, isSignedIn } = useUser();
   const [thread, setThread] = useState(null);
   const [replies, setReplies] = useState([]);
