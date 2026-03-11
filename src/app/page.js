@@ -35,9 +35,20 @@ export default function HomePage() {
         <div className="hero__scroll">▼ scroll to begin</div>
       </section>
 
+      {/* ===== News & Release ===== */}
+      <section className="section">
+        <div className="section__number">01 — NEWS & RELEASE</div>
+        <h2 className="section__heading">
+          お知らせ
+          <span className="section__heading-en">LATEST UPDATES</span>
+        </h2>
+      </section>
+
+      <NewsFeed />
+
       {/* ===== プロジェクト概要 ===== */}
       <section className="section">
-        <div className="section__number">01 — PROJECT</div>
+        <div className="section__number">02 — PROJECT</div>
         <h2 className="section__heading">
           プロジェクト概要
           <span className="section__heading-en">ABOUT KAI-I//KILL</span>
@@ -264,7 +275,7 @@ export default function HomePage() {
 
       {/* ===== 世界観ティーザー ===== */}
       <section className="section">
-        <div className="section__number">02 — WORLD</div>
+        <div className="section__number">03 — WORLD</div>
         <h2 className="section__heading">
           この世界について
           <span className="section__heading-en">WORLD CONCEPT</span>
@@ -311,17 +322,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* ===== News & Release ===== */}
-      <section className="section">
-        <div className="section__number">03 — NEWS & RELEASE</div>
-        <h2 className="section__heading">
-          お知らせ
-          <span className="section__heading-en">LATEST UPDATES</span>
-        </h2>
-      </section>
-
-      <NewsFeed />
 
       {/* ===== ナビゲーション ===== */}
       <section className="section">
