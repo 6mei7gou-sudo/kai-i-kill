@@ -48,11 +48,13 @@ const ASSIGNMENTS = {
         { id: '突撃型', upgrade: 'rank_tai', desc: '火力と耐久の前衛。傭兵の花形' },
         { id: '偵察型', upgrade: 'rank_shiya', desc: '情報収集と戦場分析。目と耳の専門家' },
         { id: '技術型', upgrade: 'rank_jutsu', desc: '装備改造と魔法技術。後方支援' },
+        { id: '護衛型', upgrade: 'rank_han', desc: '要人護衛と脅威評価。交渉と戦術判断の専門家' },
     ],
     '無所属': [
         { id: '野良討伐者', upgrade: 'rank_tai', desc: '組織に頼らず腕一本で戦う。生存特化' },
         { id: '裏社会の住人', upgrade: 'rank_han', desc: '情報網と人脈で勝負。交渉と策略' },
         { id: '在野研究者', upgrade: 'rank_shiki', desc: '独自に怪異を研究する学者肌' },
+        { id: '退魔師', upgrade: 'rank_kon', desc: '独学で祓いの術を身につけた一匹狼' },
     ],
 };
 

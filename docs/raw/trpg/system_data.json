@@ -93,12 +93,14 @@
       "mercenary": [
         { "name": "突撃型", "rank_up": "体→B", "focus": "火力と耐久の前衛" },
         { "name": "偵察型", "rank_up": "察→B", "focus": "情報収集と戦場分析" },
-        { "name": "技術型", "rank_up": "術→B", "focus": "装備改造と魔法技術" }
+        { "name": "技術型", "rank_up": "術→B", "focus": "装備改造と魔法技術" },
+        { "name": "護衛型", "rank_up": "判→B", "focus": "要人護衛と脅威評価" }
       ],
       "unaffiliated": [
         { "name": "野良討伐者", "rank_up": "体→B", "focus": "組織に頼らず腕一本で戦う" },
         { "name": "裏社会の住人", "rank_up": "判→B", "focus": "情報網と人脈で勝負" },
-        { "name": "在野研究者", "rank_up": "識→B", "focus": "独自に怪異を研究する学者肌" }
+        { "name": "在野研究者", "rank_up": "識→B", "focus": "独自に怪異を研究する学者肌" },
+        { "name": "退魔師", "rank_up": "魂→B", "focus": "独学で祓いの術を身につけた一匹狼" }
       ]
     },
     "weapon_types": [

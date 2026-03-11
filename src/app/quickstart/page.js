@@ -336,6 +336,11 @@ export default function QuickstartPage() {
                                         <td style={{ whiteSpace: 'nowrap' }}>術→B</td>
                                         <td>装備改造と魔法技術。後方支援</td>
                                     </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>護衛型</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>判→B</td>
+                                        <td>要人護衛と脅威評価。交渉と戦術判断の専門家</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -370,6 +375,11 @@ export default function QuickstartPage() {
                                         <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>在野研究者</td>
                                         <td style={{ whiteSpace: 'nowrap' }}>識→B</td>
                                         <td>独自に怪異を研究する学者肌</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>退魔師</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>魂→B</td>
+                                        <td>独学で祓いの術を身につけた一匹狼</td>
                                     </tr>
                                 </tbody>
                             </table>

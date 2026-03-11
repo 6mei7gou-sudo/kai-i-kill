@@ -69,6 +69,11 @@ export const ASSIGNMENT_SKILLS = {
         { id: '現場改造', attr: '術', level: 3, type: 'サブ', effect: '味方1人の武器修正を1ラウンド+2（CPコストなし）' },
         { id: '術式連鎖', attr: '術', level: 7, type: 'メイン', effect: '魔法攻撃成功時、追加対象にも半分のダメージ' },
     ],
+    '護衛型': [
+        { id: '脅威分析', attr: '判', level: 1, type: 'パッシブ', effect: '護衛の次の攻撃対象を予測（GMが対象を開示）' },
+        { id: '鉄壁の盾', attr: '体', level: 3, type: 'リアクション', effect: '味方への攻撃をかばう。受けるダメージ-2' },
+        { id: '護衛陣形', attr: '判', level: 7, type: 'サブ', effect: '味方全員の防御判定+2（1ラウンド持続）' },
+    ],
     // 無所属
     '野良討伐者': [
         { id: '生き残りの反射', attr: '疾', level: 1, type: 'リアクション', effect: '回避+2。HP50%以下で追加+1' },
@@ -84,6 +89,11 @@ export const ASSIGNMENT_SKILLS = {
         { id: '速読解析', attr: '識', level: 1, type: 'メイン', effect: '解明判定+2' },
         { id: '情報共有', attr: '判', level: 3, type: 'サブ', effect: '次ラウンド、味方全員の判定+1' },
         { id: '禁忌知識', attr: '識', level: 7, type: 'メイン', effect: '4鍵完了時のみ。核に直接5ダメージ。渇望+2' },
+    ],
+    '退魔師': [
+        { id: '独学の祓い', attr: '魂', level: 1, type: 'メイン', effect: '簡易浄化。共鳴メーター-2（浄化以外の任意1種）' },
+        { id: '霊脈感応', attr: '察', level: 3, type: 'パッシブ', effect: '怪異の核がいるエリアの方角を常時感知' },
+        { id: '呪返し', attr: '魂', level: 7, type: 'リアクション', effect: '魔法攻撃を反射。成功時、攻撃者に同ダメージ' },
     ],
 };
 
