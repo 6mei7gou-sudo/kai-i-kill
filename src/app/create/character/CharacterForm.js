@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, findWeapon } from '@/data/weaponData';
+import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, findWeapon, findOption } from '@/data/weaponData';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
 import { getAvailableSkills, getBackgroundSkill, getSkillTypeColor, getAxisColor } from '@/data/skillData';
 
@@ -116,7 +116,7 @@ const INITIAL = {
     stage_plus: [],
     skills: [],
     proficient_languages: [], weak_languages: [],
-    equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '',
+    equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
     fate: '', backstory: '',
     related_anomalies: '', related_characters: '', related_factions: '',
@@ -283,7 +283,43 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             const json = await res.json();
             if (!res.ok) throw new Error(json.error);
 
-            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : 'キャラクターシートを投稿しました！' });
+            // 新規作成時、装備が選択されていたら自動で武器投稿
+            if (!isEdit && form.equipment_name && !form.linked_gear_id) {
+                try {
+                    const isCustom = form.equipment_name === '_custom';
+                    const baseWeapon = isCustom ? null : findWeapon(form.equipment_name);
+                    const actualBaseName = isCustom ? (form.custom_equipment_name || '自由装備') : form.equipment_name;
+                    const optionsData = form.equipment_options.map(name => {
+                        const o = findOption(name);
+                        return o ? { name: o.name, cp: o.cp, resonance: o.resonance, risk: o.risk } : { name, cp: 0, resonance: '', risk: '低' };
+                    });
+                    const baseCp = baseWeapon ? baseWeapon.cp : 0;
+                    const totalCp = baseCp + optionsData.reduce((s, o) => s + o.cp, 0);
+                    const gearPayload = {
+                        gear_name: `【${form.character_name}】の武器`,
+                        category: form.equipment_type,
+                        manufacturer: form.equipment_maker || (baseWeapon ? baseWeapon.maker : ''),
+                        base_name: actualBaseName,
+                        base_cp: baseCp,
+                        slot_count: baseWeapon ? baseWeapon.slot : 0,
+                        options: JSON.stringify(optionsData),
+                        option_count: optionsData.length,
+                        total_cp: totalCp,
+                        risk_level: optionsData.some(o => o.risk === '高') ? '高' : optionsData.some(o => o.risk === '中') ? '中' : '低',
+                        description: form.equipment_detail || '',
+                        visibility: form.visibility || '公開',
+                    };
+                    await fetch('/api/posts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ table: 'gear_posts', data: gearPayload }),
+                    });
+                } catch (gearErr) {
+                    console.warn('武器自動投稿に失敗:', gearErr);
+                }
+            }
+
+            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : 'キャラクターシートを投稿しました！装備も自動投稿されました。' });
             if (!isEdit) setForm(INITIAL);
             setTimeout(() => router.push(`/community/characters/${json.data?.id || editId}/`), 1500);
         } catch (err) {
@@ -739,7 +775,72 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     {form.equipment_name === '_custom' && (
                         <FormInput label="装備名（自由入力）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="装備名" />
                     )}
-                    <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯、搭載オプションなど" />
+                    <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯など" />
+
+                    {/* カスタムオプション選択 */}
+                    <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
+                            カスタムオプション（任意）
+                        </div>
+                        <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                            装備に搭載するカスタムオプションを選択。汎用は全装備共通、専用は装備種別に対応。
+                        </p>
+                        {Object.entries(CUSTOM_OPTIONS).map(([catName, opts]) => {
+                            const isExclusive = catName.endsWith('専用');
+                            const matchType = catName.replace('専用', '');
+                            if (isExclusive && matchType !== form.equipment_type) return null;
+                            return (
+                                <div key={catName} style={{ marginBottom: '12px' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '4px' }}>
+                                        {catName}
+                                    </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {opts.map(opt => {
+                                            const selected = form.equipment_options.includes(opt.name);
+                                            return (
+                                                <button key={opt.name} type="button"
+                                                    onClick={() => {
+                                                        if (selected) {
+                                                            set('equipment_options', form.equipment_options.filter(n => n !== opt.name));
+                                                        } else {
+                                                            set('equipment_options', [...form.equipment_options, opt.name]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: '6px 10px', cursor: 'pointer', transition: 'all 0.2s',
+                                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+                                                        background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
+                                                        color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                                                        fontFamily: 'var(--font-mono)', fontSize: '11px',
+                                                    }}
+                                                    title={`${opt.cp}CP / 修正:${opt.mod} / 共鳴:${opt.resonance} / リスク:${opt.risk}`}
+                                                >
+                                                    {opt.name}
+                                                    <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.7 }}>{opt.cp}CP</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {form.equipment_options.length > 0 && (
+                            <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.15)' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>選択中のオプション</div>
+                                {form.equipment_options.map(name => {
+                                    const o = findOption(name);
+                                    return o ? (
+                                        <div key={name} style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', padding: '2px 0' }}>
+                                            {o.name} — {o.cp}CP / 修正:{o.mod} / 共鳴:{o.resonance} / リスク:{o.risk}
+                                        </div>
+                                    ) : null;
+                                })}
+                                <div style={{ marginTop: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-gold)', fontFamily: 'var(--font-mono)' }}>
+                                    オプション合計: {form.equipment_options.reduce((s, n) => { const o = findOption(n); return s + (o ? o.cp : 0); }, 0)}CP
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* 投稿済み装備の紐づけ */}
                     <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(212, 175, 55, 0.04)', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
@@ -793,6 +894,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
                         let usedCp = 0;
                         let cpSource = '';
+                        const optionsCp = form.equipment_options.reduce((s, n) => { const o = findOption(n); return s + (o ? o.cp : 0); }, 0);
                         const linkedGear = form.linked_gear_id ? myGear.find(g => g.id === form.linked_gear_id) : null;
                         if (linkedGear && linkedGear.total_cp != null) {
                             usedCp = Number(linkedGear.total_cp);
@@ -800,6 +902,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         } else {
                             const selectedWeapon = form.equipment_name && form.equipment_name !== '_custom' ? findWeapon(form.equipment_name) : null;
                             if (selectedWeapon) { usedCp = Number(selectedWeapon.cp || 0); cpSource = selectedWeapon.name; }
+                            usedCp += optionsCp;
+                            if (optionsCp > 0) cpSource += ` +オプション${optionsCp}CP`;
                         }
 
                         const remaining = cpBudget - usedCp;
