@@ -75,7 +75,7 @@ export default function HomePage() {
             </div>
             <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>仮想空間で世界に立つ</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-              VRChat上に構築された世界で、キャラクターとして存在する。セッションやWebゲームの結果がワールドに反映され、物語が進行する。
+              VRChat上に構築された世界で、キャラクターとして存在する。公式キャラクターによるグリーティングやイベントを定期開催予定。参加者には<span className="text-gold">限定称号</span>が付与され、キャラクターシートに刻まれる。
             </p>
           </div>
           <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
@@ -130,6 +130,88 @@ export default function HomePage() {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* 世界の鼓動 — ワールドフィード */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(10, 12, 16, 0.95), rgba(15, 18, 25, 0.95))',
+          border: '1px solid rgba(212, 175, 55, 0.2)',
+          padding: 'var(--space-xl)',
+          marginBottom: 'var(--space-lg)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+            background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
+          }} />
+
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.15em', marginBottom: 'var(--space-md)' }}>
+            ▸ WORLD PULSE — 世界の鼓動
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)' }}>
+            <div style={{ borderLeft: '2px solid rgba(212, 175, 55, 0.3)', paddingLeft: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-xs)' }}>
+                ANOMALY ACTIVITY
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                渋谷区で霊素濃度の上昇が観測されている。祓部・新怪班が監視体制を強化中。
+                <span style={{ color: 'var(--accent-gold)' }}> 怪異発生予報：注意</span>
+              </p>
+            </div>
+            <div style={{ borderLeft: '2px solid rgba(212, 175, 55, 0.3)', paddingLeft: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-xs)' }}>
+                MISSION DISPATCH
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                傭兵組合から新規依頼が2件発行。報酬ランクB。
+                <span style={{ color: 'var(--text-muted)' }}> 詳細は傭兵組合情報板へ</span>
+              </p>
+            </div>
+            <div style={{ borderLeft: '2px solid rgba(212, 175, 55, 0.3)', paddingLeft: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-xs)' }}>
+                COMMUNITY
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                新たな怪異調査書が投稿された。裏路地に潜む異形の報告——信憑性は未確認。
+                <span style={{ color: 'var(--text-muted)' }}> 検証待ち</span>
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.15), transparent)',
+          }} />
+        </div>
+
+        {/* VRグリーティング＆イベント */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{
+            background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)',
+            borderTop: '3px solid var(--accent-gold)',
+          }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              VR GREETING
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>公式キャラに会いに行く</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              祓部の隊員、傭兵のエージェント、裏社会の情報屋——物語の登場人物たちがVRChat上のワールドに常駐。話しかければ世界の裏話が聞けるかもしれない。
+            </p>
+          </div>
+          <div style={{
+            background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)',
+            borderTop: '3px solid #aa44ff',
+          }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#aa44ff', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              VR EVENT
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>イベントに参加する</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              怪異の出現演出や合同討伐ミッションを体験できる定期イベントを開催予定。参加者には<span className="text-gold">限定称号</span>が付与され、キャラクターシートとWebサイトに刻まれる。
+            </p>
           </div>
         </div>
 
