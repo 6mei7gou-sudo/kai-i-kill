@@ -11,7 +11,8 @@
       "Bash(npm install:*)",
       "Bash(npm run:*)",
       "WebFetch(domain:localhost)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }

@@ -188,7 +188,7 @@ export default function QuickstartPage() {
                                     <td>《神域の記憶》— 禁足地データベースへの非公式アクセス。古い怪異の解明難易度−1</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>元傭兵</td>
+                                    <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>鋼の肉体</td>
                                     <td style={{ whiteSpace: 'nowrap' }}>体・疾</td>
                                     <td>《戦場の勘》— 武装型・半装身型装備のCP+4。護衛への初回攻撃に+1</td>
                                 </tr>
@@ -208,7 +208,7 @@ export default function QuickstartPage() {
                                     <td>《バックドア》— NGT魔法判定に+1。独立型装備のCP+3</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>魔法資格持ち</td>
+                                    <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>魔道資格者</td>
                                     <td style={{ whiteSpace: 'nowrap' }}>術・識</td>
                                     <td>《正規詠唱》— 選択した魔法言語の+1修正が拡張。怪異誘発率の改善</td>
                                 </tr>

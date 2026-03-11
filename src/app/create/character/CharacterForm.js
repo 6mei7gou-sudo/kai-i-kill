@@ -29,11 +29,11 @@ const ABILITIES = [
 // 背景（6種）— 2能力値がC昇格 + 背景スキル自動取得
 const BACKGROUNDS = [
     { id: '神社育ち', upgrades: ['rank_shiya', 'rank_kon'], desc: '禁足地のデータベースへのアクセス権。古い怪異の解明鍵①の難易度-1' },
-    { id: '元傭兵', upgrades: ['rank_tai', 'rank_haya'], desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
+    { id: '鋼の肉体', upgrades: ['rank_tai', 'rank_haya'], desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
     { id: '都市伝説研究者', upgrades: ['rank_shiki', 'rank_han'], desc: '調査スペシャル時に解明鍵追加入手の可能性' },
     { id: '元実験体', upgrades: ['rank_kon'], extraUpgrade: 'innate_+1', desc: '魂C昇格＋異能ランク+1。渇望の覚醒ギフトを1段階低コストで使用可能' },
     { id: 'ハッカー上がり', upgrades: ['rank_shiki', 'rank_haya'], desc: 'NGT魔法判定+1。独立型装備のCP+3' },
-    { id: '魔法資格持ち', upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
+    { id: '魔道資格者', upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
 ];
 
 // 配属（所属に連動）— 1能力値がB昇格 + 配属スキル解放
@@ -786,7 +786,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     {/* CP予算 */}
                     {(() => {
                         let cpBudget = 10;
-                        if (form.background === '元傭兵' && (form.equipment_type === '武装型' || form.equipment_type === '半装身型')) cpBudget += 4;
+                        if (form.background === '鋼の肉体' && (form.equipment_type === '武装型' || form.equipment_type === '半装身型')) cpBudget += 4;
                         if (form.background === 'ハッカー上がり' && form.equipment_type === '独立型') cpBudget += 3;
 
                         let usedCp = 0;

@@ -367,7 +367,7 @@ export default function CharacterDetail({ id }) {
                     {/* CP予算 */}
                     {(() => {
                         let cpBudget = 10;
-                        if (e.background === '元傭兵' && (e.equipment_type === '武装型' || e.equipment_type === '半装身型')) cpBudget += 4;
+                        if (e.background === '鋼の肉体' && (e.equipment_type === '武装型' || e.equipment_type === '半装身型')) cpBudget += 4;
                         if (e.background === 'ハッカー上がり' && e.equipment_type === '独立型') cpBudget += 3;
                         // v3互換
                         if (e.background === '技術畑') cpBudget += 2;

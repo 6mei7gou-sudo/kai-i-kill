@@ -55,7 +55,7 @@ ALTER TABLE character_sheets
 ADD CONSTRAINT character_sheets_background_v6_check
 CHECK (background IS NULL OR background IN (
     -- v4.0 新背景
-    '神社育ち', '元傭兵', '都市伝説研究者', '元実験体', 'ハッカー上がり', '魔法資格持ち',
+    '神社育ち', '鋼の肉体', '都市伝説研究者', '元実験体', 'ハッカー上がり', '魔道資格者',
     -- v3.0 旧背景（既存データ互換）
     '鋼の肉体', '学者肌', '霊媒体質', '技術畑', 'ストリート上がり', '信仰者'
 ));
