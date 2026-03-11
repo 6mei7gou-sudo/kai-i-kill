@@ -432,6 +432,17 @@ h6 {
 
 .card-grid>.card {
   border: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-grid>.card .card__desc {
+  flex: 1;
+}
+
+.card-grid>a {
+  display: flex;
 }
 
 /* --- 2カラムグリッド --- */
