@@ -107,47 +107,96 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* TRPG ↔ Webゲーム コンバート */}
+        {/* リソースシステム */}
         <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: '1px solid var(--accent-gold-border)', marginBottom: 'var(--space-lg)' }}>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-sm)' }}>
-            RESOURCE CONVERSION — TRPG ⇄ WEB GAME
+            RESOURCE SYSTEM — ACCOUNT ECONOMY
           </div>
-          <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-md)' }}>リソースは非同期でコンバートできる</h3>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-md)' }}>ゲームリソースで世界を動かす</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
-            TRPGセッションで得た経験・装備・実績はWebゲームに持ち込める。Webゲームで蓄積した調査結果・人脈・資金はTRPGセッションに反映される。二つの遊び方は同じキャラクター、同じ世界を共有している。
+            Webゲームで稼いだリソース（通貨）は<span className="text-gold">アカウントごとに蓄積</span>される。武器の投稿、装備の改造、TRPGで作った武器の展示——すべてにゲームリソースが絡む。遊ぶほどできることが増えていく。
           </p>
-          <div className="content-body">
+          <div className="content-body" style={{ marginBottom: 'var(--space-md)' }}>
             <table>
               <thead>
                 <tr>
-                  <th>リソース</th>
-                  <th>TRPG → Webゲーム</th>
-                  <th>Webゲーム → TRPG</th>
+                  <th>操作</th>
+                  <th>コスト</th>
+                  <th>説明</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>キャラクター</td>
-                  <td>セッション後のステータスがWebゲームに同期</td>
-                  <td>Webゲームでの成長・変化がセッション開始時に反映</td>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>キャラクター作成</td>
+                  <td style={{ color: 'var(--accent-gold)', whiteSpace: 'nowrap' }}>無料</td>
+                  <td>作成時に武器を<span className="text-gold">1つ無料で登録</span>できる</td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>装備・資金</td>
-                  <td>入手した装備・報酬がWebゲーム上で管理される</td>
-                  <td>Webゲームで購入・改造した装備をセッションに持ち込み</td>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>武器の追加投稿</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>リソース必要</td>
+                  <td>2本目以降の武器登録にはゲームリソースを消費する</td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>情報・手がかり</td>
-                  <td>セッション中に得た怪異情報がDB化</td>
-                  <td>Webゲームの調査行動で得た手がかりをセッションに使用</td>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>装備の改造</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>リソース必要</td>
+                  <td>素材＋改造費用をゲームリソースで支払う</td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 700, color: 'var(--text-heading)' }}>実績・ランク</td>
-                  <td>討伐実績が傭兵ランク・祓部昇進に反映</td>
-                  <td>Webゲームでの依頼達成もランク評価の対象</td>
+                  <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>TRPG武器の展示</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>リソース必要</td>
+                  <td>TRPGセッションで作った武器をWeb上に公開・展示する</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+            <div style={{ borderLeft: '2px solid var(--accent-gold)', paddingLeft: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-xs)' }}>
+                TRPG → Web
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                セッションで得た装備・実績・怪異情報はWebに同期。TRPGで作った武器の展示にはリソースが必要。
+              </p>
+            </div>
+            <div style={{ borderLeft: '2px solid var(--accent-gold)', paddingLeft: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-xs)' }}>
+                Web → TRPG
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                Webで購入・改造した装備や調査で得た手がかりをTRPGセッションに持ち込める。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 称号・シナリオ */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', borderLeft: '3px solid var(--accent-gold)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              WEB EXCLUSIVE TITLE
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>Web限定称号</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              Webゲームの特定条件を達成すると<span className="text-gold">Web限定の称号</span>を獲得できる。依頼達成数、討伐実績、コミュニティ貢献——遊び方の数だけ称号がある。
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', borderLeft: '3px solid #cc4444' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#cc4444', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              OFFICIAL SCENARIO TITLE
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>公式シナリオ限定称号</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              公式シナリオをクリアした者だけが手に入れる<span style={{ color: '#cc4444' }}>特別な称号</span>。物語の核心に触れた証として、キャラクターシートに永久に刻まれる。
+            </p>
+          </div>
+          <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', borderLeft: '3px solid #aa44ff' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#aa44ff', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
+              WEB SCENARIO
+            </div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>公式Webシナリオ</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+              公式シナリオを購入すると、そのシナリオに連動した<span style={{ color: '#aa44ff' }}>Webシナリオ</span>にも参加可能に。TRPGの卓を離れても、物語の続きをWebで体験できる。
+            </p>
           </div>
         </div>
 
