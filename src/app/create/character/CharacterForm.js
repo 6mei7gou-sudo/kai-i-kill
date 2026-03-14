@@ -309,11 +309,24 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         summary: form.equipment_detail || '',
                         visibility: form.visibility || '公開',
                     };
-                    await fetch('/api/posts', {
+                    const gearRes = await fetch('/api/posts', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ table: 'gear_posts', data: gearPayload }),
                     });
+                    const gearJson = await gearRes.json();
+                    // 作成した武器をキャラクターに紐づけ
+                    if (gearRes.ok && gearJson.data?.id && json.data?.id) {
+                        await fetch('/api/posts', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                table: 'character_sheets',
+                                id: json.data.id,
+                                data: { linked_gear_id: gearJson.data.id },
+                            }),
+                        });
+                    }
                 } catch (gearErr) {
                     console.warn('武器自動投稿に失敗:', gearErr);
                 }

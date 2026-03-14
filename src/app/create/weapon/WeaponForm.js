@@ -51,7 +51,7 @@ const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非�
 // 初期CP基本値
 const BASE_CP_BUDGET = 10;
 
-export default function WeaponForm({ editId = null, initialData = null }) {
+export default function WeaponForm({ editId = null, initialData = null, characterBonus = null }) {
     const { user } = useUser();
     const router = useRouter();
     const isEdit = !!editId;
@@ -334,14 +334,24 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                     </div>
                     {/* CP予算バー */}
                     {(() => {
+                        const bonus = characterBonus?.bonusCp || 0;
+                        const budget = BASE_CP_BUDGET + bonus;
                         const totalCp = Number(form.base_cp || 0) + form.options.reduce((s, o) => s + Number(o.cp || 0), 0);
-                        const remaining = BASE_CP_BUDGET - totalCp;
-                        const pct = Math.min(100, Math.max(0, (totalCp / BASE_CP_BUDGET) * 100));
+                        const remaining = budget - totalCp;
+                        const pct = Math.min(100, Math.max(0, (totalCp / budget) * 100));
                         const barColor = remaining < 0 ? '#ff4444' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
                         return (
                             <div style={{ marginTop: 'var(--space-md)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
+                                {characterBonus && (
+                                    <div style={{ fontSize: '11px', color: 'var(--accent-cyber)', marginBottom: '8px', fontFamily: 'var(--font-mono)', padding: '6px 8px', background: 'rgba(100,200,255,0.06)', border: '1px solid rgba(100,200,255,0.15)' }}>
+                                        連携キャラ: {characterBonus.characterName}
+                                        {characterBonus.bonusDetail && <span style={{ marginLeft: '8px', color: 'var(--accent-gold)' }}>（{characterBonus.bonusDetail}）</span>}
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>CP予算（初期{BASE_CP_BUDGET}CP）</span>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                                        CP予算（基本{BASE_CP_BUDGET}{bonus > 0 ? ` +補正${bonus}` : ''}＝{budget}CP）
+                                    </span>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
                                         {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過！`}
                                     </span>
@@ -349,9 +359,11 @@ export default function WeaponForm({ editId = null, initialData = null }) {
                                 <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{ height: '100%', width: `${pct}%`, background: barColor, transition: 'width 0.3s, background 0.3s', borderRadius: '4px' }} />
                                 </div>
-                                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
-                                    ※ 背景「技術畑」選択時はCP+2。傭兵系統「技術屋」選択時はCP+2。キャラシート側で反映されます。
-                                </div>
+                                {!characterBonus && (
+                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                                        ※ キャラクターに連携すると、背景による補正CPが自動反映されます。
+                                    </div>
+                                )}
                             </div>
                         );
                     })()}
