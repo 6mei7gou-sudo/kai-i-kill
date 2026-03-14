@@ -302,11 +302,11 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         base_name: actualBaseName,
                         base_cp: baseCp,
                         slot_count: baseWeapon ? baseWeapon.slot : 0,
-                        options: JSON.stringify(optionsData),
+                        options: optionsData,
                         option_count: optionsData.length,
                         total_cp: totalCp,
                         risk_level: optionsData.some(o => o.risk === '高') ? '高' : optionsData.some(o => o.risk === '中') ? '中' : '低',
-                        description: form.equipment_detail || '',
+                        summary: form.equipment_detail || '',
                         visibility: form.visibility || '公開',
                     };
                     await fetch('/api/posts', {
