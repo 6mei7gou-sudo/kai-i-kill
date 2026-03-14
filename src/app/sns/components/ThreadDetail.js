@@ -33,18 +33,33 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
   const [character, setCharacter] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const channelRef = useRef(null);
+  const [locked, setLocked] = useState(false);
+  const [passwordMode, setPasswordMode] = useState('none');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
 
-  useEffect(() => {
+  const fetchThread = (password) => {
     setLoading(true);
-    fetch(`/api/sns/threads/${threadId}`)
+    const url = new URL(`/api/sns/threads/${threadId}`, window.location.origin);
+    if (password) url.searchParams.set('password', password);
+
+    fetch(url.toString())
       .then((res) => res.json())
       .then((data) => {
         const d = data.data || data;
         setThread(d.thread || d);
         setReplies(d.replies || []);
+        setLocked(d.locked || false);
+        setPasswordMode(d.password_mode || 'none');
+        if (!d.locked) setAuthenticated(true);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchThread();
   }, [threadId]);
 
   // Realtime subscription for new replies
@@ -90,6 +105,7 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
           display_icon: character.image_url || null,
           affiliation: character.affiliation,
           content: replyContent.trim(),
+          password: passwordInput || undefined,
         }),
       });
 
@@ -118,11 +134,81 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
     );
   }
 
+  // entry モードでロック中: パスワード入力ゲート
+  if (locked && passwordMode === 'entry') {
+    return (
+      <div>
+        <div className="thread-detail__header">
+          <div className="thread-detail__title">🔒 {thread.title}</div>
+          <div className="thread-list__meta">
+            <span>{thread.display_name || '匿名'}</span>
+            <span>{formatRelativeTime(thread.created_at)}</span>
+          </div>
+        </div>
+        <div style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
+            このスレッドは入場制限がかかっています。パスワードを入力してください。
+          </p>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', maxWidth: 400, margin: '0 auto' }}>
+            <input
+              type="password"
+              placeholder="パスワード"
+              value={passwordInput}
+              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
+              className="chat-input__field"
+              style={{ flex: 1 }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && passwordInput) {
+                  fetchThread(passwordInput);
+                }
+              }}
+            />
+            <button
+              className="post-composer__submit"
+              disabled={!passwordInput}
+              onClick={() => {
+                fetchThread(passwordInput);
+                setTimeout(() => {
+                  if (locked) setPasswordError('パスワードが違います');
+                }, 1000);
+              }}
+            >
+              入場
+            </button>
+          </div>
+          {passwordError && (
+            <p style={{ color: 'var(--accent-red)', marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)' }}>
+              {passwordError}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // write モードの認証ハンドラー
+  const handlePasswordAuth = () => {
+    if (!passwordInput) return;
+    fetch(`/api/sns/threads/${threadId}?password=${encodeURIComponent(passwordInput)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data && !data.data.locked) {
+          setAuthenticated(true);
+          setPasswordError('');
+        } else {
+          setPasswordError('パスワードが違います');
+        }
+      });
+  };
+
   return (
     <div>
       {/* Thread header */}
       <div className="thread-detail__header">
-        <div className="thread-detail__title">{thread.title}</div>
+        <div className="thread-detail__title">
+          {passwordMode === 'write' && <span title="書込制限">🔐 </span>}
+          {thread.title}
+        </div>
         <div className="thread-list__meta">
           {thread.category && (
             <span className="thread-list__category">
@@ -172,23 +258,56 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
       {/* Reply form */}
       {isSignedIn && (
         <div style={{ padding: 'var(--space-lg)', borderTop: 'var(--border-subtle)' }}>
-          <CharacterSelector value={character} onChange={setCharacter} />
-          <textarea
-            className="post-composer__textarea"
-            placeholder="返信を入力..."
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            style={{ marginTop: 'var(--space-sm)' }}
-          />
-          <div style={{ marginTop: 'var(--space-sm)', textAlign: 'right' }}>
-            <button
-              className="post-composer__submit"
-              disabled={!replyContent.trim() || !character || submitting}
-              onClick={handleReply}
-            >
-              {submitting ? '送信中...' : '返信'}
-            </button>
-          </div>
+          {passwordMode === 'write' && !authenticated ? (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-sm)', fontSize: 'var(--font-size-sm)' }}>
+                書き込みにはパスワードが必要です
+              </p>
+              <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', maxWidth: 400, margin: '0 auto' }}>
+                <input
+                  type="password"
+                  placeholder="パスワード"
+                  value={passwordInput}
+                  onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
+                  className="chat-input__field"
+                  style={{ flex: 1 }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handlePasswordAuth(); }}
+                />
+                <button
+                  className="post-composer__submit"
+                  disabled={!passwordInput}
+                  onClick={handlePasswordAuth}
+                >
+                  認証
+                </button>
+              </div>
+              {passwordError && (
+                <p style={{ color: 'var(--accent-red)', marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)' }}>
+                  {passwordError}
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <CharacterSelector value={character} onChange={setCharacter} />
+              <textarea
+                className="post-composer__textarea"
+                placeholder="返信を入力..."
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                style={{ marginTop: 'var(--space-sm)' }}
+              />
+              <div style={{ marginTop: 'var(--space-sm)', textAlign: 'right' }}>
+                <button
+                  className="post-composer__submit"
+                  disabled={!replyContent.trim() || !character || submitting}
+                  onClick={handleReply}
+                >
+                  {submitting ? '送信中...' : '返信'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

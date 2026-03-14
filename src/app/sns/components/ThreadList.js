@@ -33,6 +33,8 @@ export default function ThreadList({ layer, basePath }) {
   const [formTitle, setFormTitle] = useState('');
   const [formContent, setFormContent] = useState('');
   const [formCategory, setFormCategory] = useState('general');
+  const [formPassword, setFormPassword] = useState('');
+  const [formPasswordMode, setFormPasswordMode] = useState('none');
   const [character, setCharacter] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -71,6 +73,8 @@ export default function ThreadList({ layer, basePath }) {
           content: formContent.trim(),
           category: formCategory,
           layer,
+          password: formPassword || undefined,
+          password_mode: formPasswordMode !== 'none' ? formPasswordMode : undefined,
         }),
       });
 
@@ -79,6 +83,8 @@ export default function ThreadList({ layer, basePath }) {
         setThreads((prev) => [thread, ...prev]);
         setFormTitle('');
         setFormContent('');
+        setFormPassword('');
+        setFormPasswordMode('none');
         setShowForm(false);
       }
     } catch {
@@ -143,6 +149,28 @@ export default function ThreadList({ layer, basePath }) {
                 value={formContent}
                 onChange={(e) => setFormContent(e.target.value)}
               />
+              <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                <select
+                  value={formPasswordMode}
+                  onChange={(e) => setFormPasswordMode(e.target.value)}
+                  className="chat-input__field"
+                  style={{ flex: '0 0 auto', width: 'auto' }}
+                >
+                  <option value="none">パスワードなし</option>
+                  <option value="entry">入場制限（閲覧も制限）</option>
+                  <option value="write">書込制限（閲覧は自由）</option>
+                </select>
+                {formPasswordMode !== 'none' && (
+                  <input
+                    type="text"
+                    placeholder="パスワード"
+                    value={formPassword}
+                    onChange={(e) => setFormPassword(e.target.value)}
+                    className="chat-input__field"
+                    style={{ flex: 1 }}
+                  />
+                )}
+              </div>
               <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-sm)' }}>
                 <button
                   className="post-composer__submit"
@@ -181,6 +209,8 @@ export default function ThreadList({ layer, basePath }) {
           >
             <div className="thread-list__title">
               {thread.is_pinned && <span className="thread-list__pinned">📌 </span>}
+              {thread.password_mode === 'entry' && <span title="入場制限">🔒 </span>}
+              {thread.password_mode === 'write' && <span title="書込制限">🔐 </span>}
               {thread.title}
             </div>
             <div className="thread-list__meta">

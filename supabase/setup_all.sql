@@ -491,9 +491,25 @@ CREATE TABLE IF NOT EXISTS sns_threads (
   is_pinned BOOLEAN DEFAULT FALSE,
   reply_count INTEGER DEFAULT 0,
   last_replied_at TIMESTAMPTZ DEFAULT now(),
+  password_hash TEXT,
+  password_mode TEXT DEFAULT 'none',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- パスワード関連カラム追加（既存テーブル用）
+ALTER TABLE sns_threads ADD COLUMN IF NOT EXISTS password_hash TEXT;
+ALTER TABLE sns_threads ADD COLUMN IF NOT EXISTS password_mode TEXT DEFAULT 'none';
+
+-- password_mode CHECK制約（既存を削除してから再作成）
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'sns_threads'::regclass AND contype = 'c' AND pg_get_constraintdef(oid) LIKE '%password_mode%') LOOP
+    EXECUTE 'ALTER TABLE sns_threads DROP CONSTRAINT ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+ALTER TABLE sns_threads ADD CONSTRAINT sns_threads_password_mode_check
+CHECK (password_mode IS NULL OR password_mode IN ('none', 'entry', 'write'));
+
 CREATE INDEX IF NOT EXISTS idx_sns_threads_layer ON sns_threads(layer, last_replied_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sns_threads_category ON sns_threads(category);
 

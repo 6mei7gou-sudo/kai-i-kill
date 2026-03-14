@@ -2,11 +2,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHash } from 'crypto';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
+
+function hashPassword(password) {
+    return createHash('sha256').update(password).digest('hex');
+}
 
 // GET: スレッド一覧（ピン留め優先・最終返信順）
 export async function GET(request) {
@@ -37,9 +42,12 @@ export async function GET(request) {
         const { data, error } = await query;
         if (error) throw error;
 
-        const nextCursor = data.length === limit ? data[data.length - 1].last_replied_at : null;
+        // password_hash をクライアントに返さない
+        const safeData = data.map(({ password_hash, ...rest }) => rest);
 
-        return NextResponse.json({ ok: true, data, nextCursor });
+        const nextCursor = safeData.length === limit ? safeData[safeData.length - 1].last_replied_at : null;
+
+        return NextResponse.json({ ok: true, data: safeData, nextCursor });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
@@ -56,7 +64,8 @@ export async function POST(request) {
         const body = await request.json();
         const {
             character_id, layer, category, title, content,
-            display_name, display_icon, affiliation
+            display_name, display_icon, affiliation,
+            password, password_mode
         } = body;
 
         if (!title || !content || !layer) {
@@ -74,6 +83,8 @@ export async function POST(request) {
             display_icon,
             affiliation,
             last_replied_at: new Date().toISOString(),
+            password_mode: (password && password_mode) ? password_mode : 'none',
+            password_hash: password ? hashPassword(password) : null,
         };
 
         const { data, error } = await supabase
@@ -83,7 +94,10 @@ export async function POST(request) {
             .single();
 
         if (error) throw error;
-        return NextResponse.json({ ok: true, data });
+
+        // password_hash をクライアントに返さない
+        const { password_hash, ...safeData } = data;
+        return NextResponse.json({ ok: true, data: safeData });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
