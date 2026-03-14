@@ -1,6 +1,6 @@
 -- =====================================================
 -- KAI-I//KILL 全テーブル一括セットアップ
--- 新規環境でこのファイルだけ実行すれば全テーブルが構築される
+-- 既存環境でも新規環境でも安全に実行できる
 -- Supabase SQL Editorで実行してください
 -- 最終更新: 2026-03-14
 -- =====================================================
@@ -13,73 +13,63 @@ CREATE TABLE IF NOT EXISTS anomaly_drafts (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   user_id TEXT,
-
-  -- メタ情報
   author_name TEXT NOT NULL DEFAULT '名無しの討伐者',
   visibility TEXT DEFAULT '公開' CHECK (visibility IN ('公開', '限定')),
   status TEXT DEFAULT '未確認' CHECK (status IN ('未確認', '調査中', '目撃多数', '沈静化', '再燃')),
-
-  -- 画像
   thumbnail_url TEXT DEFAULT '',
   icon_url TEXT DEFAULT '',
-
-  -- 公認ステータス
   approved_status TEXT DEFAULT 'pending' CHECK (approved_status IN ('pending','approved','rejected')),
   approved_at TIMESTAMPTZ,
   approved_by TEXT,
-
-  -- 暫定分類
   grade TEXT DEFAULT '不明',
   threat_type TEXT DEFAULT '不明',
   tags TEXT[] DEFAULT '{}',
   influence_range TEXT DEFAULT '不明',
   damage_type TEXT DEFAULT '不明',
-
-  -- 概要
   anomaly_name TEXT NOT NULL,
   summary TEXT,
   typical_pattern TEXT,
   omen TEXT,
   worst_case TEXT,
-
-  -- 発生源・拡散
   origin TEXT,
   spread_route TEXT,
   distorted_countermeasure BOOLEAN DEFAULT false,
   original_countermeasure TEXT,
   current_countermeasure TEXT,
-
-  -- 核の推定
   core_type TEXT DEFAULT '不明',
   core_candidates JSONB DEFAULT '[]',
   core_behavior TEXT DEFAULT '不明',
   core_destroyable TEXT DEFAULT '不明',
-
-  -- ルール推定
   triggers JSONB DEFAULT '[]',
   taboos JSONB DEFAULT '[]',
   loopholes TEXT,
   violation_early TEXT,
   violation_mid TEXT,
   violation_late TEXT,
-
-  -- 観測記録
   testimonies JSONB DEFAULT '[]',
   media_urls JSONB DEFAULT '[]',
-
-  -- 暫定対処
   avoidance TEXT,
   secondary_prevention TEXT,
   investigation_notes TEXT,
-
-  -- 関連リンク
   related_anomalies TEXT,
   related_characters TEXT,
   related_factions TEXT,
   related_terms TEXT
 );
 
+-- カラム追加（既存テーブルに不足している場合のみ）
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT '';
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS icon_url TEXT DEFAULT '';
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS approved_status TEXT DEFAULT 'pending';
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS approved_by TEXT;
+
 ALTER TABLE anomaly_drafts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read anomaly_drafts" ON anomaly_drafts;
+DROP POLICY IF EXISTS "Anyone can insert anomaly_drafts" ON anomaly_drafts;
+DROP POLICY IF EXISTS "Owner can update anomaly_drafts" ON anomaly_drafts;
+DROP POLICY IF EXISTS "Owner can delete anomaly_drafts" ON anomaly_drafts;
 CREATE POLICY "Anyone can read anomaly_drafts" ON anomaly_drafts FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert anomaly_drafts" ON anomaly_drafts FOR INSERT WITH CHECK (true);
 CREATE POLICY "Owner can update anomaly_drafts" ON anomaly_drafts FOR UPDATE USING (true) WITH CHECK (true);
@@ -93,38 +83,26 @@ CREATE TABLE IF NOT EXISTS gear_posts (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   user_id TEXT,
-
-  -- メタ情報
   author_name TEXT NOT NULL DEFAULT '名無しの討伐者',
   visibility TEXT DEFAULT '公開' CHECK (visibility IN ('公開', '限定')),
   image_url TEXT,
   video_url TEXT,
   usage_url TEXT,
-
-  -- 画像
   thumbnail_url TEXT DEFAULT '',
   icon_url TEXT DEFAULT '',
   image_urls JSONB DEFAULT '["","",""]'::jsonb,
-
-  -- 公認ステータス
   approved_status TEXT DEFAULT 'pending' CHECK (approved_status IN ('pending','approved','rejected')),
   approved_at TIMESTAMPTZ,
   approved_by TEXT,
-
-  -- 装備カテゴリ
   gear_name TEXT NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型')),
   body_part TEXT,
   manufacturer TEXT DEFAULT 'その他',
   affiliation_fit TEXT DEFAULT 'どれでも',
-
-  -- 概要
   summary TEXT,
   intended_role TEXT[] DEFAULT '{}',
   strengths JSONB DEFAULT '[]',
   weaknesses JSONB DEFAULT '[]',
-
-  -- ベース装備
   base_name TEXT,
   quality TEXT DEFAULT '標準' CHECK (quality IN ('標準', '高品質', '試作品', '特注')),
   base_cp INT DEFAULT 0,
@@ -132,39 +110,41 @@ CREATE TABLE IF NOT EXISTS gear_posts (
   aptitude_dependency TEXT DEFAULT '低',
   base_modifier TEXT,
   additional_traits TEXT,
-
-  -- カスタム構成
   options JSONB DEFAULT '[]',
   total_cp INT DEFAULT 0,
   option_count INT DEFAULT 0,
   slot_exceeded BOOLEAN DEFAULT false,
-
-  -- 怪異発生リスク
   risk_level TEXT DEFAULT '低' CHECK (risk_level IN ('低', '中', '高', '非常に高')),
   possible_anomalies TEXT,
-
-  -- 共鳴・侵食
   resonance_tendency TEXT,
   resonance_trigger TEXT,
   erosion_risk TEXT DEFAULT 'なし',
   erosion_signs TEXT,
-
-  -- VRC改変情報
   base_product_url TEXT,
   asset_urls JSONB DEFAULT '[]',
   modification_notes TEXT,
   license_notes TEXT,
   credit TEXT,
   redistributable TEXT DEFAULT '不可',
-
-  -- 関連リンク
   related_characters TEXT,
   related_anomalies TEXT,
   related_factions TEXT,
   related_terms TEXT
 );
 
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT '';
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS icon_url TEXT DEFAULT '';
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT '["","",""]'::jsonb;
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS approved_status TEXT DEFAULT 'pending';
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS approved_by TEXT;
+
 ALTER TABLE gear_posts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read gear_posts" ON gear_posts;
+DROP POLICY IF EXISTS "Anyone can insert gear_posts" ON gear_posts;
+DROP POLICY IF EXISTS "Owner can update gear_posts" ON gear_posts;
+DROP POLICY IF EXISTS "Owner can delete gear_posts" ON gear_posts;
 CREATE POLICY "Anyone can read gear_posts" ON gear_posts FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert gear_posts" ON gear_posts FOR INSERT WITH CHECK (true);
 CREATE POLICY "Owner can update gear_posts" ON gear_posts FOR UPDATE USING (true) WITH CHECK (true);
@@ -178,26 +158,16 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   user_id TEXT,
-
-  -- メタ情報
   author_name TEXT NOT NULL DEFAULT '名無しの討伐者',
   visibility TEXT DEFAULT '公開' CHECK (visibility IN ('公開', '限定')),
   image_url TEXT,
-
-  -- 画像
   thumbnail_url TEXT DEFAULT '',
   icon_url TEXT DEFAULT '',
   image_urls JSONB DEFAULT '["","",""]'::jsonb,
-
-  -- 公認ステータス
-  approved_status TEXT DEFAULT 'pending' CHECK (approved_status IN ('pending','approved','rejected')),
+  approved_status TEXT DEFAULT 'pending',
   approved_at TIMESTAMPTZ,
   approved_by TEXT,
-
-  -- 称号
   active_title TEXT,
-
-  -- 基本情報
   character_name TEXT NOT NULL,
   title TEXT,
   age TEXT,
@@ -205,16 +175,10 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   affiliation TEXT NOT NULL CHECK (affiliation IN ('祓部', '傭兵', '無所属')),
   sub_affiliation TEXT,
   awakening TEXT NOT NULL CHECK (awakening IN ('先天覚醒型', 'ショック覚醒型', '実験覚醒型', '接触覚醒型')),
-
-  -- 背景・クラス・ギフト
   background TEXT,
   class TEXT,
   gift TEXT,
-
-  -- 武器型
   weapon_type TEXT,
-
-  -- 7能力値ランク（D,C,B,A,S）
   rank_tai TEXT NOT NULL DEFAULT 'D' CHECK (rank_tai IN ('D','C','B','A','S')),
   rank_haya TEXT NOT NULL DEFAULT 'D' CHECK (rank_haya IN ('D','C','B','A','S')),
   rank_shiki TEXT NOT NULL DEFAULT 'D' CHECK (rank_shiki IN ('D','C','B','A','S')),
@@ -222,52 +186,77 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   rank_shiya TEXT NOT NULL DEFAULT 'D' CHECK (rank_shiya IN ('D','C','B','A','S')),
   rank_jutsu TEXT NOT NULL DEFAULT 'D' CHECK (rank_jutsu IN ('D','C','B','A','S')),
   rank_kon TEXT NOT NULL DEFAULT 'D' CHECK (rank_kon IN ('D','C','B','A','S')),
-
-  -- 得意/苦手言語（配列型）
   proficient_languages TEXT[] DEFAULT '{}',
   weak_languages TEXT[] DEFAULT '{}',
-
-  -- スキル・段階調整
   skills JSONB DEFAULT '[]'::JSONB,
   stage_plus JSONB DEFAULT '[]'::JSONB,
-
-  -- 装備
   equipment_type TEXT CHECK (equipment_type IN ('武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型')),
   equipment_name TEXT,
   equipment_maker TEXT,
   equipment_detail TEXT,
   equipment_options JSONB DEFAULT '[]'::JSONB,
-  linked_gear_id UUID REFERENCES gear_posts(id) ON DELETE SET NULL,
-
-  -- サイバネティクス
   cyber_grade TEXT DEFAULT 'none' CHECK (cyber_grade IN ('none','I','II','III')),
   cybernetics JSONB DEFAULT '[]',
-
-  -- 侵食率・信念
   erosion_rate INT DEFAULT 0 CHECK (erosion_rate BETWEEN 0 AND 100),
   erosion_note TEXT,
   belief_points INT DEFAULT 5 CHECK (belief_points BETWEEN 0 AND 10),
-
-  -- 因縁・バックストーリー
   fate TEXT,
   backstory TEXT,
-
-  -- 関連リンク
   related_anomalies TEXT,
   related_characters TEXT,
   related_factions TEXT
 );
 
--- CHECK制約（背景・配属は旧値も許容）
-ALTER TABLE character_sheets
-ADD CONSTRAINT character_sheets_background_check
+-- カラム追加（既存テーブルに不足している場合のみ）
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT '';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS icon_url TEXT DEFAULT '';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS image_urls JSONB DEFAULT '["","",""]'::jsonb;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS approved_status TEXT DEFAULT 'pending';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS approved_by TEXT;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS active_title TEXT;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS sub_affiliation TEXT;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS gift TEXT;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS cyber_grade TEXT DEFAULT 'none';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS cybernetics JSONB DEFAULT '[]';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS linked_gear_id UUID;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS weapon_type TEXT;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS skills JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS stage_plus JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS equipment_options JSONB DEFAULT '[]'::JSONB;
+
+-- linked_gear_id の外部キー（存在しなければ追加）
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'character_sheets'::regclass
+    AND confrelid = 'gear_posts'::regclass
+  ) THEN
+    ALTER TABLE character_sheets
+      ADD CONSTRAINT character_sheets_linked_gear_id_fkey
+      FOREIGN KEY (linked_gear_id) REFERENCES gear_posts(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+
+-- CHECK制約（既存を削除してから再作成）
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'character_sheets'::regclass AND contype = 'c' AND pg_get_constraintdef(oid) LIKE '%background%') LOOP
+    EXECUTE 'ALTER TABLE character_sheets DROP CONSTRAINT ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+ALTER TABLE character_sheets ADD CONSTRAINT character_sheets_background_check
 CHECK (background IS NULL OR background IN (
   '神社育ち', '鋼の肉体', '都市伝説研究者', '元実験体', 'ハッカー上がり', '魔道資格者',
   '学者肌', '霊媒体質', '技術畑', 'ストリート上がり', '信仰者'
 ));
 
-ALTER TABLE character_sheets
-ADD CONSTRAINT character_sheets_sub_affiliation_check
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'character_sheets'::regclass AND contype = 'c' AND pg_get_constraintdef(oid) LIKE '%sub_affiliation%') LOOP
+    EXECUTE 'ALTER TABLE character_sheets DROP CONSTRAINT ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+ALTER TABLE character_sheets ADD CONSTRAINT character_sheets_sub_affiliation_check
 CHECK (sub_affiliation IS NULL OR sub_affiliation IN (
   '古怪班', '新怪班', '封印班', '機動班',
   '突撃型', '偵察型', '技術型', '護衛型',
@@ -276,18 +265,31 @@ CHECK (sub_affiliation IS NULL OR sub_affiliation IN (
   '路地裏の犬', 'はぐれ狼', '小さな群れ', '脱走兵'
 ));
 
-ALTER TABLE character_sheets
-ADD CONSTRAINT character_sheets_weapon_type_check
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'character_sheets'::regclass AND contype = 'c' AND pg_get_constraintdef(oid) LIKE '%weapon_type%') LOOP
+    EXECUTE 'ALTER TABLE character_sheets DROP CONSTRAINT ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
+ALTER TABLE character_sheets ADD CONSTRAINT character_sheets_weapon_type_check
 CHECK (weapon_type IS NULL OR weapon_type IN ('斬撃型', '打撃型', '射撃型', '魔導型', '体術型'));
+
+DO $$ DECLARE r RECORD; BEGIN
+  FOR r IN (SELECT conname FROM pg_constraint WHERE conrelid = 'character_sheets'::regclass AND contype = 'c' AND pg_get_constraintdef(oid) LIKE '%class%') LOOP
+    EXECUTE 'ALTER TABLE character_sheets DROP CONSTRAINT ' || quote_ident(r.conname);
+  END LOOP;
+END $$;
 
 -- RLS
 ALTER TABLE character_sheets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read character_sheets" ON character_sheets;
+DROP POLICY IF EXISTS "Anyone can insert character_sheets" ON character_sheets;
+DROP POLICY IF EXISTS "Owner can update character_sheets" ON character_sheets;
+DROP POLICY IF EXISTS "Owner can delete character_sheets" ON character_sheets;
 CREATE POLICY "Anyone can read character_sheets" ON character_sheets FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert character_sheets" ON character_sheets FOR INSERT WITH CHECK (true);
 CREATE POLICY "Owner can update character_sheets" ON character_sheets FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Owner can delete character_sheets" ON character_sheets FOR DELETE USING (true);
 
--- インデックス
 CREATE INDEX IF NOT EXISTS idx_character_sheets_weapon_type ON character_sheets(weapon_type);
 
 -- =====================================================
@@ -306,10 +308,12 @@ CREATE TABLE IF NOT EXISTS news_posts (
 );
 
 ALTER TABLE news_posts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read published news" ON news_posts;
+DROP POLICY IF EXISTS "Admins can do anything with news" ON news_posts;
 CREATE POLICY "Anyone can read published news" ON news_posts FOR SELECT USING (published = true);
 CREATE POLICY "Admins can do anything with news" ON news_posts FOR ALL USING (true) WITH CHECK (true);
-CREATE INDEX idx_news_posts_category ON news_posts (category);
-CREATE INDEX idx_news_posts_created_at ON news_posts (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_news_posts_category ON news_posts (category);
+CREATE INDEX IF NOT EXISTS idx_news_posts_created_at ON news_posts (created_at DESC);
 
 -- =====================================================
 -- 5. serial_codes（シリアルコード）
@@ -327,10 +331,11 @@ CREATE TABLE IF NOT EXISTS serial_codes (
 );
 
 ALTER TABLE serial_codes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read serial_codes" ON serial_codes;
+DROP POLICY IF EXISTS "Authenticated can update serial_codes" ON serial_codes;
 CREATE POLICY "Anyone can read serial_codes" ON serial_codes FOR SELECT USING (true);
 CREATE POLICY "Authenticated can update serial_codes" ON serial_codes FOR UPDATE USING (true) WITH CHECK (true);
 
--- サンプルコード
 INSERT INTO serial_codes (code, achievement_id, achievement_name, achievement_type, max_uses)
 VALUES
   ('KAIII-FIRST-2026', 'title_pioneer', '先駆者', 'special', 100),
@@ -358,6 +363,8 @@ CREATE TABLE IF NOT EXISTS mission_results (
 );
 
 ALTER TABLE mission_results ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read mission_results" ON mission_results;
+DROP POLICY IF EXISTS "Authenticated can insert mission_results" ON mission_results;
 CREATE POLICY "Anyone can read mission_results" ON mission_results FOR SELECT USING (true);
 CREATE POLICY "Authenticated can insert mission_results" ON mission_results FOR INSERT WITH CHECK (true);
 
@@ -381,6 +388,8 @@ CREATE TABLE IF NOT EXISTS adv_completions (
 );
 
 ALTER TABLE adv_completions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read adv_completions" ON adv_completions;
+DROP POLICY IF EXISTS "Authenticated can insert adv_completions" ON adv_completions;
 CREATE POLICY "Anyone can read adv_completions" ON adv_completions FOR SELECT USING (true);
 CREATE POLICY "Authenticated can insert adv_completions" ON adv_completions FOR INSERT WITH CHECK (true);
 
@@ -400,6 +409,8 @@ CREATE TABLE IF NOT EXISTS character_achievements (
 );
 
 ALTER TABLE character_achievements ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read character_achievements" ON character_achievements;
+DROP POLICY IF EXISTS "Authenticated can insert character_achievements" ON character_achievements;
 CREATE POLICY "Anyone can read character_achievements" ON character_achievements FOR SELECT USING (true);
 CREATE POLICY "Authenticated can insert character_achievements" ON character_achievements FOR INSERT WITH CHECK (true);
 
@@ -421,6 +432,9 @@ CREATE TABLE IF NOT EXISTS dispatch_quests (
 );
 
 ALTER TABLE dispatch_quests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can read own dispatch_quests" ON dispatch_quests;
+DROP POLICY IF EXISTS "Authenticated can insert dispatch_quests" ON dispatch_quests;
+DROP POLICY IF EXISTS "Authenticated can update own dispatch_quests" ON dispatch_quests;
 CREATE POLICY "Users can read own dispatch_quests" ON dispatch_quests FOR SELECT USING (true);
 CREATE POLICY "Authenticated can insert dispatch_quests" ON dispatch_quests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Authenticated can update own dispatch_quests" ON dispatch_quests FOR UPDATE USING (true);
@@ -429,7 +443,6 @@ CREATE POLICY "Authenticated can update own dispatch_quests" ON dispatch_quests 
 -- 10. SNS機能: MirrorLine / HUNTER//NET（7テーブル）
 -- =====================================================
 
--- sns_posts — タイムライン投稿
 CREATE TABLE IF NOT EXISTS sns_posts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id TEXT NOT NULL,
@@ -450,12 +463,11 @@ CREATE TABLE IF NOT EXISTS sns_posts (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_sns_posts_layer ON sns_posts(layer, created_at DESC);
-CREATE INDEX idx_sns_posts_user ON sns_posts(user_id);
-CREATE INDEX idx_sns_posts_parent ON sns_posts(parent_id) WHERE parent_id IS NOT NULL;
-CREATE INDEX idx_sns_posts_bot ON sns_posts(bot_id) WHERE is_bot = TRUE;
+CREATE INDEX IF NOT EXISTS idx_sns_posts_layer ON sns_posts(layer, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sns_posts_user ON sns_posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_sns_posts_parent ON sns_posts(parent_id) WHERE parent_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_sns_posts_bot ON sns_posts(bot_id) WHERE is_bot = TRUE;
 
--- sns_likes — いいね
 CREATE TABLE IF NOT EXISTS sns_likes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id TEXT NOT NULL,
@@ -463,10 +475,8 @@ CREATE TABLE IF NOT EXISTS sns_likes (
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(user_id, post_id)
 );
+CREATE INDEX IF NOT EXISTS idx_sns_likes_post ON sns_likes(post_id);
 
-CREATE INDEX idx_sns_likes_post ON sns_likes(post_id);
-
--- sns_threads — PBWスレッド
 CREATE TABLE IF NOT EXISTS sns_threads (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id TEXT NOT NULL,
@@ -484,11 +494,9 @@ CREATE TABLE IF NOT EXISTS sns_threads (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_sns_threads_layer ON sns_threads(layer, last_replied_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sns_threads_category ON sns_threads(category);
 
-CREATE INDEX idx_sns_threads_layer ON sns_threads(layer, last_replied_at DESC);
-CREATE INDEX idx_sns_threads_category ON sns_threads(category);
-
--- sns_thread_replies — スレッド返信
 CREATE TABLE IF NOT EXISTS sns_thread_replies (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   thread_id UUID NOT NULL REFERENCES sns_threads(id) ON DELETE CASCADE,
@@ -500,10 +508,8 @@ CREATE TABLE IF NOT EXISTS sns_thread_replies (
   affiliation TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_sns_thread_replies_thread ON sns_thread_replies(thread_id, created_at ASC);
 
-CREATE INDEX idx_sns_thread_replies_thread ON sns_thread_replies(thread_id, created_at ASC);
-
--- sns_chat_rooms — チャットルーム
 CREATE TABLE IF NOT EXISTS sns_chat_rooms (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL CHECK (char_length(name) <= 100),
@@ -516,10 +522,8 @@ CREATE TABLE IF NOT EXISTS sns_chat_rooms (
   expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_sns_chat_rooms_active ON sns_chat_rooms(is_active, created_at DESC);
 
-CREATE INDEX idx_sns_chat_rooms_active ON sns_chat_rooms(is_active, created_at DESC);
-
--- sns_chat_messages — チャットメッセージ
 CREATE TABLE IF NOT EXISTS sns_chat_messages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   room_id UUID NOT NULL REFERENCES sns_chat_rooms(id) ON DELETE CASCADE,
@@ -530,10 +534,8 @@ CREATE TABLE IF NOT EXISTS sns_chat_messages (
   display_icon TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_sns_chat_messages_room ON sns_chat_messages(room_id, created_at ASC);
 
-CREATE INDEX idx_sns_chat_messages_room ON sns_chat_messages(room_id, created_at ASC);
-
--- sns_chat_members — チャットルーム参加者
 CREATE TABLE IF NOT EXISTS sns_chat_members (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   room_id UUID NOT NULL REFERENCES sns_chat_rooms(id) ON DELETE CASCADE,
@@ -543,9 +545,8 @@ CREATE TABLE IF NOT EXISTS sns_chat_members (
   joined_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(room_id, user_id)
 );
-
-CREATE INDEX idx_sns_chat_members_room ON sns_chat_members(room_id);
-CREATE INDEX idx_sns_chat_members_user ON sns_chat_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_sns_chat_members_room ON sns_chat_members(room_id);
+CREATE INDEX IF NOT EXISTS idx_sns_chat_members_user ON sns_chat_members(user_id);
 
 -- SNS RLS
 ALTER TABLE sns_posts ENABLE ROW LEVEL SECURITY;
@@ -556,39 +557,53 @@ ALTER TABLE sns_chat_rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sns_chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sns_chat_members ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "sns_posts_read" ON sns_posts;
+DROP POLICY IF EXISTS "sns_posts_write" ON sns_posts;
+DROP POLICY IF EXISTS "sns_posts_update" ON sns_posts;
+DROP POLICY IF EXISTS "sns_posts_delete" ON sns_posts;
 CREATE POLICY "sns_posts_read" ON sns_posts FOR SELECT USING (true);
 CREATE POLICY "sns_posts_write" ON sns_posts FOR INSERT WITH CHECK (true);
 CREATE POLICY "sns_posts_update" ON sns_posts FOR UPDATE USING (true);
 CREATE POLICY "sns_posts_delete" ON sns_posts FOR DELETE USING (true);
 
+DROP POLICY IF EXISTS "sns_likes_read" ON sns_likes;
+DROP POLICY IF EXISTS "sns_likes_write" ON sns_likes;
+DROP POLICY IF EXISTS "sns_likes_delete" ON sns_likes;
 CREATE POLICY "sns_likes_read" ON sns_likes FOR SELECT USING (true);
 CREATE POLICY "sns_likes_write" ON sns_likes FOR INSERT WITH CHECK (true);
 CREATE POLICY "sns_likes_delete" ON sns_likes FOR DELETE USING (true);
 
+DROP POLICY IF EXISTS "sns_threads_read" ON sns_threads;
+DROP POLICY IF EXISTS "sns_threads_write" ON sns_threads;
 CREATE POLICY "sns_threads_read" ON sns_threads FOR SELECT USING (true);
 CREATE POLICY "sns_threads_write" ON sns_threads FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "sns_thread_replies_read" ON sns_thread_replies;
+DROP POLICY IF EXISTS "sns_thread_replies_write" ON sns_thread_replies;
 CREATE POLICY "sns_thread_replies_read" ON sns_thread_replies FOR SELECT USING (true);
 CREATE POLICY "sns_thread_replies_write" ON sns_thread_replies FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "sns_chat_rooms_read" ON sns_chat_rooms;
+DROP POLICY IF EXISTS "sns_chat_rooms_write" ON sns_chat_rooms;
+DROP POLICY IF EXISTS "sns_chat_rooms_update" ON sns_chat_rooms;
 CREATE POLICY "sns_chat_rooms_read" ON sns_chat_rooms FOR SELECT USING (true);
 CREATE POLICY "sns_chat_rooms_write" ON sns_chat_rooms FOR INSERT WITH CHECK (true);
 CREATE POLICY "sns_chat_rooms_update" ON sns_chat_rooms FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "sns_chat_messages_read" ON sns_chat_messages;
+DROP POLICY IF EXISTS "sns_chat_messages_write" ON sns_chat_messages;
 CREATE POLICY "sns_chat_messages_read" ON sns_chat_messages FOR SELECT USING (true);
 CREATE POLICY "sns_chat_messages_write" ON sns_chat_messages FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "sns_chat_members_read" ON sns_chat_members;
+DROP POLICY IF EXISTS "sns_chat_members_write" ON sns_chat_members;
+DROP POLICY IF EXISTS "sns_chat_members_delete" ON sns_chat_members;
 CREATE POLICY "sns_chat_members_read" ON sns_chat_members FOR SELECT USING (true);
 CREATE POLICY "sns_chat_members_write" ON sns_chat_members FOR INSERT WITH CHECK (true);
 CREATE POLICY "sns_chat_members_delete" ON sns_chat_members FOR DELETE USING (true);
 
 -- =====================================================
--- セットアップ完了
--- テーブル数: 14
---   anomaly_drafts, gear_posts, character_sheets,
---   news_posts, serial_codes,
---   mission_results, adv_completions, character_achievements,
---   dispatch_quests,
---   sns_posts, sns_likes, sns_threads, sns_thread_replies,
---   sns_chat_rooms, sns_chat_messages, sns_chat_members
+-- セットアップ完了（14テーブル）
+-- 既存環境: ポリシー再作成・不足カラム追加・制約更新
+-- 新規環境: 全テーブル・ポリシー・インデックス作成
 -- =====================================================
