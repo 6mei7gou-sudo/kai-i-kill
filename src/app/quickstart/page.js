@@ -142,7 +142,7 @@ export default function QuickstartPage() {
                             <tr>
                                 <td style={{ fontWeight: 700, color: 'var(--accent-gold)', fontSize: 'var(--font-size-lg)' }}>魂</td>
                                 <td>たましい</td>
-                                <td>精神力・意志の強さ。異能の発動、恐怖への抵抗、封印処理に使う</td>
+                                <td>精神力・意志の強さ。恐怖への抵抗、封印処理に使う</td>
                             </tr>
                         </tbody>
                     </table>
@@ -199,7 +199,7 @@ export default function QuickstartPage() {
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>元実験体</td>
-                                    <td style={{ whiteSpace: 'nowrap' }}>魂＋異能+1</td>
+                                    <td style={{ whiteSpace: 'nowrap' }}>魂</td>
                                     <td>《刻まれた回路》— 渇望ギフトのコスト軽減</td>
                                 </tr>
                                 <tr>
@@ -419,7 +419,7 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>実験覚醒型</td>
                                     <td>人体実験で強制覚醒</td>
-                                    <td>異能+1。察判定+1（怪異への過敏さ）</td>
+                                    <td>察判定+1（怪異への過敏さ）</td>
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>接触覚醒型</td>
@@ -630,8 +630,8 @@ export default function QuickstartPage() {
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#8844aa' }}>渇望</td>
-                                <td>異能・特殊素材装備を使用した時</td>
-                                <td>次の異能使用のコストが倍増</td>
+                                <td>特殊素材・禁忌の力を使用した時</td>
+                                <td>次の特殊行動のコストが倍増</td>
                             </tr>
                             <tr>
                                 <td style={{ fontWeight: 700, color: '#44aa88' }}>浄化</td>
