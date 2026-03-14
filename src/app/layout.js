@@ -114,7 +114,7 @@ export default function RootLayout({ children }) {
                 <div className="site-sidebar__title-sm">電脳怪異譚</div>
                 <div className="site-sidebar__title">KAI-I//KILL</div>
                 <div className="site-sidebar__subtitle">討伐者ハンドブック</div>
-                <div className="site-sidebar__version">BETA 0.1.0</div>
+                <div className="site-sidebar__version">BETA 0.1.0 — PLAYER DOC</div>
               </div>
 
               {/* 認証ボタン */}
