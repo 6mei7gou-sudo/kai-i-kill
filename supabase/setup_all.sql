@@ -619,7 +619,47 @@ CREATE POLICY "sns_chat_members_write" ON sns_chat_members FOR INSERT WITH CHECK
 CREATE POLICY "sns_chat_members_delete" ON sns_chat_members FOR DELETE USING (true);
 
 -- =====================================================
--- セットアップ完了（14テーブル）
+-- 11. account_cp（アカウントCP残高）
+-- =====================================================
+CREATE TABLE IF NOT EXISTS account_cp (
+  user_id TEXT PRIMARY KEY,
+  balance INT NOT NULL DEFAULT 10,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE account_cp ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read account_cp" ON account_cp;
+DROP POLICY IF EXISTS "Anyone can insert account_cp" ON account_cp;
+DROP POLICY IF EXISTS "Anyone can update account_cp" ON account_cp;
+CREATE POLICY "Anyone can read account_cp" ON account_cp FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert account_cp" ON account_cp FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update account_cp" ON account_cp FOR UPDATE USING (true) WITH CHECK (true);
+
+-- =====================================================
+-- 12. cp_transactions（CP変動履歴）
+-- =====================================================
+CREATE TABLE IF NOT EXISTS cp_transactions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  amount INT NOT NULL,
+  balance_after INT NOT NULL,
+  source_type TEXT NOT NULL CHECK (source_type IN ('mission', 'adv', 'dispatch', 'gear_craft', 'serial_code', 'admin', 'initial')),
+  source_id TEXT,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cp_transactions_user ON cp_transactions(user_id, created_at DESC);
+
+ALTER TABLE cp_transactions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can read cp_transactions" ON cp_transactions;
+DROP POLICY IF EXISTS "Anyone can insert cp_transactions" ON cp_transactions;
+CREATE POLICY "Anyone can read cp_transactions" ON cp_transactions FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert cp_transactions" ON cp_transactions FOR INSERT WITH CHECK (true);
+
+-- =====================================================
+-- セットアップ完了（16テーブル）
 -- 既存環境: ポリシー再作成・不足カラム追加・制約更新
 -- 新規環境: 全テーブル・ポリシー・インデックス作成
 -- =====================================================

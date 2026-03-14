@@ -48,10 +48,7 @@ const CATEGORY_INFO = {
 
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
 
-// 初期CP基本値
-const BASE_CP_BUDGET = 10;
-
-export default function WeaponForm({ editId = null, initialData = null, characterBonus = null }) {
+export default function WeaponForm({ editId = null, initialData = null, characterBonus = null, originalTotalCp = 0 }) {
     const { user } = useUser();
     const router = useRouter();
     const isEdit = !!editId;
@@ -59,6 +56,8 @@ export default function WeaponForm({ editId = null, initialData = null, characte
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
+    const [accountCp, setAccountCp] = useState(null); // null = 読み込み中
+    const [cpLoading, setCpLoading] = useState(true);
 
     // 編集モード: 既存データをフォームにセット
     useEffect(() => {
@@ -74,6 +73,19 @@ export default function WeaponForm({ editId = null, initialData = null, characte
             setForm(prev => ({ ...prev, ...parsed }));
         }
     }, [initialData]);
+
+    // アカウントCP残高を取得
+    useEffect(() => {
+        if (!user) return;
+        setCpLoading(true);
+        fetch('/api/cp')
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) setAccountCp(data.balance);
+            })
+            .catch(() => {})
+            .finally(() => setCpLoading(false));
+    }, [user]);
 
     // ユーザー名を自動セット
     useEffect(() => {
@@ -129,6 +141,17 @@ export default function WeaponForm({ editId = null, initialData = null, characte
         try {
             const totalCp = form.base_cp + form.options.reduce((s, o) => s + (o.cp || 0), 0);
             const optCount = form.options.filter(o => o.name.trim()).length;
+
+            // CP消費量を計算（編集時は差分のみ）
+            const cpCost = isEdit ? totalCp - (originalTotalCp || 0) : totalCp;
+
+            // CP不足チェック（消費が必要な場合のみ）
+            if (cpCost > 0 && accountCp !== null && accountCp < cpCost) {
+                setResult({ ok: false, msg: `CP不足です（残高: ${accountCp}CP、必要: ${cpCost}CP）。ゲームをプレイしてCPを獲得しましょう。` });
+                setSubmitting(false);
+                return;
+            }
+
             const payload = {
                 ...form, intended_role: form.intended_role,
                 strengths: JSON.stringify(form.strengths.filter(Boolean)),
@@ -147,6 +170,13 @@ export default function WeaponForm({ editId = null, initialData = null, characte
             const res = await fetch('/api/posts', { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
             const json = await res.json();
             if (!res.ok) throw new Error(json.error);
+
+            // API側でCP消費済み — 残高を再取得して表示を更新
+            try {
+                const cpRes = await fetch('/api/cp');
+                const cpJson = await cpRes.json();
+                if (cpJson.ok) setAccountCp(cpJson.balance);
+            } catch (_) {}
 
             setResult({ ok: true, msg: isEdit ? '装備データを更新しました！' : '武器・装備を投稿しました！' });
             if (!isEdit) setForm(INITIAL);
@@ -334,23 +364,30 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                     </div>
                     {/* CP予算バー */}
                     {(() => {
-                        const bonus = characterBonus?.bonusCp || 0;
-                        const budget = BASE_CP_BUDGET + bonus;
+                        const accp = accountCp ?? 10; // 読み込み中は仮値10
+                        const budget = accp + (isEdit ? (originalTotalCp || 0) : 0);
                         const totalCp = Number(form.base_cp || 0) + form.options.reduce((s, o) => s + Number(o.cp || 0), 0);
                         const remaining = budget - totalCp;
-                        const pct = Math.min(100, Math.max(0, (totalCp / budget) * 100));
+                        const pct = budget > 0 ? Math.min(100, Math.max(0, (totalCp / budget) * 100)) : 0;
                         const barColor = remaining < 0 ? '#ff4444' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
                         return (
                             <div style={{ marginTop: 'var(--space-md)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' }}>
+                                {/* アカウントCP残高 */}
+                                <div style={{ fontSize: '11px', color: 'var(--accent-gold)', marginBottom: '8px', fontFamily: 'var(--font-mono)', padding: '6px 8px', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span>ACCOUNT CP</span>
+                                    <span style={{ fontWeight: 700, fontSize: '14px' }}>
+                                        {cpLoading ? '...' : `${accp}CP`}
+                                    </span>
+                                </div>
                                 {characterBonus && (
                                     <div style={{ fontSize: '11px', color: 'var(--accent-cyber)', marginBottom: '8px', fontFamily: 'var(--font-mono)', padding: '6px 8px', background: 'rgba(100,200,255,0.06)', border: '1px solid rgba(100,200,255,0.15)' }}>
                                         連携キャラ: {characterBonus.characterName}
-                                        {characterBonus.bonusDetail && <span style={{ marginLeft: '8px', color: 'var(--accent-gold)' }}>（{characterBonus.bonusDetail}）</span>}
+                                        {characterBonus.bonusDetail && <span style={{ marginLeft: '8px', color: 'var(--text-muted)' }}>（{characterBonus.bonusDetail} ※作成時にアカウントCPへ加算済み）</span>}
                                     </div>
                                 )}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                        CP予算（基本{BASE_CP_BUDGET}{bonus > 0 ? ` +補正${bonus}` : ''}＝{budget}CP）
+                                        CP予算（残高{accp}{isEdit && originalTotalCp > 0 ? ` +既存${originalTotalCp}` : ''}＝{budget}CP）
                                     </span>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
                                         {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過！`}
@@ -359,9 +396,9 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                                 <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{ height: '100%', width: `${pct}%`, background: barColor, transition: 'width 0.3s, background 0.3s', borderRadius: '4px' }} />
                                 </div>
-                                {!characterBonus && (
-                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
-                                        ※ キャラクターに連携すると、背景による補正CPが自動反映されます。
+                                {remaining < 0 && (
+                                    <div style={{ fontSize: '10px', color: 'var(--accent-danger)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+                                        CP不足です。ゲームをプレイしてCPを獲得しましょう。
                                     </div>
                                 )}
                             </div>

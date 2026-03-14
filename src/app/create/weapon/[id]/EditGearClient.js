@@ -56,5 +56,5 @@ export default function EditGearClient({ id }) {
         return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--accent-danger)' }}>この装備データを編集する権限がありません。</div>;
     }
 
-    return <WeaponForm editId={id} initialData={entry} characterBonus={characterBonus} />;
+    return <WeaponForm editId={id} initialData={entry} characterBonus={characterBonus} originalTotalCp={entry.total_cp || 0} />;
 }

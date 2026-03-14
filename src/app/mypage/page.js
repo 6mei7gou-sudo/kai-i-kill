@@ -69,6 +69,7 @@ export default function MyPage() {
     const [achievements, setAchievements] = useState([]);
     const [dispatchHistory, setDispatchHistory] = useState([]);
     const [activeDispatches, setActiveDispatches] = useState([]);
+    const [accountCp, setAccountCp] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -89,6 +90,13 @@ export default function MyPage() {
                 setCharacters(charJson.data || []);
                 setGear(gearJson.data || []);
                 setAnomalies(anomalyJson.data || []);
+
+                // アカウントCP取得（テーブル未作成でもエラーにしない）
+                try {
+                    const cpRes = await fetch('/api/cp');
+                    const cpJson = await cpRes.json();
+                    if (cpJson.ok) setAccountCp(cpJson.balance);
+                } catch (_) { /* CP未設定時は無視 */ }
 
                 // ゲーム戦績取得（テーブル未作成でもエラーにしない）
                 try {
@@ -264,6 +272,10 @@ export default function MyPage() {
 
                             {/* 統計 */}
                             <div style={{ marginTop: '48px', padding: '20px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--accent-gold)' }}>{accountCp ?? '—'}</div>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>ACCOUNT CP</div>
+                                </div>
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-3xl)', fontWeight: 700, color: 'var(--accent-gold)' }}>{characters.length + gear.length + anomalies.length}</div>
                                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>TOTAL POSTS</div>

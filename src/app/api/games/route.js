@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { awardCp, MISSION_CP, ADV_CP } from '@/lib/cpService';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -93,7 +94,26 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ ok: true, data: result });
+    // CP報酬の付与
+    let cpAwarded = 0;
+    try {
+      if (table === 'mission_results' && data.result === '勝利' && data.difficulty) {
+        const cp = MISSION_CP[data.difficulty] || 0;
+        if (cp > 0) {
+          await awardCp(supabase, userId, cp, 'mission', result.id, `ミッション「${data.mission_name}」(${data.difficulty}) 勝利`);
+          cpAwarded = cp;
+        }
+      }
+      if (table === 'adv_completions' && data.ending_type) {
+        const cp = ADV_CP[data.ending_type] || 0;
+        if (cp > 0) {
+          await awardCp(supabase, userId, cp, 'adv', result.id, `怪異譚「${data.scenario_name}」クリア (${data.ending_type})`);
+          cpAwarded = cp;
+        }
+      }
+    } catch (_) { /* CP付与失敗はゲーム結果保存に影響させない */ }
+
+    return NextResponse.json({ ok: true, data: result, cpAwarded });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

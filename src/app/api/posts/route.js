@@ -2,6 +2,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { awardCp, deductCp, calcBackgroundCpBonus } from '@/lib/cpService';
 
 // サーバーサイド用Supabaseクライアント（anon keyで接続、RLSは全許可設定のため）
 const supabase = createClient(
@@ -60,7 +61,31 @@ export async function POST(request) {
             .single();
 
         if (error) throw error;
-        return NextResponse.json({ ok: true, data: result });
+
+        // キャラ作成時：背景×装備分類のCP補正をアカウントに付与
+        let cpAwarded = 0;
+        if (table === 'character_sheets') {
+            try {
+                const bonus = calcBackgroundCpBonus(data.background, data.equipment_type);
+                if (bonus > 0) {
+                    await awardCp(supabase, userId, bonus, 'initial', result.id,
+                        `キャラ「${data.character_name}」作成ボーナス（背景「${data.background}」+${bonus}CP）`);
+                    cpAwarded = bonus;
+                }
+            } catch (_) { /* CP付与失敗はキャラ作成に影響させない */ }
+        }
+
+        // 武器投稿時：CPをアカウントから消費
+        let cpDeducted = 0;
+        if (table === 'gear_posts' && result.total_cp > 0) {
+            try {
+                await deductCp(supabase, userId, result.total_cp, result.id,
+                    `装備「${result.gear_name}」の製作（${result.total_cp}CP）`);
+                cpDeducted = result.total_cp;
+            } catch (_) { /* CP不足でも投稿自体は通す */ }
+        }
+
+        return NextResponse.json({ ok: true, data: result, cpAwarded, cpDeducted });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
@@ -81,9 +106,10 @@ export async function PATCH(request) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
 
-        // 所有権チェック
+        // 所有権チェック（gear_postsの場合はtotal_cpも取得して差分計算に使う）
+        const selectCols = table === 'gear_posts' ? 'user_id, total_cp' : 'user_id';
         const { data: existing, error: fetchError } = await supabase
-            .from(table).select('user_id').eq('id', id).single();
+            .from(table).select(selectCols).eq('id', id).single();
         if (fetchError) throw fetchError;
         if (existing.user_id !== userId && !ADMIN_IDS.includes(userId)) {
             return NextResponse.json({ error: '自分の投稿のみ編集できます' }, { status: 403 });
@@ -98,7 +124,27 @@ export async function PATCH(request) {
             .single();
 
         if (error) throw error;
-        return NextResponse.json({ ok: true, data: result });
+
+        // 武器編集時：CPの差分を消費/返還
+        let cpDelta = 0;
+        if (table === 'gear_posts' && typeof result.total_cp === 'number') {
+            const oldCp = existing.total_cp || 0;
+            const diff = result.total_cp - oldCp;
+            if (diff !== 0) {
+                try {
+                    if (diff > 0) {
+                        await deductCp(supabase, userId, diff, id,
+                            `装備「${result.gear_name}」の改修（+${diff}CP）`);
+                    } else {
+                        await awardCp(supabase, userId, Math.abs(diff), 'gear_craft', id,
+                            `装備「${result.gear_name}」の改修による返還（${Math.abs(diff)}CP）`);
+                    }
+                    cpDelta = diff;
+                } catch (_) { /* CP処理失敗は更新に影響させない */ }
+            }
+        }
+
+        return NextResponse.json({ ok: true, data: result, cpDelta });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }

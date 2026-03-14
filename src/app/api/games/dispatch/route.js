@@ -2,6 +2,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { awardCp, DISPATCH_CP } from '@/lib/cpService';
+import dispatchQuests from '@/data/dispatches/dispatch_quests.json';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -126,7 +128,21 @@ export async function PATCH(request) {
       }
     }
 
-    return NextResponse.json({ ok: true, data });
+    // 成功時にCP報酬を付与
+    let cpAwarded = 0;
+    if (result === '成功') {
+      try {
+        const quest = dispatchQuests.find(q => q.id === data.quest_id);
+        const rank = quest?.recommended_rank;
+        const cp = rank ? (DISPATCH_CP[rank] || 0) : 0;
+        if (cp > 0) {
+          await awardCp(supabase, userId, cp, 'dispatch', data.id, `派遣「${data.quest_name}」(${rank}) 成功`);
+          cpAwarded = cp;
+        }
+      } catch (_) { /* CP付与失敗は派遣結果に影響させない */ }
+    }
+
+    return NextResponse.json({ ok: true, data, cpAwarded });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
