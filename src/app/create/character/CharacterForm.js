@@ -1011,16 +1011,16 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.sectionTitle}>SECTION 12 — STORY</div>
                     <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>
                     <div style={S.fieldGroup}>
-                        <label style={S.label}>簡略来歴（80文字以内） — 資格証の画像に表示されます</label>
+                        <label style={S.label}>簡略来歴（250文字以内） — 資格証の画像に表示されます</label>
                         <textarea
                             value={form.brief_history}
-                            onChange={e => { if (e.target.value.length <= 80) set('brief_history', e.target.value); }}
-                            maxLength={80}
-                            placeholder="例：灰嶺市底澱出身。幼少期に怪異に家族を奪われ、独学で祓いの術を身につけた。"
-                            style={{ width: '100%', minHeight: '56px', padding: '10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', resize: 'vertical' }}
+                            onChange={e => { if (e.target.value.length <= 250) set('brief_history', e.target.value); }}
+                            maxLength={250}
+                            placeholder="例：灰嶺市底澱出身。幼少期に怪異に家族を奪われ、独学で祓いの術を身につけた。祓部への入隊を拒み、裏社会の情報網を頼りに単独で怪異を追い続けている。「あの日の借りは、必ず返す」——それだけが、この街で生き延びる理由。"
+                            style={{ width: '100%', minHeight: '80px', padding: '10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', resize: 'vertical' }}
                         />
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: form.brief_history.length >= 70 ? '#ffaa00' : 'var(--text-muted)', textAlign: 'right', marginTop: '4px' }}>
-                            {form.brief_history.length} / 80
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: form.brief_history.length >= 230 ? '#ffaa00' : 'var(--text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                            {form.brief_history.length} / 250
                         </div>
                     </div>
                     <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
