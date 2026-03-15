@@ -133,6 +133,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     const { user } = useUser();
     const router = useRouter();
     const isEdit = !!editId;
+    const isOfficial = !!(initialData?.is_official);
 
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
@@ -173,6 +174,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
     // --- ランク計算（背景→C、配属→B、覚醒→C） ---
     const getEffectiveRank = useCallback((abilityKey) => {
+        // 公式キャラはフォームの値をそのまま使用（自由設定）
+        if (isOfficial) return form[abilityKey] || 'D';
         let rank = 'D';
         // 背景によるC昇格
         if (selectedBg && selectedBg.upgrades.includes(abilityKey)) {
@@ -187,7 +190,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             rank = 'B';
         }
         return rank;
-    }, [form.awakening, innateChoice, selectedBg, selectedAssignment]);
+    }, [form, isOfficial, innateChoice, selectedBg, selectedAssignment]);
 
     // --- 段階表示 ---
     const getStageDisplay = useCallback((abilityKey) => {
@@ -212,10 +215,11 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             const current = [...(prev[key] || [])];
             const other = prev[otherKey] || [];
             if (current.includes(langId)) return { ...prev, [key]: current.filter(l => l !== langId) };
-            if (current.length >= 3 || other.includes(langId)) return prev;
+            // 公式キャラは制限なし、通常は3つまで＋相互排他
+            if (!isOfficial && (current.length >= 3 || other.includes(langId))) return prev;
             return { ...prev, [key]: [...current, langId] };
         });
-    }, []);
+    }, [isOfficial]);
 
     // --- 段階トグル ---
     const toggleStagePlus = useCallback((abilityKey) => {
@@ -224,10 +228,11 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             if (current.includes(abilityKey)) {
                 return { ...prev, stage_plus: current.filter(k => k !== abilityKey) };
             }
-            if (current.length >= 2) return prev;
+            // 公式キャラは制限なし、通常は2つまで
+            if (!isOfficial && current.length >= 2) return prev;
             return { ...prev, stage_plus: [...current, abilityKey] };
         });
-    }, []);
+    }, [isOfficial]);
 
     // --- スキルトグル ---
     const toggleSkill = useCallback((skillId) => {
@@ -236,7 +241,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             if (current.includes(skillId)) {
                 return { ...prev, skills: current.filter(s => s !== skillId) };
             }
-            if (current.length >= 2) return prev;
+            // 公式キャラは制限なし、通常は2枠まで
+            if (!isOfficial && current.length >= 2) return prev;
             return { ...prev, skills: [...current, skillId] };
         });
     }, []);
@@ -580,6 +586,20 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                                     {upgradeSource.length > 0 && (
                                         <div style={{ fontSize: '10px', color: 'var(--accent-gold)', marginTop: '4px' }}>
                                             ▲ {upgradeSource.join(' / ')}
+                                        </div>
+                                    )}
+                                    {/* 公式キャラ：ランク直接選択 */}
+                                    {isOfficial && (
+                                        <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                                            {RANKS.map(r => (
+                                                <button key={r} type="button" onClick={() => set(ability.key, r)}
+                                                    style={{
+                                                        padding: '3px 8px', fontFamily: 'var(--font-mono)', fontSize: '10px', cursor: 'pointer',
+                                                        background: form[ability.key] === r ? 'rgba(192,208,224,0.2)' : 'transparent',
+                                                        border: form[ability.key] === r ? '1px solid rgba(192,208,224,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                                        color: form[ability.key] === r ? '#c0d0e0' : 'var(--text-muted)',
+                                                    }}>{r}</button>
+                                            ))}
                                         </div>
                                     )}
                                     {/* 段階トグル */}
