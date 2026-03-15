@@ -118,7 +118,7 @@ const INITIAL = {
     proficient_languages: [], weak_languages: [],
     equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
-    fate: '', backstory: '',
+    fate: '', backstory: '', brief_history: '',
     related_anomalies: '', related_characters: '', related_factions: '',
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
@@ -1010,6 +1010,19 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 12 — STORY</div>
                     <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>
+                    <div style={S.fieldGroup}>
+                        <label style={S.label}>簡略来歴（80文字以内） — 資格証の画像に表示されます</label>
+                        <textarea
+                            value={form.brief_history}
+                            onChange={e => { if (e.target.value.length <= 80) set('brief_history', e.target.value); }}
+                            maxLength={80}
+                            placeholder="例：灰嶺市底澱出身。幼少期に怪異に家族を奪われ、独学で祓いの術を身につけた。"
+                            style={{ width: '100%', minHeight: '56px', padding: '10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', resize: 'vertical' }}
+                        />
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: form.brief_history.length >= 70 ? '#ffaa00' : 'var(--text-muted)', textAlign: 'right', marginTop: '4px' }}>
+                            {form.brief_history.length} / 80
+                        </div>
+                    </div>
                     <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
                     <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." />
                 </div>

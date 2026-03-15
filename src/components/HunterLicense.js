@@ -197,6 +197,14 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
                 </div>
             </div>
 
+            {/* BRIEF HISTORY */}
+            {c.brief_history && (
+                <div className="hl-history">
+                    <div className="hl-history__label" style={{ color: affColor }}>// BRIEF HISTORY</div>
+                    <div className="hl-history__text">{c.brief_history}</div>
+                </div>
+            )}
+
             {/* FOOTER */}
             <div className="hl-footer">
                 <span>ISSUED: {formatDate(c.created_at)}</span>

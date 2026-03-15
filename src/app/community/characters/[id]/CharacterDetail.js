@@ -454,7 +454,7 @@ export default function CharacterDetail({ id }) {
                         setExporting(true);
                         const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
                         const idShort = (e.id || '').substring(0, 8);
-                        await exportAsImage(licenseRef.current, `kaiii_license_${idShort}_${dateStr}`, { width: 1200, height: 630 });
+                        await exportAsImage(licenseRef.current, `kaiii_license_${idShort}_${dateStr}`, { width: 1200, height: 727 });
                         setExporting(false);
                     }}
                     disabled={exporting}

@@ -224,6 +224,7 @@ ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS weapon_type TEXT;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS skills JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS stage_plus JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS equipment_options JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS brief_history TEXT DEFAULT '';
 
 -- linked_gear_id の外部キー（存在しなければ追加）
 DO $$

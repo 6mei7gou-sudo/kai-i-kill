@@ -4,7 +4,7 @@
 .hunter-license {
     position: relative;
     width: 1200px;
-    height: 630px;
+    height: 727px;
     background: #05070a;
     color: #e8e6e3;
     font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
@@ -118,10 +118,10 @@
 /* ===== ID / META（ポートレート下） ===== */
 .hl-id-meta {
     position: absolute;
-    top: 420px;
+    top: 416px;
     left: 20px;
     width: 270px;
-    height: 180px;
+    height: 100px;
     padding: 12px 0;
 }
 
@@ -337,6 +337,35 @@
 
 .hl-belief-dot--empty {
     background: #333;
+}
+
+/* ===== BRIEF HISTORY ===== */
+.hl-history {
+    position: absolute;
+    top: 530px;
+    left: 20px;
+    right: 20px;
+    height: 80px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.hl-history__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}
+
+.hl-history__text {
+    font-size: 12px;
+    color: #9a9a9a;
+    line-height: 1.6;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 /* ===== FOOTER ===== */
