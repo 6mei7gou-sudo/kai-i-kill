@@ -9,8 +9,15 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const LEVELUP_CP_COST = 150;
-const MAX_LEVEL = 10;
+// レベルごとの必要CP（現在のレベル → 次のレベルに上がるためのコスト）
+const LEVELUP_CP_TABLE = {
+    1: 100,   // Lv1→2
+    2: 150,   // Lv2→3
+    3: 250,   // Lv3→4
+    4: 400,   // Lv4→5
+};
+const PL_MAX_LEVEL = 5;
+const OFFICIAL_MAX_LEVEL = 10;
 
 // POST: レベルアップ
 export async function POST(request) {
@@ -45,10 +52,11 @@ export async function POST(request) {
         }
 
         const currentLevel = char.level || 1;
+        const maxLevel = char.is_official ? OFFICIAL_MAX_LEVEL : PL_MAX_LEVEL;
 
         // 上限チェック
-        if (currentLevel >= MAX_LEVEL) {
-            return NextResponse.json({ error: `最大レベル（Lv${MAX_LEVEL}）に達しています` }, { status: 400 });
+        if (currentLevel >= maxLevel) {
+            return NextResponse.json({ error: `最大レベル（Lv${maxLevel}）に達しています` }, { status: 400 });
         }
 
         const newLevel = currentLevel + 1;
@@ -61,10 +69,14 @@ export async function POST(request) {
                 return NextResponse.json({ error: '公式キャラクターではありません' }, { status: 403 });
             }
         } else if (method === 'cp') {
-            // CP消費でレベルアップ
+            // CP消費でレベルアップ（レベルごとにコストが増加）
+            const cost = LEVELUP_CP_TABLE[currentLevel];
+            if (!cost) {
+                return NextResponse.json({ error: `Lv${currentLevel}からのCP消費レベルアップはできません` }, { status: 400 });
+            }
             try {
-                await deductCp(supabase, userId, LEVELUP_CP_COST, character_id,
-                    `「${char.character_name}」レベルアップ（Lv${currentLevel}→${newLevel}）`);
+                await deductCp(supabase, userId, cost, character_id,
+                    `「${char.character_name}」レベルアップ（Lv${currentLevel}→${newLevel}、${cost}CP）`);
             } catch (err) {
                 return NextResponse.json({ error: err.message }, { status: 400 });
             }
@@ -117,10 +129,14 @@ export async function POST(request) {
 
         if (updateErr) throw updateErr;
 
+        // 次のレベルアップコストも返す
+        const nextCost = LEVELUP_CP_TABLE[newLevel] || null;
+
         return NextResponse.json({
             ok: true,
             data: updated,
             levelUp: { from: currentLevel, to: newLevel, method },
+            nextCost,
         });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });

@@ -254,10 +254,13 @@ export default function CharacterDetail({ id }) {
             )}
 
             {/* ===== レベルアップ ===== */}
-            {isOwner && (e.level || 1) < 10 && (
+            {isOwner && (e.level || 1) < (e.is_official ? 10 : 5) && (() => {
+                const PL_CP_TABLE = { 1: 100, 2: 150, 3: 250, 4: 400 };
+                const cpCost = PL_CP_TABLE[e.level || 1] || null;
+                return (
                 <div style={{ ...SS.section, marginBottom: 'var(--space-lg)' }}>
                     <div style={SS.sTitle}>LEVEL UP</div>
-                    <h2 style={SS.sHead}>レベルアップ（現在 Lv.{e.level || 1}）</h2>
+                    <h2 style={SS.sHead}>レベルアップ（現在 Lv.{e.level || 1}{e.is_official ? ' / 上限10' : ' / 上限5'}）</h2>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap' }}>
                         {e.is_official ? (
                             <button
@@ -288,7 +291,7 @@ export default function CharacterDetail({ id }) {
                                                 border: levelUpMethod === m ? '1px solid rgba(212,175,55,0.4)' : '1px solid rgba(255,255,255,0.05)',
                                                 color: levelUpMethod === m ? 'var(--accent-gold)' : 'var(--text-muted)',
                                             }}>
-                                            {m === 'cp' ? 'CP消費（150CP）' : 'シリアルコード'}
+                                            {m === 'cp' ? `CP消費（${cpCost || '?'}CP）` : 'シリアルコード'}
                                         </button>
                                     ))}
                                 </div>
@@ -324,7 +327,8 @@ export default function CharacterDetail({ id }) {
                     </div>
                     {levelUpMsg && <div style={{ fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', color: levelUpMsg.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>{levelUpMsg.text}</div>}
                 </div>
-            )}
+                );
+            })()}
 
             {/* ===== 能力値（ランク制） ===== */}
             <div style={SS.section}>
