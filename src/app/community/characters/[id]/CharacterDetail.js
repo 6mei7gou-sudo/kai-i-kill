@@ -254,28 +254,30 @@ export default function CharacterDetail({ id }) {
                 <h2 style={SS.sHead}>能力値ランク</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
                     {ABILITIES.map(a => {
-                        const rank = e[a.key] || 'D';
-                        const val = RANK_ORDER[rank] || 1;
+                        const hiddenAbilities = Array.isArray(e.hidden_abilities) ? e.hidden_abilities : [];
+                        const isHidden = hiddenAbilities.includes(a.key);
+                        const rank = isHidden ? '?' : (e[a.key] || 'D');
+                        const val = isHidden ? 0 : (RANK_ORDER[rank] || 1);
                         const pct = (val / 5) * 100;
-                        const hasPlus = stagePlus.includes(a.key);
-                        const display = hasPlus && rank !== 'S' ? `${rank}+` : rank;
-                        const isMax = val === maxRankVal;
+                        const hasPlus = !isHidden && stagePlus.includes(a.key);
+                        const display = isHidden ? '？' : (hasPlus && rank !== 'S' ? `${rank}+` : rank);
+                        const isMax = !isHidden && val === maxRankVal;
                         return (
-                            <div key={a.key} style={{ padding: '12px 14px', background: 'rgba(0,0,0,0.2)', border: isMax ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.2)' : 'var(--border-subtle)' }}>
+                            <div key={a.key} style={{ padding: '12px 14px', background: 'rgba(0,0,0,0.2)', border: isHidden ? '1px solid rgba(255,255,255,0.03)' : isMax ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.2)' : 'var(--border-subtle)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
                                         {a.name} <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>({a.reading})</span>
                                     </span>
                                     <span style={{
                                         fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700,
-                                        color: rankColor(rank), minWidth: '36px', textAlign: 'center',
+                                        color: isHidden ? '#333' : rankColor(rank), minWidth: '36px', textAlign: 'center',
                                     }}>{display}</span>
                                 </div>
                                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                                    <div style={{ height: '100%', width: `${pct}%`, background: isMax ? 'var(--accent-gold)' : affColor, transition: 'width 0.5s' }} />
+                                    <div style={{ height: '100%', width: `${pct}%`, background: isHidden ? '#222' : isMax ? 'var(--accent-gold)' : affColor, transition: 'width 0.5s' }} />
                                 </div>
                                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                    {RANK_DICE[rank]}{hasPlus ? '（達成値+1）' : ''}
+                                    {isHidden ? '—' : `${RANK_DICE[rank]}${hasPlus ? '（達成値+1）' : ''}`}
                                 </div>
                             </div>
                         );

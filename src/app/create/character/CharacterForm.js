@@ -118,7 +118,7 @@ const INITIAL = {
     proficient_languages: [], weak_languages: [],
     equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
-    fate: '', backstory: '', brief_history: '',
+    fate: '', backstory: '', brief_history: '', hidden_abilities: [],
     related_anomalies: '', related_characters: '', related_factions: '',
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
@@ -614,6 +614,28 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                                         }}>
                                         {hasPlus ? '＋段階 ✓' : '＋段階'}
                                     </button>
+                                    {/* 公式キャラ：能力値を非表示にするトグル */}
+                                    {isOfficial && (() => {
+                                        const hidden = (form.hidden_abilities || []).includes(ability.key);
+                                        return (
+                                            <button type="button" onClick={() => {
+                                                setForm(prev => {
+                                                    const cur = [...(prev.hidden_abilities || [])];
+                                                    return { ...prev, hidden_abilities: hidden ? cur.filter(k => k !== ability.key) : [...cur, ability.key] };
+                                                });
+                                            }}
+                                                style={{
+                                                    marginTop: '4px', marginLeft: '4px', padding: '3px 10px',
+                                                    fontFamily: 'var(--font-mono)', fontSize: '10px',
+                                                    background: hidden ? 'rgba(255,77,77,0.12)' : 'transparent',
+                                                    border: hidden ? '1px solid rgba(255,77,77,0.3)' : '1px dashed rgba(255,255,255,0.15)',
+                                                    color: hidden ? '#ff4d4d' : 'var(--text-muted)',
+                                                    cursor: 'pointer',
+                                                }}>
+                                                {hidden ? '非公開 ✓' : '非公開'}
+                                            </button>
+                                        );
+                                    })()}
                                 </div>
                             );
                         })}

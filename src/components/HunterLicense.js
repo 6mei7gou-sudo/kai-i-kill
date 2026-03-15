@@ -70,6 +70,7 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
     const proficient = Array.isArray(c.proficient_languages) ? c.proficient_languages : [];
     const weak = Array.isArray(c.weak_languages) ? c.weak_languages : [];
     const stagePlus = Array.isArray(c.stage_plus) ? c.stage_plus : (typeof c.stage_plus === 'string' ? JSON.parse(c.stage_plus || '[]') : []);
+    const hiddenAbilities = Array.isArray(c.hidden_abilities) ? c.hidden_abilities : (typeof c.hidden_abilities === 'string' ? JSON.parse(c.hidden_abilities || '[]') : []);
 
     return (
         <div className="hunter-license" ref={ref}>
@@ -129,15 +130,16 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
                 <div className="hl-abilities__label" style={{ color: affColor }}>// ABILITIES</div>
                 <div className="hl-abilities__grid">
                     {ABILITIES.map(a => {
-                        const rank = c[a.key] || 'D';
-                        const color = RANK_COLORS[rank] || RANK_COLORS.D;
-                        const fill = RANK_FILL[rank] || 20;
-                        const plus = hasStage(stagePlus, a.key);
+                        const isHidden = hiddenAbilities.includes(a.key);
+                        const rank = isHidden ? '?' : (c[a.key] || 'D');
+                        const color = isHidden ? '#333' : (RANK_COLORS[rank] || RANK_COLORS.D);
+                        const fill = isHidden ? 0 : (RANK_FILL[rank] || 20);
+                        const plus = !isHidden && hasStage(stagePlus, a.key);
                         return (
                             <div className="hl-ability" key={a.key}>
                                 <div className="hl-ability__name">{a.name}</div>
                                 <div className="hl-ability__rank" style={{ color }}>
-                                    {rank}
+                                    {isHidden ? '？' : rank}
                                     {plus && <span className="hl-ability__plus" style={{ color: affColor }}>+</span>}
                                 </div>
                                 <div className="hl-ability__bar">
