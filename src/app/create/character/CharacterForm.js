@@ -118,7 +118,7 @@ const INITIAL = {
     proficient_languages: [], weak_languages: [],
     equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
-    fate: '', backstory: '', brief_history: '', hidden_abilities: [],
+    level: 1, fate: '', backstory: '', brief_history: '', hidden_abilities: [],
     related_anomalies: '', related_characters: '', related_factions: '',
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
@@ -551,6 +551,25 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         })}
                     </div>
                 </div>
+
+                {/* ====== 公式キャラ用レベル設定 ====== */}
+                {isOfficial && (
+                    <div style={S.section}>
+                        <div style={S.sectionTitle}>LEVEL（公式キャラ専用）</div>
+                        <h2 style={S.sectionHeading}>レベル設定</h2>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            {[1,2,3,4,5,6,7,8,9,10].map(lv => (
+                                <button key={lv} type="button" onClick={() => set('level', lv)}
+                                    style={{
+                                        padding: '6px 14px', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                                        background: form.level === lv ? 'rgba(192,208,224,0.2)' : 'transparent',
+                                        border: form.level === lv ? '1px solid rgba(192,208,224,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                        color: form.level === lv ? '#c0d0e0' : 'var(--text-muted)',
+                                    }}>Lv.{lv}</button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* ====== SEC 6: 能力値＋段階調整 ====== */}
                 <div style={S.section}>

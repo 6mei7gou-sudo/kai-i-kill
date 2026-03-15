@@ -54,6 +54,10 @@ export default function CharacterDetail({ id }) {
     const [serialCode, setSerialCode] = useState('');
     const [serialMsg, setSerialMsg] = useState(null);
     const [exporting, setExporting] = useState(false);
+    const [levelUpMethod, setLevelUpMethod] = useState('cp');
+    const [levelUpCode, setLevelUpCode] = useState('');
+    const [levelUpMsg, setLevelUpMsg] = useState(null);
+    const [levelingUp, setLevelingUp] = useState(false);
     const licenseRef = useRef(null);
     const [serialLoading, setSerialLoading] = useState(false);
     const [linkedGear, setLinkedGear] = useState(null);
@@ -172,6 +176,7 @@ export default function CharacterDetail({ id }) {
 
                         <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                             {e.character_name}
+                            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--accent-gold)', verticalAlign: 'middle' }}>Lv.{e.level || 1}</span>
                             {e.is_official && <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(192,208,224,0.12)', border: '1px solid rgba(192,208,224,0.3)', color: '#c0d0e0', verticalAlign: 'middle' }}>★ OFFICIAL</span>}
                             {e.title && <span style={{ fontSize: 'var(--font-size-md)', fontWeight: 400, color: 'var(--text-muted)' }}>「{e.title}」</span>}
                             {e.active_title && (
@@ -245,6 +250,79 @@ export default function CharacterDetail({ id }) {
                             {serialMsg && <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', color: serialMsg.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>{serialMsg.text}</div>}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* ===== レベルアップ ===== */}
+            {isOwner && (e.level || 1) < 10 && (
+                <div style={{ ...SS.section, marginBottom: 'var(--space-lg)' }}>
+                    <div style={SS.sTitle}>LEVEL UP</div>
+                    <h2 style={SS.sHead}>レベルアップ（現在 Lv.{e.level || 1}）</h2>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap' }}>
+                        {e.is_official ? (
+                            <button
+                                onClick={async () => {
+                                    setLevelingUp(true); setLevelUpMsg(null);
+                                    try {
+                                        const res = await fetch('/api/games/levelup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ character_id: id, method: 'official' }) });
+                                        const json = await res.json();
+                                        if (!res.ok) throw new Error(json.error);
+                                        setE(prev => ({ ...prev, level: json.data.level }));
+                                        setLevelUpMsg({ ok: true, text: `Lv.${json.levelUp.from} → Lv.${json.levelUp.to} にレベルアップ！` });
+                                    } catch (err) { setLevelUpMsg({ ok: false, text: err.message }); }
+                                    finally { setLevelingUp(false); }
+                                }}
+                                disabled={levelingUp}
+                                style={{ padding: '8px 20px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', background: 'rgba(192,208,224,0.1)', border: '1px solid rgba(192,208,224,0.3)', color: '#c0d0e0', cursor: 'pointer', fontWeight: 700 }}
+                            >
+                                {levelingUp ? '処理中...' : '★ レベルアップ（公式・無制限）'}
+                            </button>
+                        ) : (
+                            <>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                    {['cp', 'serial'].map(m => (
+                                        <button key={m} type="button" onClick={() => { setLevelUpMethod(m); setLevelUpMsg(null); }}
+                                            style={{
+                                                padding: '4px 12px', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer',
+                                                background: levelUpMethod === m ? 'rgba(212,175,55,0.15)' : 'transparent',
+                                                border: levelUpMethod === m ? '1px solid rgba(212,175,55,0.4)' : '1px solid rgba(255,255,255,0.05)',
+                                                color: levelUpMethod === m ? 'var(--accent-gold)' : 'var(--text-muted)',
+                                            }}>
+                                            {m === 'cp' ? 'CP消費（150CP）' : 'シリアルコード'}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', gap: 'var(--space-sm)', flex: 1, minWidth: '200px' }}>
+                                    {levelUpMethod === 'serial' && (
+                                        <input type="text" value={levelUpCode} onChange={ev => { setLevelUpCode(ev.target.value); setLevelUpMsg(null); }}
+                                            placeholder="レベルアップ用コード" style={{ flex: 1, padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', background: 'var(--bg-card)', border: 'var(--border-subtle)', color: 'var(--text-primary)', textTransform: 'uppercase' }} />
+                                    )}
+                                    <button
+                                        onClick={async () => {
+                                            if (levelUpMethod === 'serial' && !levelUpCode.trim()) return;
+                                            setLevelingUp(true); setLevelUpMsg(null);
+                                            try {
+                                                const payload = { character_id: id, method: levelUpMethod };
+                                                if (levelUpMethod === 'serial') payload.code = levelUpCode.trim();
+                                                const res = await fetch('/api/games/levelup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                                                const json = await res.json();
+                                                if (!res.ok) throw new Error(json.error);
+                                                setE(prev => ({ ...prev, level: json.data.level }));
+                                                setLevelUpCode('');
+                                                setLevelUpMsg({ ok: true, text: `Lv.${json.levelUp.from} → Lv.${json.levelUp.to} にレベルアップ！` });
+                                            } catch (err) { setLevelUpMsg({ ok: false, text: err.message }); }
+                                            finally { setLevelingUp(false); }
+                                        }}
+                                        disabled={levelingUp || (levelUpMethod === 'serial' && !levelUpCode.trim())}
+                                        style={{ padding: '8px 16px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', color: 'var(--accent-gold)', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}
+                                    >
+                                        {levelingUp ? '処理中...' : 'レベルアップ'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    {levelUpMsg && <div style={{ fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', color: levelUpMsg.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>{levelUpMsg.text}</div>}
                 </div>
             )}
 

@@ -227,6 +227,7 @@ ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS equipment_options JSONB DE
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS brief_history TEXT DEFAULT '';
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS hidden_abilities JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS level INT DEFAULT 1;
 ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
 ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
 
