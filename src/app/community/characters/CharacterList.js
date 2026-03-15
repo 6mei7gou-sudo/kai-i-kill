@@ -69,6 +69,7 @@ export default function CharacterList() {
                                     <h3 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
                                         <span style={{ color: AFF_COLOR[e.affiliation], marginRight: '8px' }}>{AFF_ICON[e.affiliation]}</span>
                                         {e.character_name}
+                                        {e.is_official && <span style={{ fontSize: '9px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '1px 6px', marginLeft: '8px', background: 'rgba(192,208,224,0.12)', border: '1px solid rgba(192,208,224,0.3)', color: '#c0d0e0', verticalAlign: 'middle' }}>★</span>}
                                         {e.title && <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginLeft: '12px', fontWeight: 400 }}>「{e.title}」</span>}
                                     </h3>
                                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>

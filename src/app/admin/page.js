@@ -108,6 +108,24 @@ export default function AdminPage() {
         }
     };
 
+    // 公式フラグ切り替え
+    const handleOfficialToggle = async (id, current) => {
+        try {
+            const res = await fetch('/api/approve', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table: activeTab, id, is_official: !current }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+            setItems(prev => prev.map(item =>
+                item.id === id ? { ...item, is_official: !current } : item
+            ));
+        } catch (err) {
+            alert('公式フラグ変更に失敗: ' + err.message);
+        }
+    };
+
     // 承認ステータス変更
     const handleApprove = async (id, newStatus) => {
         try {
@@ -298,6 +316,7 @@ export default function AdminPage() {
                                                 <th style={thStyle}></th>
                                                 <th style={thStyle}>名前</th>
                                                 <th style={thStyle}>投稿者</th>
+                                                <th style={thStyle}>公式</th>
                                                 <th style={thStyle}>ステータス</th>
                                                 <th style={thStyle}>日付</th>
                                                 <th style={thStyle}>操作</th>
@@ -324,6 +343,20 @@ export default function AdminPage() {
                                                             </Link>
                                                         </td>
                                                         <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{item.author_name || '—'}</td>
+                                                        <td style={tdStyle}>
+                                                            <button
+                                                                onClick={() => handleOfficialToggle(item.id, !!item.is_official)}
+                                                                style={{
+                                                                    padding: '3px 10px', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                                                                    background: item.is_official ? 'rgba(192,208,224,0.15)' : 'transparent',
+                                                                    border: item.is_official ? '1px solid rgba(192,208,224,0.4)' : '1px solid rgba(255,255,255,0.05)',
+                                                                    color: item.is_official ? '#c0d0e0' : 'var(--text-muted)',
+                                                                    fontFamily: 'var(--font-mono)',
+                                                                }}
+                                                            >
+                                                                {item.is_official ? '★ 公式' : '— 一般'}
+                                                            </button>
+                                                        </td>
                                                         <td style={tdStyle}>
                                                             <span style={{ padding: '3px 10px', fontSize: '10px', fontWeight: 700, background: st.bg, border: `1px solid ${st.border}`, color: st.color }}>
                                                                 {st.label}

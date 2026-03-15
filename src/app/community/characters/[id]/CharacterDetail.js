@@ -172,6 +172,7 @@ export default function CharacterDetail({ id }) {
 
                         <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                             {e.character_name}
+                            {e.is_official && <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(192,208,224,0.12)', border: '1px solid rgba(192,208,224,0.3)', color: '#c0d0e0', verticalAlign: 'middle' }}>★ OFFICIAL</span>}
                             {e.title && <span style={{ fontSize: 'var(--font-size-md)', fontWeight: 400, color: 'var(--text-muted)' }}>「{e.title}」</span>}
                             {e.active_title && (
                                 <span style={{ fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 10px', background: 'rgba(212, 175, 55, 0.15)', border: '1px solid rgba(212, 175, 55, 0.4)', color: 'var(--accent-gold)' }}>

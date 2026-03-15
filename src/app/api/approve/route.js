@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
-// PATCH: 承認ステータスを変更
+// PATCH: 承認ステータスを変更 / 公式フラグを切り替え
 export async function PATCH(request) {
     try {
         const { userId } = await auth();
@@ -22,11 +22,25 @@ export async function PATCH(request) {
         }
 
         const body = await request.json();
-        const { table, id, status: newStatus } = body;
+        const { table, id, status: newStatus, is_official } = body;
 
         if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
+
+        // 公式フラグの切り替え
+        if (typeof is_official === 'boolean') {
+            const { data, error } = await supabase
+                .from(table)
+                .update({ is_official })
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return NextResponse.json({ ok: true, data });
+        }
+
+        // 承認ステータスの変更
         if (!['pending', 'approved', 'rejected'].includes(newStatus)) {
             return NextResponse.json({ error: '不正なステータス' }, { status: 400 });
         }

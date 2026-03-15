@@ -225,6 +225,9 @@ ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS skills JSONB DEFAULT '[]':
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS stage_plus JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS equipment_options JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS brief_history TEXT DEFAULT '';
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
+ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
+ALTER TABLE anomaly_drafts ADD COLUMN IF NOT EXISTS is_official BOOLEAN DEFAULT false;
 
 -- linked_gear_id の外部キー（存在しなければ追加）
 DO $$
