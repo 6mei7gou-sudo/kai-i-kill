@@ -1,12 +1,14 @@
 // キャラクターシート詳細 — v4.0 6軸スキル対応
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
 import { getBackgroundSkill, getSkillTypeColor, getAxisColor, getAvailableSkills } from '@/data/skillData';
+import HunterLicense from '@/components/HunterLicense';
+import { exportAsImage } from '@/lib/exportImage';
 
 const AFF_COLOR = { '祓部': '#4488ff', '傭兵': '#ffaa00', '無所属': '#ff6644' };
 const LANG_COLORS = { 'Igniscript': '#ff4444', 'Lupis Surf': '#4488ff', 'Ivyo': '#44cc44', 'NGT': '#ffcc00', 'Monyx': '#aaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
@@ -51,6 +53,9 @@ export default function CharacterDetail({ id }) {
     const [achievements, setAchievements] = useState([]);
     const [serialCode, setSerialCode] = useState('');
     const [serialMsg, setSerialMsg] = useState(null);
+    const [showLicense, setShowLicense] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const licenseRef = useRef(null);
     const [serialLoading, setSerialLoading] = useState(false);
     const [linkedGear, setLinkedGear] = useState(null);
     const isOwner = user && e?.user_id && user.id === e.user_id;
@@ -436,9 +441,44 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
+            {/* 討伐者資格証 */}
+            {showLicense && (
+                <div className="hl-preview-container">
+                    <HunterLicense ref={licenseRef} character={e} />
+                    <div className="hl-preview-container__actions">
+                        <button
+                            onClick={async () => {
+                                if (!licenseRef.current || exporting) return;
+                                setExporting(true);
+                                const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                                const idShort = (e.id || '').substring(0, 8);
+                                await exportAsImage(licenseRef.current, `kaiii_license_${idShort}_${dateStr}`, { width: 1200, height: 630 });
+                                setExporting(false);
+                            }}
+                            disabled={exporting}
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.3)', padding: '8px 20px', cursor: 'pointer' }}
+                        >
+                            {exporting ? 'EXPORTING...' : '画像を保存'}
+                        </button>
+                        <button
+                            onClick={() => setShowLicense(false)}
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', background: 'transparent', border: 'var(--border-subtle)', padding: '8px 20px', cursor: 'pointer' }}
+                        >
+                            閉じる
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* フッター */}
             <IdBadge id={id} label="CHARACTER ID" created_at={e.created_at} updated_at={e.updated_at} />
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginBottom: 'var(--space-2xl)' }}>
+                <button
+                    onClick={() => setShowLicense(!showLicense)}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', background: 'rgba(212,175,55,0.05)', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)', cursor: 'pointer' }}
+                >
+                    {showLicense ? '資格証を閉じる' : '資格証を生成'}
+                </button>
                 {isOwner && <Link href={`/create/character/${id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', padding: '4px 12px', border: '1px solid rgba(255,170,0,0.3)', textDecoration: 'none' }}>編集</Link>}
                 <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', padding: '4px 12px', border: 'var(--border-subtle)', textDecoration: 'none' }}>← 一覧</Link>
             </div>

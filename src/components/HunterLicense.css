@@ -1,0 +1,379 @@
+/* 討伐者資格証 — 固定サイズレイアウト（1200×630px） */
+/* html2canvas でキャプチャするため、全値をpx固定 */
+
+.hunter-license {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    background: #05070a;
+    color: #e8e6e3;
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* 走査線オーバーレイ */
+.hunter-license::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* 所属色グロー（左辺） */
+.hunter-license__glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 左辺アクセントライン */
+.hunter-license__left-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    z-index: 2;
+}
+
+/* ===== HEADER ===== */
+.hl-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a0c10;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    z-index: 2;
+}
+
+.hl-header__left {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+    letter-spacing: 0.05em;
+}
+
+.hl-header__right {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+}
+
+/* ヘッダー下の所属色ライン */
+.hl-header__accent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+}
+
+/* ===== PORTRAIT ===== */
+.hl-portrait {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+    width: 280px;
+    height: 340px;
+    background: #0a0c10;
+    overflow: hidden;
+}
+
+.hl-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+
+.hl-portrait__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    font-weight: 700;
+    opacity: 0.3;
+}
+
+/* ===== ID / META（ポートレート下） ===== */
+.hl-id-meta {
+    position: absolute;
+    top: 400px;
+    left: 20px;
+    width: 280px;
+    height: 200px;
+    padding: 12px 0;
+}
+
+.hl-id-meta__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    color: #555566;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+}
+
+.hl-id-meta__value {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+    margin-bottom: 12px;
+}
+
+.hl-id-meta__info {
+    font-size: 12px;
+    color: #9a9a9a;
+    margin-bottom: 4px;
+}
+
+.hl-id-meta__author {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+    margin-top: 8px;
+}
+
+/* ===== NAME BLOCK ===== */
+.hl-name {
+    position: absolute;
+    top: 50px;
+    left: 320px;
+    right: 20px;
+    height: 100px;
+}
+
+.hl-name__row1 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.hl-name__bar {
+    display: inline-block;
+    width: 4px;
+    height: 36px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.hl-name__char-name {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.hl-name__title {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.hl-name__row2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.hl-name__badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.hl-name__sub {
+    font-size: 14px;
+    color: #e8e6e3;
+}
+
+.hl-name__awakening {
+    font-size: 14px;
+    color: #9a9a9a;
+}
+
+/* ===== ABILITY BLOCK ===== */
+.hl-abilities {
+    position: absolute;
+    top: 160px;
+    left: 320px;
+    right: 20px;
+    height: 110px;
+}
+
+.hl-abilities__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.hl-abilities__grid {
+    display: flex;
+    gap: 4px;
+}
+
+.hl-ability {
+    flex: 1;
+    text-align: center;
+}
+
+.hl-ability__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #9a9a9a;
+    margin-bottom: 2px;
+}
+
+.hl-ability__rank {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.hl-ability__plus {
+    font-size: 12px;
+    vertical-align: super;
+    margin-left: 1px;
+}
+
+.hl-ability__bar {
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.hl-ability__bar-fill {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+/* ===== DATA BLOCK ===== */
+.hl-data {
+    position: absolute;
+    top: 280px;
+    left: 320px;
+    right: 20px;
+    height: 140px;
+}
+
+.hl-data__label-row {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.hl-data__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+}
+
+.hl-data-item__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+}
+
+.hl-data-item__value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e8e6e3;
+    margin-top: 1px;
+}
+
+/* 魔法言語の色付き略称 */
+.hl-lang {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.hl-lang--weak {
+    text-decoration: line-through;
+    opacity: 0.4;
+}
+
+/* 信念点ドット */
+.hl-belief-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 3px;
+}
+
+.hl-belief-dot--active {
+    /* 色はインラインで所属色を指定 */
+}
+
+.hl-belief-dot--empty {
+    background: #333;
+}
+
+/* ===== FOOTER ===== */
+.hl-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    color: #555566;
+    z-index: 2;
+}
+
+.hl-footer__status {
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 8px;
+}
+
+/* ===== プレビューコンテナ ===== */
+.hl-preview-container {
+    margin: 24px 0;
+    padding: 24px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow-x: auto;
+}
+
+.hl-preview-container__actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
