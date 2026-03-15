@@ -90,8 +90,8 @@
     position: absolute;
     top: 50px;
     left: 20px;
-    width: 280px;
-    height: 340px;
+    width: 270px;
+    height: 360px;
     background: #0a0c10;
     overflow: hidden;
 }
@@ -118,10 +118,10 @@
 /* ===== ID / META（ポートレート下） ===== */
 .hl-id-meta {
     position: absolute;
-    top: 400px;
+    top: 420px;
     left: 20px;
-    width: 280px;
-    height: 200px;
+    width: 270px;
+    height: 180px;
     padding: 12px 0;
 }
 
@@ -156,7 +156,7 @@
 .hl-name {
     position: absolute;
     top: 50px;
-    left: 320px;
+    left: 310px;
     right: 20px;
     height: 100px;
 }
@@ -220,7 +220,7 @@
 .hl-abilities {
     position: absolute;
     top: 160px;
-    left: 320px;
+    left: 310px;
     right: 20px;
     height: 110px;
 }
@@ -278,7 +278,7 @@
 .hl-data {
     position: absolute;
     top: 280px;
-    left: 320px;
+    left: 310px;
     right: 20px;
     height: 140px;
 }
