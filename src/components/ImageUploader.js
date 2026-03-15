@@ -21,6 +21,7 @@ export default function ImageUploader({
     folder = 'general',
     label = '画像',
     compact = false,
+    hint = '',
 }) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
@@ -111,6 +112,7 @@ export default function ImageUploader({
                         <span className="image-uploader__placeholder">
                             📁 クリックまたはドラッグ&ドロップ<br />
                             <small>JPEG / PNG / WebP / GIF（5MB以下）</small>
+                            {hint && <><br /><small style={{ color: '#d4af37' }}>{hint}</small></>}
                         </span>
                     )}
                     <input

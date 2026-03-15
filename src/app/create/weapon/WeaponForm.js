@@ -206,13 +206,13 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
                     </div>
                     <div style={S.row}>
-                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="gear" />
-                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="gear" compact />
+                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="gear" hint="推奨 3:4（例: 600×800px）" />
+                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="gear" compact hint="推奨 1:1（例: 200×200px）" />
                     </div>
                     <div style={S.row}>
-                        <ImageUploader label="画像1" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} folder="gear" />
-                        <ImageUploader label="画像2" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} folder="gear" />
-                        <ImageUploader label="画像3" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} folder="gear" />
+                        <ImageUploader label="画像1" value={form.image_urls[0]} onChange={v => { const a = [...form.image_urls]; a[0] = v; set('image_urls', a); }} folder="gear" hint="推奨 16:9" />
+                        <ImageUploader label="画像2" value={form.image_urls[1]} onChange={v => { const a = [...form.image_urls]; a[1] = v; set('image_urls', a); }} folder="gear" hint="推奨 16:9" />
+                        <ImageUploader label="画像3" value={form.image_urls[2]} onChange={v => { const a = [...form.image_urls]; a[2] = v; set('image_urls', a); }} folder="gear" hint="推奨 16:9" />
                     </div>
                     <div style={S.row}>
                         <FormInput label="動画URL（任意）" value={form.video_url} onChange={v => set('video_url', v)} placeholder="https://..." />

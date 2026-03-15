@@ -57,6 +57,7 @@ export default function CharacterSheetPage() {
                             value={state.characterImage}
                             onChange={v => setField('characterImage', v)}
                             folder="sheet-characters"
+                            hint="推奨 3:4（例: 600×800px）"
                         />
                     </div>
                     <div className="profile-field">

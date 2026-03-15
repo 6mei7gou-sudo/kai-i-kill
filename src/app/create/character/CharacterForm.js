@@ -385,12 +385,12 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
                     </div>
                     <div style={S.row}>
-                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="characters" />
-                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="characters" compact />
+                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="characters" hint="推奨 3:4（例: 600×800px）" />
+                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="characters" compact hint="推奨 1:1（例: 200×200px）" />
                     </div>
                     <div style={S.row}>
                         {form.image_urls.map((url, i) => (
-                            <ImageUploader key={i} label={`画像${i + 1}`} value={url} onChange={v => { const a = [...form.image_urls]; a[i] = v; set('image_urls', a); }} folder="characters" />
+                            <ImageUploader key={i} label={`画像${i + 1}`} value={url} onChange={v => { const a = [...form.image_urls]; a[i] = v; set('image_urls', a); }} folder="characters" hint="推奨 16:9（例: 1200×675px）" />
                         ))}
                     </div>
                 </div>
