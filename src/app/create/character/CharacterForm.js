@@ -23,7 +23,7 @@ const ABILITIES = [
     { key: 'rank_han', name: '判', reading: 'はん', desc: '解明宣言・看破・戦術判断' },
     { key: 'rank_shiya', name: '察', reading: 'さつ', desc: '怪異感知・観察・証言聴取' },
     { key: 'rank_jutsu', name: '術', reading: 'じゅつ', desc: '魔法行使・魔導具操作' },
-    { key: 'rank_kon', name: '魂', reading: 'こん', desc: '信念維持・精神防御・異能発動' },
+    { key: 'rank_kon', name: '魂', reading: 'こん', desc: '信念維持・精神防御' },
 ];
 
 // 背景（6種）— 2能力値がC昇格 + 背景スキル自動取得
@@ -31,7 +31,7 @@ const BACKGROUNDS = [
     { id: '神社育ち', upgrades: ['rank_shiya', 'rank_kon'], desc: '禁足地のデータベースへのアクセス権。古い怪異の解明鍵①の難易度-1' },
     { id: '鋼の肉体', upgrades: ['rank_tai', 'rank_haya'], desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
     { id: '都市伝説研究者', upgrades: ['rank_shiki', 'rank_han'], desc: '調査スペシャル時に解明鍵追加入手の可能性' },
-    { id: '元実験体', upgrades: ['rank_kon'], extraUpgrade: 'innate_+1', desc: '魂C昇格＋異能ランク+1。渇望の覚醒ギフトを1段階低コストで使用可能' },
+    { id: '元実験体', upgrades: ['rank_kon'], desc: '魂C昇格。渇望の覚醒ギフトを1段階低コストで使用可能' },
     { id: 'ハッカー上がり', upgrades: ['rank_shiki', 'rank_haya'], desc: 'NGT魔法判定+1。独立型装備のCP+3' },
     { id: '魔道資格者', upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
 ];
@@ -62,7 +62,7 @@ const ASSIGNMENTS = {
 const AWAKENINGS = [
     { id: '先天覚醒型', desc: '生まれつき素養を持ち訓練で開花', effect: '術または魂がCでスタート（背景とは別枠）' },
     { id: 'ショック覚醒型', desc: '怪異に関わる強烈な体験が引き金', effect: '恨み/喪失に対する判定+1。初期信念+1' },
-    { id: '実験覚醒型', desc: '人体実験で強制覚醒', effect: '異能ランク+1。察判定+1（怪異への過敏さ）' },
+    { id: '実験覚醒型', desc: '人体実験で強制覚醒', effect: '察判定+1（怪異への過敏さ）' },
     { id: '接触覚醒型', desc: '怪異の核や特殊素材への長期接触', effect: '察判定に常時+1（怪異の気配への鋭敏さ）' },
 ];
 
