@@ -342,10 +342,10 @@
 /* ===== BRIEF HISTORY ===== */
 .hl-history {
     position: absolute;
-    top: 430px;
+    top: 460px;
     left: 310px;
     right: 20px;
-    height: 160px;
+    height: 140px;
     padding: 10px 14px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.04);
