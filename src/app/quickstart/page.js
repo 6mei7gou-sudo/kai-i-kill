@@ -244,12 +244,12 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>傭兵</td>
                                     <td>装備1ランク上、コネクション+2、初期二つ名</td>
-                                    <td>収益不安定、法的保護が限定的</td>
+                                    <td>契約に縛られる。本業が別でもライセンスがあれば傭兵</td>
                                 </tr>
                                 <tr>
                                     <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>無所属</td>
                                     <td>察+1常時、裏ルート、勘判定</td>
-                                    <td>法的保護なし、補給不安定、情報に疎い</td>
+                                    <td>組織に属せない者。法的保護なし、補給不安定</td>
                                 </tr>
                             </tbody>
                         </table>
