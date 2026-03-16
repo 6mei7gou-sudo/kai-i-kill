@@ -823,9 +823,18 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT</div>
                     <h2 style={S.sectionHeading}>主力装備</h2>
+                    {form.affiliation === '祓部' && !isOfficial && (
+                        <p style={{ fontSize: '11px', color: '#ffaa00', fontFamily: 'var(--font-mono)', marginBottom: 'var(--space-md)', padding: '8px 12px', background: 'rgba(255,170,0,0.06)', border: '1px solid rgba(255,170,0,0.15)' }}>
+                            祓部所属の装備は蒼鉄機工製または汎用品に限定されます。
+                        </p>
+                    )}
                     <div style={S.row}>
                         <FormSelect label="装備種別" value={form.equipment_type} onChange={v => { set('equipment_type', v); set('equipment_name', ''); }} options={EQUIPMENT_TYPES} />
-                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={MANUFACTURER_NAMES} />
+                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={
+                            (form.affiliation === '祓部' && !isOfficial)
+                                ? MANUFACTURER_NAMES.filter(m => m === '蒼鉄機工' || m === '汎用品')
+                                : MANUFACTURER_NAMES
+                        } />
                     </div>
                     <div style={S.fieldGroup}>
                         <label style={S.label}>装備名</label>
@@ -840,7 +849,13 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                             style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
                         >
                             <option value="">— 装備を選択 —</option>
-                            {(BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).map(w => (
+                            {(BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).filter(w => {
+                                // 祓部の非公式キャラは蒼鉄機工と汎用品のみ使用可
+                                if (form.affiliation === '祓部' && !isOfficial) {
+                                    return w.maker === '蒼鉄機工' || w.maker === '汎用品';
+                                }
+                                return true;
+                            }).map(w => (
                                 <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / {w.maker}）</option>
                             ))}
                             <option value="_custom">自由入力…</option>
