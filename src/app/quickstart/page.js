@@ -301,6 +301,11 @@ export default function QuickstartPage() {
                                         <td style={{ whiteSpace: 'nowrap' }}>体→B</td>
                                         <td>前線投入の実働部隊。直轄即応隊・広域機動班</td>
                                     </tr>
+                                    <tr>
+                                        <td style={{ fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' }}>支援課</td>
+                                        <td style={{ whiteSpace: 'nowrap' }}>術→B</td>
+                                        <td>後方支援・魔法補助・回復・結界展開の専門部隊</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

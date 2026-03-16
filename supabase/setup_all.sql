@@ -264,7 +264,7 @@ DO $$ DECLARE r RECORD; BEGIN
 END $$;
 ALTER TABLE character_sheets ADD CONSTRAINT character_sheets_sub_affiliation_check
 CHECK (sub_affiliation IS NULL OR sub_affiliation IN (
-  '古怪班', '新怪班', '封印班', '機動班',
+  '古怪班', '新怪班', '封印班', '機動班', '支援課',
   '突撃型', '偵察型', '技術型', '護衛型',
   '野良討伐者', '裏社会の住人', '在野研究者', '退魔師',
   '特務班', '技術班', '戦闘屋', '調査屋', '運び屋', '技術屋',
