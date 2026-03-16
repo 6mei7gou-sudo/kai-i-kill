@@ -43,7 +43,6 @@ const ASSIGNMENTS = {
         { id: '新怪班', upgrade: 'rank_shiya', desc: '現代型怪異の追跡・分析。SNS・デジタルメディア' },
         { id: '封印班', upgrade: 'rank_kon', desc: '禁足地の管理と特級怪異の封印。浄化の専門家' },
         { id: '機動班', upgrade: 'rank_tai', desc: '前線投入の実働部隊。直轄即応隊・広域機動班' },
-        { id: '支援課', upgrade: 'rank_jutsu', desc: '後方支援・魔法補助・回復・結界展開の専門部隊' },
     ],
     '傭兵': [
         { id: '突撃型', upgrade: 'rank_tai', desc: '火力と耐久の前衛。傭兵の花形' },
