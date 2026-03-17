@@ -110,12 +110,16 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
       });
 
       const replyJson = await res.json();
-      if (res.ok && replyJson.data) {
+      if (!res.ok) {
+        alert('返信に失敗: ' + (replyJson.error || '不明なエラー'));
+        return;
+      }
+      if (replyJson.data) {
         setReplies((prev) => [...prev, replyJson.data]);
         setReplyContent('');
       }
-    } catch {
-      // silent fail
+    } catch (err) {
+      alert('返信に失敗: ' + err.message);
     } finally {
       setSubmitting(false);
     }

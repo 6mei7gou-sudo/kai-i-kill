@@ -56,12 +56,16 @@ export default function PostComposer({ layer, parentId, onPost, onHunterCommand 
       });
 
       const postJson = await res.json();
-      if (res.ok && postJson.data) {
+      if (!res.ok) {
+        alert('投稿に失敗: ' + (postJson.error || '不明なエラー'));
+        return;
+      }
+      if (postJson.data) {
         setContent('');
         onPost?.(postJson.data);
       }
-    } catch {
-      // silent fail
+    } catch (err) {
+      alert('投稿に失敗: ' + err.message);
     } finally {
       setSubmitting(false);
     }

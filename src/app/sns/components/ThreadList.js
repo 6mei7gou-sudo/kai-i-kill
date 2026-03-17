@@ -79,7 +79,11 @@ export default function ThreadList({ layer, basePath }) {
       });
 
       const json = await res.json();
-      if (res.ok && json.data) {
+      if (!res.ok) {
+        alert('スレッド作成に失敗: ' + (json.error || '不明なエラー'));
+        return;
+      }
+      if (json.data) {
         setThreads((prev) => [json.data, ...prev]);
         setFormTitle('');
         setFormContent('');
@@ -87,8 +91,8 @@ export default function ThreadList({ layer, basePath }) {
         setFormPasswordMode('none');
         setShowForm(false);
       }
-    } catch {
-      // silent fail
+    } catch (err) {
+      alert('スレッド作成に失敗: ' + err.message);
     } finally {
       setSubmitting(false);
     }
