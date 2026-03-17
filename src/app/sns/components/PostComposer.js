@@ -55,10 +55,10 @@ export default function PostComposer({ layer, parentId, onPost, onHunterCommand 
         }),
       });
 
-      if (res.ok) {
-        const post = await res.json();
+      const postJson = await res.json();
+      if (res.ok && postJson.data) {
         setContent('');
-        onPost?.(post);
+        onPost?.(postJson.data);
       }
     } catch {
       // silent fail

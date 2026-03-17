@@ -94,9 +94,9 @@ export default function ChatRoom({ roomId, layer }) {
         }),
       });
 
-      if (res.ok) {
-        const msg = await res.json();
-        setMessages((prev) => [...prev, msg]);
+      const msgJson = await res.json();
+      if (res.ok && msgJson.data) {
+        setMessages((prev) => [...prev, msgJson.data]);
         setInput('');
       }
     } catch {

@@ -109,9 +109,9 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
         }),
       });
 
-      if (res.ok) {
-        const reply = await res.json();
-        setReplies((prev) => [...prev, reply]);
+      const replyJson = await res.json();
+      if (res.ok && replyJson.data) {
+        setReplies((prev) => [...prev, replyJson.data]);
         setReplyContent('');
       }
     } catch {

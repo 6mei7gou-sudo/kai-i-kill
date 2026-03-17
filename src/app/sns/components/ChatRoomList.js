@@ -45,9 +45,9 @@ export default function ChatRoomList({ layer }) {
         }),
       });
 
-      if (res.ok) {
-        const room = await res.json();
-        setRooms((prev) => [room, ...prev]);
+      const roomJson = await res.json();
+      if (res.ok && roomJson.data) {
+        setRooms((prev) => [roomJson.data, ...prev]);
         setFormName('');
         setFormDescription('');
         setFormExpires('');

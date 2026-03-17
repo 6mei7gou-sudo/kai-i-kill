@@ -78,9 +78,9 @@ export default function ThreadList({ layer, basePath }) {
         }),
       });
 
-      if (res.ok) {
-        const thread = await res.json();
-        setThreads((prev) => [thread, ...prev]);
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setThreads((prev) => [json.data, ...prev]);
         setFormTitle('');
         setFormContent('');
         setFormPassword('');
