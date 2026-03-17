@@ -48,10 +48,13 @@ const CATEGORY_INFO = {
 
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
 
+const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 export default function WeaponForm({ editId = null, initialData = null, characterBonus = null, originalTotalCp = 0 }) {
     const { user } = useUser();
     const router = useRouter();
     const isEdit = !!editId;
+    const isAdmin = !!(user && ADMIN_IDS.includes(user.id));
 
     const [form, setForm] = useState(INITIAL);
     const [submitting, setSubmitting] = useState(false);
@@ -145,8 +148,8 @@ export default function WeaponForm({ editId = null, initialData = null, characte
             // CP消費量を計算（編集時は差分のみ）
             const cpCost = isEdit ? totalCp - (originalTotalCp || 0) : totalCp;
 
-            // CP不足チェック（消費が必要な場合のみ）
-            if (cpCost > 0 && accountCp !== null && accountCp < cpCost) {
+            // CP不足チェック（管理者は免除）
+            if (!isAdmin && cpCost > 0 && accountCp !== null && accountCp < cpCost) {
                 setResult({ ok: false, msg: `CP不足です（残高: ${accountCp}CP、必要: ${cpCost}CP）。ゲームをプレイしてCPを獲得しましょう。` });
                 setSubmitting(false);
                 return;
@@ -362,8 +365,14 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                             </label>
                         </div>
                     </div>
+                    {/* 管理者モード表示 */}
+                    {isAdmin && (
+                        <div style={{ marginTop: 'var(--space-md)', padding: '10px 14px', background: 'rgba(192,208,224,0.06)', border: '1px solid rgba(192,208,224,0.2)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#c0d0e0' }}>
+                            ★ ADMIN MODE — CP制限なし・全メーカー・全オプション使用可能
+                        </div>
+                    )}
                     {/* CP予算バー */}
-                    {(() => {
+                    {!isAdmin && (() => {
                         const accp = accountCp ?? 10; // 読み込み中は仮値10
                         const budget = accp + (isEdit ? (originalTotalCp || 0) : 0);
                         const totalCp = Number(form.base_cp || 0) + form.options.reduce((s, o) => s + Number(o.cp || 0), 0);

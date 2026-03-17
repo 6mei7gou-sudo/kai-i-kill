@@ -75,9 +75,9 @@ export async function POST(request) {
             } catch (_) { /* CP付与失敗はキャラ作成に影響させない */ }
         }
 
-        // 武器投稿時：CPをアカウントから消費
+        // 武器投稿時：CPをアカウントから消費（管理者は免除）
         let cpDeducted = 0;
-        if (table === 'gear_posts' && result.total_cp > 0) {
+        if (table === 'gear_posts' && result.total_cp > 0 && !ADMIN_IDS.includes(userId)) {
             try {
                 await deductCp(supabase, userId, result.total_cp, result.id,
                     `装備「${result.gear_name}」の製作（${result.total_cp}CP）`);
@@ -125,9 +125,9 @@ export async function PATCH(request) {
 
         if (error) throw error;
 
-        // 武器編集時：CPの差分を消費/返還
+        // 武器編集時：CPの差分を消費/返還（管理者は免除）
         let cpDelta = 0;
-        if (table === 'gear_posts' && typeof result.total_cp === 'number') {
+        if (table === 'gear_posts' && typeof result.total_cp === 'number' && !ADMIN_IDS.includes(userId)) {
             const oldCp = existing.total_cp || 0;
             const diff = result.total_cp - oldCp;
             if (diff !== 0) {
