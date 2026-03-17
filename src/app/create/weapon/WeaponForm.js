@@ -264,33 +264,45 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 3 — BASE</div>
                     <h2 style={S.sectionHeading}>ベース装備</h2>
-                    <div style={S.fieldGroup}>
-                        <label style={S.label}>ベース装備を選択</label>
-                        <select
-                            value={form.base_name}
-                            onChange={e => {
-                                const name = e.target.value;
-                                set('base_name', name);
-                                const w = findWeapon(name);
-                                if (w) {
-                                    set('base_cp', w.cp);
-                                    set('slot_count', w.slot);
-                                    set('manufacturer', w.maker);
-                                    set('base_modifier', w.mod);
-                                    set('additional_traits', w.note);
-                                }
-                            }}
-                            style={{ width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
-                        >
-                            <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— ベース装備を選択 —</option>
-                            {(BASE_WEAPONS_BY_CATEGORY[form.category] || []).map(w => (
-                                <option key={w.name} value={w.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{w.name}（{w.cp}CP / {w.maker}）</option>
-                            ))}
-                            <option value="_custom" style={{ background: '#0a0c10', color: '#e8e6e3' }}>自由入力…</option>
-                        </select>
-                    </div>
-                    {form.base_name === '_custom' && (
-                        <FormInput label="ベース名（自由入力）" value={form.custom_base_name || ''} onChange={v => set('custom_base_name', v)} placeholder="例：強化戦術銃【制式型】" />
+                    {isAdmin ? (
+                        /* 管理者：全フィールド自由入力 */
+                        <>
+                            <FormInput label="ベース装備名（自由入力）" value={form.base_name} onChange={v => set('base_name', v)} placeholder="例：蒼鉄制式剣【試作三型】" />
+                            <FormInput label="基礎修正・性能" value={form.base_modifier} onChange={v => set('base_modifier', v)} placeholder="例：+3（古怪+4）" />
+                            <FormInput label="追加特性" value={form.additional_traits} onChange={v => set('additional_traits', v)} placeholder="例：怪異特効、隠匿可、調査持込可" />
+                        </>
+                    ) : (
+                        /* 一般ユーザー：ドロップダウンから選択 */
+                        <>
+                            <div style={S.fieldGroup}>
+                                <label style={S.label}>ベース装備を選択</label>
+                                <select
+                                    value={form.base_name}
+                                    onChange={e => {
+                                        const name = e.target.value;
+                                        set('base_name', name);
+                                        const w = findWeapon(name);
+                                        if (w) {
+                                            set('base_cp', w.cp);
+                                            set('slot_count', w.slot);
+                                            set('manufacturer', w.maker);
+                                            set('base_modifier', w.mod);
+                                            set('additional_traits', w.note);
+                                        }
+                                    }}
+                                    style={{ width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
+                                >
+                                    <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— ベース装備を選択 —</option>
+                                    {(BASE_WEAPONS_BY_CATEGORY[form.category] || []).map(w => (
+                                        <option key={w.name} value={w.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{w.name}（{w.cp}CP / {w.maker}）</option>
+                                    ))}
+                                    <option value="_custom" style={{ background: '#0a0c10', color: '#e8e6e3' }}>自由入力…</option>
+                                </select>
+                            </div>
+                            {form.base_name === '_custom' && (
+                                <FormInput label="ベース名（自由入力）" value={form.custom_base_name || ''} onChange={v => set('custom_base_name', v)} placeholder="例：強化戦術銃【制式型】" />
+                            )}
+                        </>
                     )}
                     <div style={S.row}>
                         <FormSelect label="品質" value={form.quality} onChange={v => set('quality', v)} options={OPTIONS.qualities} />
@@ -298,8 +310,12 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                         <FormInput label="スロット数" value={form.slot_count} onChange={v => set('slot_count', v)} type="number" />
                         <FormSelect label="素養依存" value={form.aptitude_dependency} onChange={v => set('aptitude_dependency', v)} options={OPTIONS.aptitudes} />
                     </div>
-                    <FormInput label="基礎修正・性能" value={form.base_modifier} onChange={v => set('base_modifier', v)} placeholder="例：武器修正 +2" />
-                    <FormInput label="追加特性" value={form.additional_traits} onChange={v => set('additional_traits', v)} placeholder="例：隠匿可、調査持込可" />
+                    {!isAdmin && (
+                        <>
+                            <FormInput label="基礎修正・性能" value={form.base_modifier} onChange={v => set('base_modifier', v)} placeholder="例：武器修正 +2" />
+                            <FormInput label="追加特性" value={form.additional_traits} onChange={v => set('additional_traits', v)} placeholder="例：隠匿可、調査持込可" />
+                        </>
+                    )}
                 </div>
 
                 {/* セクション4：カスタム構成 */}
