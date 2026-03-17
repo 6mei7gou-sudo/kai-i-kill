@@ -46,9 +46,9 @@ export default function PostComposer({ layer, parentId, onPost, onHunterCommand 
         body: JSON.stringify({
           user_id: user.id,
           character_id: character.id,
-          character_name: character.character_name,
-          character_affiliation: character.affiliation,
-          character_image_url: character.image_url,
+          display_name: character.display_name || character.character_name,
+          display_icon: character.image_url || null,
+          affiliation: character.affiliation,
           content: content.trim(),
           layer,
           parent_id: parentId || null,

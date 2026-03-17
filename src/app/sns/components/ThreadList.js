@@ -66,7 +66,7 @@ export default function ThreadList({ layer, basePath }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           character_id: character.id,
-          display_name: character.character_name,
+          display_name: character.display_name || character.character_name,
           display_icon: character.image_url || null,
           affiliation: character.affiliation,
           title: formTitle.trim(),

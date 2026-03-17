@@ -101,7 +101,7 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           character_id: character.id,
-          display_name: character.character_name,
+          display_name: character.display_name || character.character_name,
           display_icon: character.image_url || null,
           affiliation: character.affiliation,
           content: replyContent.trim(),

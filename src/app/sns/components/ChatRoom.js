@@ -88,8 +88,8 @@ export default function ChatRoom({ roomId, layer }) {
           room_id: roomId,
           user_id: user.id,
           character_id: character.id,
-          character_name: character.character_name,
-          character_image_url: character.image_url,
+          display_name: character.display_name || character.character_name,
+          display_icon: character.image_url || null,
           content: input.trim(),
         }),
       });
@@ -146,14 +146,14 @@ export default function ChatRoom({ roomId, layer }) {
             <div key={msg.id} className="chat-message">
               <div className="chat-message__avatar">
                 {msg.character_image_url ? (
-                  <img src={msg.character_image_url} alt={msg.character_name} />
+                  <img src={msg.display_icon || msg.character_image_url} alt={msg.display_name || msg.character_name} />
                 ) : (
                   '👤'
                 )}
               </div>
               <div className="chat-message__body">
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-sm)' }}>
-                  <span className="chat-message__name">{msg.character_name || '匿名'}</span>
+                  <span className="chat-message__name">{msg.display_name || msg.character_name || '匿名'}</span>
                   <span className="chat-message__time">{formatTime(msg.created_at)}</span>
                 </div>
                 <div className="chat-message__text">{msg.content}</div>

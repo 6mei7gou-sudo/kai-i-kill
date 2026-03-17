@@ -24,6 +24,7 @@ export default function CharacterSelector({ value, onChange }) {
           onChange({
             id: first.id,
             character_name: first.character_name,
+            display_name: first.character_name,
             affiliation: first.affiliation,
             image_url: first.image_url,
           });
@@ -47,27 +48,49 @@ export default function CharacterSelector({ value, onChange }) {
 
   const handleSelect = (char) => {
     onChange({
+      ...value,
       id: char.id,
       character_name: char.character_name,
+      display_name: value?.display_name || char.character_name,
       affiliation: char.affiliation,
       image_url: char.image_url,
     });
     setOpen(false);
   };
 
+  const handleDisplayNameChange = (e) => {
+    onChange({
+      ...value,
+      display_name: e.target.value,
+    });
+  };
+
   return (
     <div className="char-selector" ref={ref}>
-      <button
-        type="button"
-        className="char-selector__button"
-        onClick={() => setOpen(!open)}
-      >
-        {loading
-          ? '読込中...'
-          : value
-            ? `${value.character_name}${value.affiliation ? ` / ${value.affiliation}` : ''}`
-            : 'キャラクター選択'}
-      </button>
+      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+        <button
+          type="button"
+          className="char-selector__button"
+          onClick={() => setOpen(!open)}
+          style={{ flex: '0 0 auto' }}
+        >
+          {loading
+            ? '読込中...'
+            : value
+              ? `${value.character_name}${value.affiliation ? ` / ${value.affiliation}` : ''}`
+              : 'キャラクター選択'}
+        </button>
+        {value && (
+          <input
+            type="text"
+            value={value.display_name || ''}
+            onChange={handleDisplayNameChange}
+            placeholder="表示名"
+            className="chat-input__field"
+            style={{ flex: 1, minWidth: 0 }}
+          />
+        )}
+      </div>
 
       {open && (
         <div className="char-selector__dropdown">
