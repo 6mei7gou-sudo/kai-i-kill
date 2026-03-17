@@ -342,10 +342,10 @@
 /* ===== BRIEF HISTORY ===== */
 .hl-history {
     position: absolute;
-    top: 460px;
+    top: 530px;
     left: 310px;
     right: 20px;
-    height: 140px;
+    height: 80px;
     padding: 10px 14px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.04);
@@ -364,7 +364,7 @@
     line-height: 1.6;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 7;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
