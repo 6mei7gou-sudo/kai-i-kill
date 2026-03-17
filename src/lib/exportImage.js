@@ -1,7 +1,6 @@
 // 画像出力ユーティリティ — html2canvas でDOM要素をPNGとしてダウンロード
+// html2canvas は使用時に動的インポート（初期バンドルに含めない）
 'use client';
-
-import html2canvas from 'html2canvas';
 
 /**
  * 指定DOM要素をPNG画像としてダウンロード
@@ -10,6 +9,7 @@ import html2canvas from 'html2canvas';
  * @param {object} options - { scale, width, height, backgroundColor }
  */
 export async function exportAsImage(element, filename = 'export', options = {}) {
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(element, {
         scale: options.scale || 2,
         useCORS: true,

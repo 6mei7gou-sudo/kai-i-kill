@@ -1,7 +1,7 @@
 'use client';
 
 // PNG出力 — html2canvas でシートまたはキャラカードをPNG画像として保存
-import html2canvas from 'html2canvas';
+// html2canvas は使用時に動的インポート
 
 /**
  * 指定DOM要素をPNG画像としてダウンロード
@@ -10,6 +10,7 @@ import html2canvas from 'html2canvas';
  * @param {object} options - 追加オプション
  */
 export async function exportPng(element, filename = 'character_card', options = {}) {
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(element, {
         scale: options.scale || 2,
         useCORS: true,

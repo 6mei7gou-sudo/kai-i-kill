@@ -1,8 +1,7 @@
 'use client';
 
 // PDF出力 — html2canvas でシートをキャプチャ → jsPDF でA4 PDFに変換
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+// html2canvas, jsPDF は使用時に動的インポート
 
 /**
  * 指定DOM要素をPDFとしてダウンロード
@@ -10,6 +9,8 @@ import { jsPDF } from 'jspdf';
  * @param {string} filename - 出力ファイル名（拡張子なし）
  */
 export async function exportPdf(element, filename = 'character') {
+    const { default: html2canvas } = await import('html2canvas');
+    const { jsPDF } = await import('jspdf');
     // DOMをキャンバスに変換（高解像度）
     const canvas = await html2canvas(element, {
         scale: 2,

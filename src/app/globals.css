@@ -488,146 +488,37 @@ h6 {
   border: var(--border-subtle);
 }
 
-.badge--grade-special {
-  color: var(--grade-special);
-  border: 1px solid rgba(230, 57, 70, 0.35);
-  background: rgba(230, 57, 70, 0.1);
-}
-
-.badge--grade-1 {
-  color: var(--grade-1);
-  border: 1px solid var(--accent-gold-border);
-  background: var(--accent-gold-subtle);
-}
-
-.badge--grade-2 {
-  color: var(--grade-2);
-  border: 1px solid rgba(199, 143, 48, 0.3);
-  background: rgba(199, 143, 48, 0.08);
-}
-
-.badge--grade-3 {
-  color: var(--grade-3);
-  border: 1px solid rgba(138, 122, 69, 0.3);
-  background: rgba(138, 122, 69, 0.08);
-}
-
-.badge--grade-4 {
-  color: var(--grade-4);
-  border: 1px solid rgba(90, 106, 80, 0.3);
-  background: rgba(90, 106, 80, 0.08);
-}
-
-.badge--grade-5 {
-  color: var(--grade-5);
-  border: 1px solid rgba(74, 80, 96, 0.3);
-  background: rgba(74, 80, 96, 0.08);
-}
-
-/* 脅威度種別バッジ */
-.badge--threat-alpha {
-  color: var(--threat-alpha);
-  border: 1px solid rgba(230, 57, 70, 0.35);
-  background: rgba(230, 57, 70, 0.1);
-}
-
-.badge--threat-beta {
-  color: var(--threat-beta);
-  border: 1px solid rgba(230, 149, 43, 0.35);
-  background: rgba(230, 149, 43, 0.1);
-}
-
-.badge--threat-gamma {
-  color: var(--threat-gamma);
-  border: 1px solid rgba(138, 122, 69, 0.3);
-  background: rgba(138, 122, 69, 0.08);
-}
-
-.badge--threat-delta {
-  color: var(--threat-delta);
-  border: 1px solid rgba(58, 110, 165, 0.35);
-  background: rgba(58, 110, 165, 0.1);
-}
-
-/* 所属バッジ */
-.badge--faction-haraebe {
-  color: var(--faction-haraebe);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  background: rgba(212, 175, 55, 0.08);
-}
-
-.badge--faction-mercenary {
-  color: var(--faction-mercenary);
-  border: 1px solid rgba(58, 110, 165, 0.3);
-  background: rgba(58, 110, 165, 0.08);
-}
-
-.badge--faction-unaffiliated {
-  color: var(--faction-unaffiliated);
-  border: 1px solid rgba(122, 122, 138, 0.3);
-  background: rgba(122, 122, 138, 0.08);
-}
-
-/* 感情共鳴バッジ */
-.badge--resonance-fear {
-  color: var(--resonance-fear);
-  border: 1px solid rgba(139, 32, 48, 0.4);
-  background: rgba(139, 32, 48, 0.1);
-}
-
-.badge--resonance-rage {
-  color: var(--resonance-rage);
-  border: 1px solid rgba(212, 80, 32, 0.4);
-  background: rgba(212, 80, 32, 0.1);
-}
-
-.badge--resonance-sorrow {
-  color: var(--resonance-sorrow);
-  border: 1px solid rgba(40, 85, 160, 0.4);
-  background: rgba(40, 85, 160, 0.1);
-}
-
-.badge--resonance-haste {
-  color: var(--resonance-haste);
-  border: 1px solid rgba(212, 136, 32, 0.4);
-  background: rgba(212, 136, 32, 0.1);
-}
-
-.badge--resonance-thirst {
-  color: var(--resonance-thirst);
-  border: 1px solid rgba(112, 48, 160, 0.4);
-  background: rgba(112, 48, 160, 0.1);
-}
-
-.badge--resonance-purge {
-  color: var(--resonance-purge);
-  border: 1px solid rgba(64, 160, 112, 0.4);
-  background: rgba(64, 160, 112, 0.1);
-}
-
-/* 魔法言語バッジ */
-.badge--magic-ignis {
-  color: var(--magic-ignis);
-  border: 1px solid rgba(212, 48, 48, 0.35);
-  background: rgba(212, 48, 48, 0.08);
-}
-
-.badge--magic-lupis {
-  color: var(--magic-lupis);
-  border: 1px solid rgba(48, 112, 192, 0.35);
-  background: rgba(48, 112, 192, 0.08);
-}
-
-.badge--magic-ivyo {
-  color: var(--magic-ivyo);
-  border: 1px solid rgba(48, 160, 80, 0.35);
-  background: rgba(48, 160, 80, 0.08);
-}
-
-.badge--magic-ngt {
-  color: var(--magic-ngt);
-  border: 1px solid rgba(192, 160, 48, 0.35);
-  background: rgba(192, 160, 48, 0.08);
+/* バッジカラーシステム — CSS変数ベースで統合 */
+.badge--grade-special  { --b: 230, 57, 70;  color: var(--grade-special); }
+.badge--grade-1        { --b: 212, 175, 55; color: var(--grade-1); }
+.badge--grade-2        { --b: 199, 143, 48; color: var(--grade-2); }
+.badge--grade-3        { --b: 138, 122, 69; color: var(--grade-3); }
+.badge--grade-4        { --b: 90, 106, 80;  color: var(--grade-4); }
+.badge--grade-5        { --b: 74, 80, 96;   color: var(--grade-5); }
+.badge--threat-alpha   { --b: 230, 57, 70;  color: var(--threat-alpha); }
+.badge--threat-beta    { --b: 230, 149, 43; color: var(--threat-beta); }
+.badge--threat-gamma   { --b: 138, 122, 69; color: var(--threat-gamma); }
+.badge--threat-delta   { --b: 58, 110, 165; color: var(--threat-delta); }
+.badge--faction-haraebe      { --b: 212, 175, 55; color: var(--faction-haraebe); }
+.badge--faction-mercenary    { --b: 58, 110, 165; color: var(--faction-mercenary); }
+.badge--faction-unaffiliated { --b: 122, 122, 138; color: var(--faction-unaffiliated); }
+.badge--resonance-fear    { --b: 139, 32, 48;  color: var(--resonance-fear); }
+.badge--resonance-rage    { --b: 212, 80, 32;  color: var(--resonance-rage); }
+.badge--resonance-sorrow  { --b: 40, 85, 160;  color: var(--resonance-sorrow); }
+.badge--resonance-haste   { --b: 212, 136, 32; color: var(--resonance-haste); }
+.badge--resonance-thirst  { --b: 112, 48, 160; color: var(--resonance-thirst); }
+.badge--resonance-purge   { --b: 64, 160, 112; color: var(--resonance-purge); }
+.badge--magic-ignis { --b: 212, 48, 48;  color: var(--magic-ignis); }
+.badge--magic-lupis { --b: 48, 112, 192; color: var(--magic-lupis); }
+.badge--magic-ivyo  { --b: 48, 160, 80;  color: var(--magic-ivyo); }
+.badge--magic-ngt   { --b: 192, 160, 48; color: var(--magic-ngt); }
+[class*="badge--grade-"],
+[class*="badge--threat-"],
+[class*="badge--faction-"],
+[class*="badge--resonance-"],
+[class*="badge--magic-"] {
+  border: 1px solid rgba(var(--b), 0.3);
+  background: rgba(var(--b), 0.08);
 }
 
 /* 共鳴メーターのインライン強調マーク */
