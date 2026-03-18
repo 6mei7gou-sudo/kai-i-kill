@@ -135,12 +135,25 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     const isEdit = !!editId;
     const isOfficial = !!(initialData?.is_official);
 
-    const [form, setForm] = useState(INITIAL);
+    const DRAFT_KEY = `kaiii_char_draft_${editId || 'new'}`;
+
+    const [form, setForm] = useState(() => {
+        // 編集モードでなければlocalStorageから下書きを復元
+        if (typeof window !== 'undefined' && !editId) {
+            try {
+                const saved = localStorage.getItem(DRAFT_KEY);
+                if (saved) return { ...INITIAL, ...JSON.parse(saved) };
+            } catch {}
+        }
+        return INITIAL;
+    });
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const [myGear, setMyGear] = useState([]);
     const [innateChoice, setInnateChoice] = useState('rank_jutsu');
+    const [draftMsg, setDraftMsg] = useState(null);
 
+    // 編集モード：initialDataで上書き
     useEffect(() => {
         if (initialData) {
             setForm(prev => ({
@@ -151,6 +164,22 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             }));
         }
     }, [initialData]);
+
+    // 自動保存（2秒デバウンス）
+    useEffect(() => {
+        if (isEdit) return; // 編集モードでは下書き保存しない
+        const timer = setTimeout(() => {
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+            } catch {}
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [form, isEdit, DRAFT_KEY]);
+
+    // 下書きクリア（投稿成功時に呼ぶ）
+    const clearDraft = () => {
+        try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    };
 
     useEffect(() => {
         if (user && !form.author_name && !isEdit) {
@@ -339,6 +368,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             }
 
             setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : 'キャラクターシートを投稿しました！装備も自動投稿されました。' });
+            clearDraft();
             if (!isEdit) setForm(INITIAL);
             setTimeout(() => router.push(`/community/characters/${json.data?.id || editId}/`), 1500);
         } catch (err) {
@@ -382,6 +412,24 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             </section>
 
             <form onSubmit={handleSubmit}>
+                {/* 下書き通知 */}
+                {!isEdit && typeof window !== 'undefined' && (() => {
+                    let hasDraft = false;
+                    try { hasDraft = !!localStorage.getItem(DRAFT_KEY); } catch {}
+                    return hasDraft ? (
+                        <div style={{ padding: '10px 14px', marginBottom: 'var(--space-md)', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)' }}>
+                                下書きを自動復元しました（入力内容は自動保存されます）
+                            </span>
+                            <button type="button" onClick={() => { clearDraft(); setForm(INITIAL); setDraftMsg('下書きをクリアしました'); }}
+                                style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '3px 10px', cursor: 'pointer' }}>
+                                下書きをクリア
+                            </button>
+                        </div>
+                    ) : null;
+                })()}
+                {draftMsg && <div style={{ padding: '8px 14px', marginBottom: 'var(--space-md)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>{draftMsg}</div>}
+
                 {/* ====== SEC 0: メタ ====== */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 0 — META</div>
