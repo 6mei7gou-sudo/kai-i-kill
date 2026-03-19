@@ -4,7 +4,7 @@
 .hunter-license {
     position: relative;
     width: 1200px;
-    height: 727px;
+    height: 760px;
     background: #05070a;
     color: #e8e6e3;
     font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
@@ -366,6 +366,35 @@
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+}
+
+/* ===== FANART POLICY ===== */
+.hl-fanart {
+    position: absolute;
+    top: 620px;
+    left: 310px;
+    right: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hl-fanart__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+}
+
+.hl-fanart__items {
+    display: flex;
+    gap: 6px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* ===== FOOTER ===== */

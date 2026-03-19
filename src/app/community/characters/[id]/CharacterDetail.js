@@ -525,6 +525,41 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
+            {/* ===== 二次創作ガイドライン ===== */}
+            {e.fanart_policy && Object.keys(e.fanart_policy).length > 0 && (() => {
+                const FA_LABELS = {
+                    coupling: 'カップリング', bl: 'BL', gl: 'GL', nl: 'NL', yume: '夢表現',
+                    commission: 'FA外部発注', body_change: '身体変更', gender_swap: '性転換',
+                    hairstyle_change: '髪型変更', costume_change: '衣装変更', parody: 'パロディ',
+                    mild_sexual: '性表現（軽度）', mild_violence: '暴力（軽度）', r18: 'R18', r18g: 'R18G',
+                };
+                const FA_COLOR = { ok: '#00ffaa', ask: '#ffaa00', ng: '#ff4d4d' };
+                const FA_LABEL = { ok: 'OK', ask: '要相談', ng: 'NG' };
+                const p = e.fanart_policy;
+                return (
+                    <div style={SS.section}>
+                        <div style={SS.sTitle}>FANART POLICY</div>
+                        <h2 style={SS.sHead}>二次創作ガイドライン</h2>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '4px' }}>
+                            {Object.entries(FA_LABELS).map(([key, label]) => {
+                                const val = p[key] || 'ok';
+                                return (
+                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
+                                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{label}</span>
+                                        <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: FA_COLOR[val] }}>{FA_LABEL[val]}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {p.note && (
+                            <div style={{ marginTop: 'var(--space-sm)', padding: '8px 12px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                                {p.note}
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
             {/* 討伐者資格証（画面外に配置してキャプチャ用） */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                 <HunterLicense ref={licenseRef} character={e} />
@@ -539,7 +574,7 @@ export default function CharacterDetail({ id }) {
                         setExporting(true);
                         const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
                         const idShort = (e.id || '').substring(0, 8);
-                        await exportAsImage(licenseRef.current, `kaiii_license_${idShort}_${dateStr}`, { width: 1200, height: 727 });
+                        await exportAsImage(licenseRef.current, `kaiii_license_${idShort}_${dateStr}`, { width: 1200, height: 760 });
                         setExporting(false);
                     }}
                     disabled={exporting}

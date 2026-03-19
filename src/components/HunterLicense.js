@@ -207,6 +207,30 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
                 </div>
             )}
 
+            {/* FANART POLICY（一行サマリー） */}
+            {c.fanart_policy && (() => {
+                const FA_SHORT = {
+                    coupling: 'CP', bl: 'BL', gl: 'GL', nl: 'NL', yume: '夢',
+                    commission: '発注', body_change: '体変更', gender_swap: '性転換',
+                    hairstyle_change: '髪型', costume_change: '衣装', parody: 'パロ',
+                    mild_sexual: '性（軽）', mild_violence: '暴力（軽）', r18: 'R18', r18g: 'R18G',
+                };
+                const COLOR = { ok: '#00ffaa', ask: '#ffaa00', ng: '#ff4d4d' };
+                const p = c.fanart_policy;
+                const entries = Object.entries(FA_SHORT).filter(([k]) => p[k]);
+                if (entries.length === 0) return null;
+                return (
+                    <div className="hl-fanart">
+                        <span className="hl-fanart__label" style={{ color: affColor }}>// FANART</span>
+                        <span className="hl-fanart__items">
+                            {entries.map(([k, label]) => (
+                                <span key={k} style={{ color: COLOR[p[k]] || '#555' }}>{label}</span>
+                            ))}
+                        </span>
+                    </div>
+                );
+            })()}
+
             {/* FOOTER */}
             <div className="hl-footer">
                 <span>ISSUED: {formatDate(c.created_at)}</span>
