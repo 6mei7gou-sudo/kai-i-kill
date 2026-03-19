@@ -447,9 +447,9 @@ export default function CharacterDetail({ id }) {
                     <div style={SS.sTitle}>EQUIPMENT</div>
                     <h2 style={SS.sHead}>主力装備</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
-                        <Field label="種別" value={e.equipment_type} />
-                        <Field label="装備名" value={e.equipment_name === '_custom' ? e.custom_equipment_name : e.equipment_name} />
-                        <Field label="メーカー" value={e.equipment_maker} />
+                        <Field label="種別" value={linkedGear?.category || e.equipment_type} />
+                        <Field label="装備名" value={linkedGear?.gear_name || (e.equipment_name === '_custom' ? e.custom_equipment_name : e.equipment_name)} />
+                        <Field label="メーカー" value={linkedGear?.manufacturer || e.equipment_maker} />
                     </div>
                     <Field label="詳細" value={e.equipment_detail} />
 
@@ -562,7 +562,7 @@ export default function CharacterDetail({ id }) {
 
             {/* 討伐者資格証（画面外に配置してキャプチャ用） */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-                <HunterLicense ref={licenseRef} character={e} />
+                <HunterLicense ref={licenseRef} character={{ ...e, equipment_name: linkedGear?.gear_name || e.equipment_name, equipment_maker: linkedGear?.manufacturer || e.equipment_maker }} />
             </div>
 
             {/* フッター */}
