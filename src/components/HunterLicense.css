@@ -386,25 +386,30 @@
     margin-bottom: 6px;
 }
 
-.hl-fanart-block__row {
+.hl-fanart-block__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px 8px;
+}
+
+.hl-fanart-block__item {
     display: flex;
-    gap: 8px;
-    align-items: baseline;
-    margin-bottom: 2px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1px 0;
 }
 
-.hl-fanart-block__tag {
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    min-width: 40px;
-    flex-shrink: 0;
-}
-
-.hl-fanart-block__list {
+.hl-fanart-block__item-name {
     font-size: 9px;
     color: #9a9a9a;
-    line-height: 1.4;
+}
+
+.hl-fanart-block__item-val {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    min-width: 28px;
+    text-align: right;
 }
 
 .hl-fanart-block__note {
@@ -412,6 +417,7 @@
     font-size: 8px;
     color: #555566;
     font-style: italic;
+    grid-column: 1 / -1;
 }
 
 /* ===== FOOTER ===== */

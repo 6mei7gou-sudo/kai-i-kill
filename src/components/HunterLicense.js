@@ -226,31 +226,23 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
                     { key: 'r18', label: 'R18' },
                     { key: 'r18g', label: 'R18G' },
                 ];
+                const COLOR = { ok: '#00ffaa', ask: '#ffaa00', ng: '#ff4d4d' };
+                const LABEL = { ok: 'OK', ask: '要相談', ng: 'NG' };
                 const p = c.fanart_policy;
-                const okItems = FA_ITEMS.filter(i => p[i.key] === 'ok');
-                const askItems = FA_ITEMS.filter(i => p[i.key] === 'ask');
-                const ngItems = FA_ITEMS.filter(i => p[i.key] === 'ng');
                 return (
                     <div className="hl-fanart-block">
                         <div className="hl-fanart-block__label" style={{ color: affColor }}>// FANART POLICY</div>
-                        {okItems.length > 0 && (
-                            <div className="hl-fanart-block__row">
-                                <span className="hl-fanart-block__tag" style={{ color: '#00ffaa' }}>OK</span>
-                                <span className="hl-fanart-block__list">{okItems.map(i => i.label).join(' / ')}</span>
-                            </div>
-                        )}
-                        {askItems.length > 0 && (
-                            <div className="hl-fanart-block__row">
-                                <span className="hl-fanart-block__tag" style={{ color: '#ffaa00' }}>要相談</span>
-                                <span className="hl-fanart-block__list">{askItems.map(i => i.label).join(' / ')}</span>
-                            </div>
-                        )}
-                        {ngItems.length > 0 && (
-                            <div className="hl-fanart-block__row">
-                                <span className="hl-fanart-block__tag" style={{ color: '#ff4d4d' }}>NG</span>
-                                <span className="hl-fanart-block__list">{ngItems.map(i => i.label).join(' / ')}</span>
-                            </div>
-                        )}
+                        <div className="hl-fanart-block__grid">
+                            {FA_ITEMS.map(item => {
+                                const val = p[item.key] || 'ng';
+                                return (
+                                    <div key={item.key} className="hl-fanart-block__item">
+                                        <span className="hl-fanart-block__item-name">{item.label}</span>
+                                        <span className="hl-fanart-block__item-val" style={{ color: COLOR[val] }}>{LABEL[val]}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
                         {p.note && (
                             <div className="hl-fanart-block__note">{p.note}</div>
                         )}
