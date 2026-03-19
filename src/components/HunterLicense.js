@@ -207,26 +207,53 @@ const HunterLicense = forwardRef(function HunterLicense({ character: c }, ref) {
                 </div>
             )}
 
-            {/* FANART POLICY（一行サマリー） */}
+            {/* FANART POLICY */}
             {c.fanart_policy && (() => {
-                const FA_SHORT = {
-                    coupling: 'CP', bl: 'BL', gl: 'GL', nl: 'NL', yume: '夢',
-                    commission: '発注', body_change: '体変更', gender_swap: '性転換',
-                    hairstyle_change: '髪型', costume_change: '衣装', parody: 'パロ',
-                    mild_sexual: '性（軽）', mild_violence: '暴力（軽）', r18: 'R18', r18g: 'R18G',
-                };
-                const COLOR = { ok: '#00ffaa', ask: '#ffaa00', ng: '#ff4d4d' };
+                const FA_ITEMS = [
+                    { key: 'coupling', label: 'カップリング' },
+                    { key: 'bl', label: 'BL' },
+                    { key: 'gl', label: 'GL' },
+                    { key: 'nl', label: 'NL' },
+                    { key: 'yume', label: '夢表現' },
+                    { key: 'commission', label: 'FA外部発注' },
+                    { key: 'body_change', label: '身体変更' },
+                    { key: 'gender_swap', label: '性転換' },
+                    { key: 'hairstyle_change', label: '髪型変更' },
+                    { key: 'costume_change', label: '衣装変更' },
+                    { key: 'parody', label: 'パロディ' },
+                    { key: 'mild_sexual', label: '性表現（軽度）' },
+                    { key: 'mild_violence', label: '暴力（軽度）' },
+                    { key: 'r18', label: 'R18' },
+                    { key: 'r18g', label: 'R18G' },
+                ];
                 const p = c.fanart_policy;
-                const entries = Object.entries(FA_SHORT).filter(([k]) => p[k]);
-                if (entries.length === 0) return null;
+                const okItems = FA_ITEMS.filter(i => p[i.key] === 'ok');
+                const askItems = FA_ITEMS.filter(i => p[i.key] === 'ask');
+                const ngItems = FA_ITEMS.filter(i => p[i.key] === 'ng');
                 return (
-                    <div className="hl-fanart">
-                        <span className="hl-fanart__label" style={{ color: affColor }}>// FANART</span>
-                        <span className="hl-fanart__items">
-                            {entries.map(([k, label]) => (
-                                <span key={k} style={{ color: COLOR[p[k]] || '#555' }}>{label}</span>
-                            ))}
-                        </span>
+                    <div className="hl-fanart-block">
+                        <div className="hl-fanart-block__label" style={{ color: affColor }}>// FANART POLICY</div>
+                        {okItems.length > 0 && (
+                            <div className="hl-fanart-block__row">
+                                <span className="hl-fanart-block__tag" style={{ color: '#00ffaa' }}>OK</span>
+                                <span className="hl-fanart-block__list">{okItems.map(i => i.label).join(' / ')}</span>
+                            </div>
+                        )}
+                        {askItems.length > 0 && (
+                            <div className="hl-fanart-block__row">
+                                <span className="hl-fanart-block__tag" style={{ color: '#ffaa00' }}>要相談</span>
+                                <span className="hl-fanart-block__list">{askItems.map(i => i.label).join(' / ')}</span>
+                            </div>
+                        )}
+                        {ngItems.length > 0 && (
+                            <div className="hl-fanart-block__row">
+                                <span className="hl-fanart-block__tag" style={{ color: '#ff4d4d' }}>NG</span>
+                                <span className="hl-fanart-block__list">{ngItems.map(i => i.label).join(' / ')}</span>
+                            </div>
+                        )}
+                        {p.note && (
+                            <div className="hl-fanart-block__note">{p.note}</div>
+                        )}
                     </div>
                 );
             })()}

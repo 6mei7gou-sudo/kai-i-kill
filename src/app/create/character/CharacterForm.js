@@ -123,10 +123,10 @@ const INITIAL = {
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
     fanart_policy: {
-        coupling: 'ok', bl: 'ok', gl: 'ok', nl: 'ok', yume: 'ok',
-        commission: 'ok', body_change: 'ok', gender_swap: 'ok',
-        hairstyle_change: 'ok', costume_change: 'ok', parody: 'ok',
-        mild_sexual: 'ok', mild_violence: 'ok', r18: 'ng', r18g: 'ng',
+        coupling: 'ng', bl: 'ng', gl: 'ng', nl: 'ng', yume: 'ng',
+        commission: 'ng', body_change: 'ng', gender_swap: 'ng',
+        hairstyle_change: 'ng', costume_change: 'ng', parody: 'ng',
+        mild_sexual: 'ng', mild_violence: 'ng', r18: 'ng', r18g: 'ng',
         note: '',
     },
 };

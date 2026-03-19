@@ -369,32 +369,49 @@
 }
 
 /* ===== FANART POLICY ===== */
-.hl-fanart {
+.hl-fanart-block {
     position: absolute;
     top: 620px;
-    left: 310px;
+    left: 20px;
     right: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
 }
 
-.hl-fanart__label {
+.hl-fanart-block__label {
     font-family: 'JetBrains Mono', 'Consolas', monospace;
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}
+
+.hl-fanart-block__row {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 2px;
+}
+
+.hl-fanart-block__tag {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 40px;
     flex-shrink: 0;
 }
 
-.hl-fanart__items {
-    display: flex;
-    gap: 6px;
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
+.hl-fanart-block__list {
+    font-size: 9px;
+    color: #9a9a9a;
+    line-height: 1.4;
+}
+
+.hl-fanart-block__note {
+    margin-top: 4px;
     font-size: 8px;
-    font-weight: 700;
-    overflow: hidden;
-    white-space: nowrap;
+    color: #555566;
+    font-style: italic;
 }
 
 /* ===== FOOTER ===== */
