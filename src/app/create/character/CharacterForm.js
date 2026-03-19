@@ -338,8 +338,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     const baseCp = baseWeapon ? baseWeapon.cp : 0;
                     const totalCp = baseCp + optionsData.reduce((s, o) => s + o.cp, 0);
                     const gearPayload = {
-                        gear_name: `【${form.character_name}】の武器`,
+                        gear_name: `${actualBaseName}【${form.character_name}】`,
                         category: form.equipment_type,
+                        author_name: form.author_name,
                         manufacturer: form.equipment_maker || (baseWeapon ? baseWeapon.maker : ''),
                         base_name: actualBaseName,
                         base_cp: baseCp,
