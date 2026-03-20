@@ -120,6 +120,7 @@ const INITIAL = {
     belief_points: 5,
     level: 1, fate: '', backstory: '', brief_history: '', hidden_abilities: [],
     related_anomalies: '', related_characters: '', related_factions: '',
+    social_x: '', social_vrc: '', social_url: '',
     cyber_grade: 'none',
     cybernetics: [{ name: '', part: '' }, { name: '', part: '' }, { name: '', part: '' }],
     fanart_policy: {
@@ -1224,6 +1225,18 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <FormInput label="関連怪異" value={form.related_anomalies} onChange={v => set('related_anomalies', v)} placeholder="TMP-??? / KAI-####" />
                         <FormInput label="関連キャラ" value={form.related_characters} onChange={v => set('related_characters', v)} placeholder="CHAR-???" />
                         <FormInput label="関連組織" value={form.related_factions} onChange={v => set('related_factions', v)} placeholder="FAC-???" />
+                    </div>
+                </div>
+
+                {/* ====== SEC 15: ソーシャルリンク ====== */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 15 — SOCIAL</div>
+                    <h2 style={S.sectionHeading}>SNSアカウント</h2>
+                    <p style={sectionNote}>プレイヤーの連絡先としてキャラクターシートに表示されます（すべて任意）。</p>
+                    <div style={S.row}>
+                        <FormInput label="X（旧Twitter）" value={form.social_x} onChange={v => set('social_x', v)} placeholder="@username" />
+                        <FormInput label="VRChat" value={form.social_vrc} onChange={v => set('social_vrc', v)} placeholder="VRChat表示名" />
+                        <FormInput label="URL" value={form.social_url} onChange={v => set('social_url', v)} placeholder="https://..." />
                     </div>
                 </div>
 

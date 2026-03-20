@@ -525,6 +525,37 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
+            {/* ===== SNSアカウント ===== */}
+            {(e.social_x || e.social_vrc || e.social_url) && (
+                <div style={SS.section}>
+                    <div style={SS.sTitle}>SOCIAL</div>
+                    <h2 style={SS.sHead}>SNSアカウント</h2>
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                        {e.social_x && (
+                            <a href={e.social_x.startsWith('http') ? e.social_x : `https://x.com/${e.social_x.replace(/^@/, '')}`}
+                                target="_blank" rel="noopener noreferrer"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', textDecoration: 'none', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
+                                <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>X</span>
+                                {e.social_x.startsWith('http') ? e.social_x.split('/').pop() : e.social_x}
+                            </a>
+                        )}
+                        {e.social_vrc && (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
+                                <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>VRC</span>
+                                {e.social_vrc}
+                            </span>
+                        )}
+                        {e.social_url && (
+                            <a href={e.social_url} target="_blank" rel="noopener noreferrer"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', textDecoration: 'none', color: 'var(--accent-cyber)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', wordBreak: 'break-all' }}>
+                                <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>URL</span>
+                                {e.social_url.replace(/^https?:\/\//, '')}
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* ===== 二次創作ガイドライン ===== */}
             {e.fanart_policy && Object.keys(e.fanart_policy).length > 0 && (() => {
                 const FA_LABELS = {
