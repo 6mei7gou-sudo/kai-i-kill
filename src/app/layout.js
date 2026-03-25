@@ -79,6 +79,12 @@ const navGroups = [
       { href: '/community/characters/', icon: '☖', text: 'キャラシート一覧' },
     ],
   },
+  {
+    label: 'サポート',
+    items: [
+      { href: '/contact/', icon: '✉', text: 'お問い合わせ' },
+    ],
+  },
 ];
 
 export default function RootLayout({ children }) {
