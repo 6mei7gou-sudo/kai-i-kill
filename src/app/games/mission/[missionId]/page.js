@@ -19,6 +19,7 @@ export default function MissionDetailPage() {
   const [characters, setCharacters] = useState([]);
   const [selectedChar, setSelectedChar] = useState(null);
   const [selectedParty, setSelectedParty] = useState([]);
+  const [dispatchedCharIds, setDispatchedCharIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
   const mission = getMissionById(missionId);
@@ -27,13 +28,14 @@ export default function MissionDetailPage() {
 
   useEffect(() => {
     if (!isLoaded || !user) { setLoading(false); return; }
-    fetch(`/api/posts?table=character_sheets&user_id=${user.id}`)
-      .then(r => r.json())
-      .then(res => {
-        if (res.ok) setCharacters(res.data || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/posts?table=character_sheets&user_id=${user.id}`).then(r => r.json()),
+      fetch(`/api/games/dispatch?user_id=${user.id}&active=true`).then(r => r.json()),
+    ]).then(([charRes, dispatchRes]) => {
+      if (charRes.ok) setCharacters(charRes.data || []);
+      if (dispatchRes.ok) setDispatchedCharIds(new Set((dispatchRes.data || []).map(d => d.character_id)));
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, [isLoaded, user]);
 
   if (!mission) {
@@ -148,19 +150,21 @@ export default function MissionDetailPage() {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
               {characters.map(c => {
+                const isDispatched = dispatchedCharIds.has(c.id);
                 const isInParty = selectedParty.find(p => p.id === c.id);
                 const isSelected = isCoop ? isInParty : selectedChar?.id === c.id;
                 const partyIndex = isCoop ? selectedParty.findIndex(p => p.id === c.id) + 1 : 0;
                 return (
                   <div
                     key={c.id}
-                    onClick={() => isCoop ? togglePartyMember(c) : setSelectedChar(c)}
+                    onClick={() => !isDispatched && (isCoop ? togglePartyMember(c) : setSelectedChar(c))}
                     style={{
                       padding: 'var(--space-md)',
                       border: isSelected ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
-                      background: isSelected ? 'var(--accent-gold-subtle)' : 'var(--bg-card)',
+                      background: isSelected ? 'var(--accent-gold-subtle)' : isDispatched ? 'rgba(255,255,255,0.02)' : 'var(--bg-card)',
                       borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer',
+                      cursor: isDispatched ? 'not-allowed' : 'pointer',
+                      opacity: isDispatched ? 0.5 : 1,
                       transition: 'all 0.2s',
                     }}
                   >
@@ -174,10 +178,15 @@ export default function MissionDetailPage() {
                             [{partyIndex}]
                           </span>
                         )}
-                        <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>{c.character_name}</span>
+                        <span style={{ fontWeight: 700, color: isDispatched ? 'var(--text-muted)' : 'var(--text-heading)' }}>{c.character_name}</span>
                         <span style={{ color: 'var(--text-secondary)', marginLeft: 'var(--space-md)', fontSize: 'var(--font-size-sm)' }}>
                           {c.class} / {c.affiliation}
                         </span>
+                        {isDispatched && (
+                          <span className="badge--gold" style={{ marginLeft: 'var(--space-sm)', fontSize: 'var(--font-size-xs)' }}>
+                            派遣中
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                         HP {calculateHP(c.rank_tai)} | 体{c.rank_tai} 疾{c.rank_haya} 識{c.rank_shiki} 判{c.rank_han} 察{c.rank_shiya} 術{c.rank_jutsu} 魂{c.rank_kon}

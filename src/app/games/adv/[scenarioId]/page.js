@@ -13,6 +13,7 @@ export default function AdvDetailPage() {
   const [characters, setCharacters] = useState([]);
   const [completions, setCompletions] = useState([]);
   const [selectedChar, setSelectedChar] = useState(null);
+  const [dispatchedCharIds, setDispatchedCharIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
 
   const scenario = getScenarioById(scenarioId);
@@ -23,9 +24,11 @@ export default function AdvDetailPage() {
     Promise.all([
       fetch(`/api/posts?table=character_sheets&user_id=${user.id}`).then(r => r.json()),
       fetch(`/api/games?table=adv_completions&user_id=${user.id}`).then(r => r.json()),
-    ]).then(([charRes, compRes]) => {
+      fetch(`/api/games/dispatch?user_id=${user.id}&active=true`).then(r => r.json()),
+    ]).then(([charRes, compRes, dispatchRes]) => {
       if (charRes.ok) setCharacters(charRes.data || []);
       if (compRes.ok) setCompletions(compRes.data || []);
+      if (dispatchRes.ok) setDispatchedCharIds(new Set((dispatchRes.data || []).map(d => d.character_id)));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [isLoaded, user]);
@@ -96,26 +99,33 @@ export default function AdvDetailPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
               {characters.map(c => {
                 const completed = completedCharIds.has(c.id);
+                const isDispatched = dispatchedCharIds.has(c.id);
+                const disabled = completed || isDispatched;
                 return (
                   <div
                     key={c.id}
-                    onClick={() => !completed && setSelectedChar(c)}
+                    onClick={() => !disabled && setSelectedChar(c)}
                     style={{
                       padding: 'var(--space-md)',
                       border: selectedChar?.id === c.id ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
-                      background: selectedChar?.id === c.id ? 'var(--accent-gold-subtle)' : completed ? 'rgba(255,255,255,0.02)' : 'var(--bg-card)',
+                      background: selectedChar?.id === c.id ? 'var(--accent-gold-subtle)' : disabled ? 'rgba(255,255,255,0.02)' : 'var(--bg-card)',
                       borderRadius: 'var(--radius-md)',
-                      cursor: completed ? 'not-allowed' : 'pointer',
-                      opacity: completed ? 0.5 : 1,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      opacity: disabled ? 0.5 : 1,
                       transition: 'all 0.2s',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <span style={{ fontWeight: 700, color: completed ? 'var(--text-muted)' : 'var(--text-heading)' }}>{c.character_name}</span>
+                        <span style={{ fontWeight: 700, color: disabled ? 'var(--text-muted)' : 'var(--text-heading)' }}>{c.character_name}</span>
                         <span style={{ color: 'var(--text-secondary)', marginLeft: 'var(--space-md)', fontSize: 'var(--font-size-sm)' }}>
                           {c.class} / {c.affiliation}
                         </span>
+                        {isDispatched && (
+                          <span className="badge--gold" style={{ marginLeft: 'var(--space-sm)', fontSize: 'var(--font-size-xs)' }}>
+                            派遣中
+                          </span>
+                        )}
                       </div>
                       {completed && (
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)' }}>
