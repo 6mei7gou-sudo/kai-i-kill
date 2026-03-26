@@ -62,6 +62,7 @@ export default function BattlePage() {
   const [state, setState] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [cpAwarded, setCpAwarded] = useState(0);
   const [isCoop, setIsCoop] = useState(false);
 
   // 初期化
@@ -176,6 +177,8 @@ export default function BattlePage() {
         }),
       });
       if (!res.ok) throw new Error('保存に失敗しました');
+      const json = await res.json();
+      if (json.cpAwarded) setCpAwarded(json.cpAwarded);
       setSaved(true);
     } catch (e) {
       console.error(e);
@@ -388,6 +391,11 @@ export default function BattlePage() {
                 : ` | 残HP ${state.player.hp}`
               }
             </div>
+            {state.phase === PHASE.VICTORY && (
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', marginTop: 'var(--space-sm)' }}>
+                CP報酬: +{{ E: 1, D: 2, C: 3, B: 5, A: 8, S: 12 }[JSON.parse(sessionStorage.getItem('battle_mission'))?.difficulty] || 0} CP
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', marginTop: 'var(--space-xl)' }}>
               {user && !saved && (
@@ -395,7 +403,12 @@ export default function BattlePage() {
                   {saving ? '保存中...' : '戦績を保存'}
                 </button>
               )}
-              {saved && <span style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>保存完了</span>}
+              {saved && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
+                  <span style={{ color: 'var(--accent-gold)' }}>保存完了</span>
+                  {cpAwarded > 0 && <span style={{ color: 'var(--accent-gold)', marginLeft: 'var(--space-sm)' }}>+{cpAwarded} CP</span>}
+                </span>
+              )}
               <button
                 onClick={() => router.push(`/games/mission/${missionId}/`)}
                 style={actionBtnStyle('var(--text-secondary)')}
