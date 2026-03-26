@@ -96,7 +96,7 @@ export default function AdvPlayPage() {
     if (!user || saved) return;
     setSaving(true);
     try {
-      await fetch('/api/games', {
+      const res = await fetch('/api/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -114,6 +114,7 @@ export default function AdvPlayPage() {
           },
         }),
       });
+      if (!res.ok) throw new Error('保存に失敗しました');
       setSaved(true);
     } catch (e) {
       console.error(e);

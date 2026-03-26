@@ -154,7 +154,7 @@ export default function BattlePage() {
     } : getBattleResult(state);
 
     try {
-      await fetch('/api/games', {
+      const res = await fetch('/api/games', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -175,6 +175,7 @@ export default function BattlePage() {
           },
         }),
       });
+      if (!res.ok) throw new Error('保存に失敗しました');
       setSaved(true);
     } catch (e) {
       console.error(e);

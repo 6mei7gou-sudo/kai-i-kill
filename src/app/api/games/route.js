@@ -50,7 +50,8 @@ export async function POST(request) {
       return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
     }
 
-    const payload = { ...data, user_id: userId };
+    const { achievements, ...insertData } = data;
+    const payload = { ...insertData, user_id: userId };
 
     // ADV完了の重複チェック
     if (table === 'adv_completions') {
@@ -79,8 +80,8 @@ export async function POST(request) {
     if (error) throw error;
 
     // 実績があれば保存
-    if (data.achievements && Array.isArray(data.achievements)) {
-      for (const ach of data.achievements) {
+    if (achievements && Array.isArray(achievements)) {
+      for (const ach of achievements) {
         await supabase
           .from('character_achievements')
           .upsert({
