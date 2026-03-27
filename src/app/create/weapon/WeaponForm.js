@@ -155,15 +155,27 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                 return;
             }
 
+            // _custom を実際の名前に解決
+            const resolvedBaseName = form.base_name === '_custom' ? (form.custom_base_name || '') : form.base_name;
+            const resolvedOptions = form.options.filter(o => o.name.trim()).map(o => {
+                if (o.name === '_custom') {
+                    const { custom_name, ...rest } = o;
+                    return { ...rest, name: custom_name || '' };
+                }
+                return o;
+            });
+
             const payload = {
                 ...form, intended_role: form.intended_role,
+                base_name: resolvedBaseName,
                 strengths: JSON.stringify(form.strengths.filter(Boolean)),
                 weaknesses: JSON.stringify(form.weaknesses.filter(Boolean)),
-                options: JSON.stringify(form.options.filter(o => o.name.trim())),
+                options: JSON.stringify(resolvedOptions),
                 asset_urls: JSON.stringify(form.asset_urls.filter(Boolean)),
                 total_cp: totalCp, option_count: optCount, risk_level: calcRisk(),
             };
             delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id;
+            delete payload.custom_base_name;
 
             const method = isEdit ? 'PATCH' : 'POST';
             const body = isEdit
