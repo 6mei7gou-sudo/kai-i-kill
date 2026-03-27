@@ -734,7 +734,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.sectionTitle}>SECTION 7 — SKILLS</div>
                     <h2 style={S.sectionHeading}>スキル選択</h2>
                     <p style={sectionNote}>
-                        Lv1では2スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
+                        Lv{form.level}では{[0,2,3,4,5,6,7,8,9,10,12][form.level] || 2}スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
                     </p>
 
                     {/* 背景スキル（自動取得） */}
@@ -747,13 +747,13 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
 
                     {/* スロット残り */}
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= 2 ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
-                        スロット: {(form.skills || []).length} / 2
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= ([0,2,3,4,5,6,7,8,9,10,12][form.level] || 2) ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
+                        スロット: {(form.skills || []).length} / {[0,2,3,4,5,6,7,8,9,10,12][form.level] || 2}
                     </div>
 
                     {/* スキル一覧 */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
-                        {availableSkills.filter(s => s.level <= 1).map(skill => {
+                        {availableSkills.filter(s => s.level <= form.level).map(skill => {
                             const selected = (form.skills || []).includes(skill.id);
                             const axisColor = getAxisColor(skill.axis);
                             const typeColor = getSkillTypeColor(skill.type);
@@ -781,14 +781,14 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         })}
                     </div>
 
-                    {/* Lv2以上のスキルは参考表示 */}
-                    {availableSkills.filter(s => s.level > 1).length > 0 && (
+                    {/* 現在のレベルより上のスキルは参考表示 */}
+                    {availableSkills.filter(s => s.level > form.level).length > 0 && (
                         <details style={{ marginTop: 'var(--space-lg)' }}>
                             <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                                Lv2以降で取得可能なスキル（{availableSkills.filter(s => s.level > 1).length}種）
+                                Lv{form.level + 1}以降で取得可能なスキル（{availableSkills.filter(s => s.level > form.level).length}種）
                             </summary>
                             <div style={{ ...gridCards, marginTop: 'var(--space-sm)' }}>
-                                {availableSkills.filter(s => s.level > 1).map(skill => (
+                                {availableSkills.filter(s => s.level > form.level).map(skill => (
                                     <div key={skill.id} style={{ padding: '10px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', opacity: 0.6 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
                                             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-xs)' }}>{skill.id}</span>
