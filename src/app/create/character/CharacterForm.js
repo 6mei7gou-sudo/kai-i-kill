@@ -272,14 +272,15 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     }, [isOfficial]);
 
     // --- スキルトグル ---
+    const SKILL_SLOTS_BY_LEVEL = [0,2,3,4,5,6,7,8,9,10,12];
     const toggleSkill = useCallback((skillId) => {
         setForm(prev => {
             const current = [...(prev.skills || [])];
             if (current.includes(skillId)) {
                 return { ...prev, skills: current.filter(s => s !== skillId) };
             }
-            // 公式キャラは制限なし、通常は2枠まで
-            if (!isOfficial && current.length >= 2) return prev;
+            const maxSlots = SKILL_SLOTS_BY_LEVEL[prev.level] || 2;
+            if (!isOfficial && current.length >= maxSlots) return prev;
             return { ...prev, skills: [...current, skillId] };
         });
     }, []);
@@ -734,7 +735,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <div style={S.sectionTitle}>SECTION 7 — SKILLS</div>
                     <h2 style={S.sectionHeading}>スキル選択</h2>
                     <p style={sectionNote}>
-                        Lv{form.level}では{[0,2,3,4,5,6,7,8,9,10,12][form.level] || 2}スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
+                        Lv{form.level}では{SKILL_SLOTS_BY_LEVEL[form.level] || 2}スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
                     </p>
 
                     {/* 背景スキル（自動取得） */}
@@ -747,8 +748,8 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
 
                     {/* スロット残り */}
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= ([0,2,3,4,5,6,7,8,9,10,12][form.level] || 2) ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
-                        スロット: {(form.skills || []).length} / {[0,2,3,4,5,6,7,8,9,10,12][form.level] || 2}
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= (SKILL_SLOTS_BY_LEVEL[form.level] || 2) ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
+                        スロット: {(form.skills || []).length} / {SKILL_SLOTS_BY_LEVEL[form.level] || 2}
                     </div>
 
                     {/* スキル一覧 */}
