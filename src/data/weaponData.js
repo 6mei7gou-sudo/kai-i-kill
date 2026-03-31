@@ -23,7 +23,6 @@ export const MANUFACTURER_TIER = {
     '雷禽重工':  { modBonus: 1, cpMul: 1.6, slotBonus: 1, desc: '高出力・高リスク。傭兵向け市場を独占', note: '素養C以上推奨。高出力', fit: '傭兵' },
     '鴉羽技研':  { modBonus: 1, cpMul: 1.6, slotBonus: 1, desc: 'グレーゾーン職人集団。違法改造・特注品', note: '違法スロット。検知リスク', fit: '無所属' },
     '銀鎚精機':  { modBonus: 1, cpMul: 2.4, slotBonus: 1, desc: '個人専用品の職人集団。世界に一つの専用機', note: '個人専用品。他者使用不可', fit: '全' },
-    '蜃気楼工廠': { modBonus: 2, cpMul: 2.4, slotBonus: 1, desc: '実態不明の製造者。闇市場に流通する謎の魔導具', note: '侵食ロール。出所不明', fit: '上級者向け' },
     'その他':    { modBonus: 0, cpMul: 1.0, slotBonus: 0, desc: '上記以外 / 自作 / 出所不明', note: '自作・出所不明', fit: '自由' },
 };
 
