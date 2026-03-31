@@ -192,6 +192,7 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   stage_plus JSONB DEFAULT '[]'::JSONB,
   equipment_type TEXT CHECK (equipment_type IN ('武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型')),
   equipment_name TEXT,
+  custom_equipment_name TEXT,
   equipment_maker TEXT,
   equipment_detail TEXT,
   equipment_options JSONB DEFAULT '[]'::JSONB,

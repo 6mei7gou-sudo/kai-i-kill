@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, findWeapon, findOption } from '@/data/weaponData';
+import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, findWeapon, findOption, getWeaponsByMaker } from '@/data/weaponData';
+import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
+import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
 import { getAvailableSkills, getBackgroundSkill, getSkillTypeColor, getAxisColor } from '@/data/skillData';
 
@@ -116,7 +118,7 @@ const INITIAL = {
     stage_plus: [],
     skills: [],
     proficient_languages: [], weak_languages: [],
-    equipment_type: '武装型', equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
+    equipment_type: '武装型', equipment_name: '', custom_equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
     level: 1, fate: '', backstory: '', brief_history: '', hidden_abilities: [],
     related_anomalies: '', related_characters: '', related_factions: '',
@@ -294,6 +296,27 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     }), [form.affiliation, form.sub_affiliation, form.awakening, form.weapon_type]);
 
     const bgSkill = useMemo(() => getBackgroundSkill(form.background), [form.background]);
+
+    // --- 武器ステータス計算 ---
+    const weaponStats = useMemo(() => {
+        if (!form.equipment_name || form.equipment_name === '_custom') return null;
+        return calcWeaponStats({
+            weaponName: form.equipment_name,
+            equipmentType: form.equipment_type,
+            options: form.equipment_options,
+            gift: form.gift,
+            weaponType: form.weapon_type,
+        });
+    }, [form.equipment_name, form.equipment_type, form.equipment_options, form.gift, form.weapon_type]);
+
+    const attackAbilityKey = useMemo(() => getAttackAbility(form.weapon_type), [form.weapon_type]);
+
+    const damageRange = useMemo(() => {
+        if (!weaponStats || !attackAbilityKey) return null;
+        const rank = getEffectiveRank(attackAbilityKey);
+        const hp = (form.stage_plus || []).includes(attackAbilityKey);
+        return calcExpectedDamage(rank, weaponStats.totalMod, hp);
+    }, [weaponStats, attackAbilityKey, getEffectiveRank, form.stage_plus]);
 
     // --- 投稿処理 ---
     const handleSubmit = async (e) => {
@@ -887,7 +910,12 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
                     <div style={S.row}>
                         <FormSelect label="装備種別" value={form.equipment_type} onChange={v => { set('equipment_type', v); set('equipment_name', ''); }} options={EQUIPMENT_TYPES} />
-                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={
+                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => {
+                            set('equipment_maker', v);
+                            // メーカー変更時、現在の武器が合わなければクリア
+                            const cur = findWeapon(form.equipment_name);
+                            if (cur && v && v !== 'その他' && cur.maker !== v) set('equipment_name', '');
+                        }} options={
                             (form.affiliation === '祓部' && !isOfficial)
                                 ? MANUFACTURER_NAMES.filter(m => m === '蒼鉄機工' || m === '汎用品')
                                 : MANUFACTURER_NAMES
@@ -907,14 +935,29 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         >
                             <option value="">— 装備を選択 —</option>
                             {(BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).filter(w => {
-                                // 祓部の非公式キャラは蒼鉄機工と汎用品のみ使用可
                                 if (form.affiliation === '祓部' && !isOfficial) {
                                     return w.maker === '蒼鉄機工' || w.maker === '汎用品';
                                 }
+                                if (form.equipment_maker && form.equipment_maker !== 'その他') {
+                                    return w.maker === form.equipment_maker;
+                                }
                                 return true;
                             }).map(w => (
-                                <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / {w.maker}）</option>
+                                <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / 修正:{w.mod} / {w.maker}）</option>
                             ))}
+                            {form.equipment_maker && form.equipment_maker !== 'その他' && (
+                                <option disabled>── 他メーカー ──</option>
+                            )}
+                            {form.equipment_maker && form.equipment_maker !== 'その他' &&
+                                (BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).filter(w => {
+                                    if (form.affiliation === '祓部' && !isOfficial) {
+                                        return (w.maker === '蒼鉄機工' || w.maker === '汎用品') && w.maker !== form.equipment_maker;
+                                    }
+                                    return w.maker !== form.equipment_maker;
+                                }).map(w => (
+                                    <option key={`other_${w.name}`} value={w.name} style={{ color: '#666' }}>{w.name}（{w.cp}CP / 修正:{w.mod} / {w.maker}）</option>
+                                ))
+                            }
                             <option value="_custom">自由入力…</option>
                         </select>
                     </div>
@@ -987,6 +1030,17 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                             </div>
                         )}
                     </div>
+
+                    {/* 武器ステータスパネル */}
+                    {weaponStats && (
+                        <WeaponStatsPanel
+                            stats={weaponStats}
+                            weaponType={form.weapon_type}
+                            abilityRank={attackAbilityKey ? getEffectiveRank(attackAbilityKey) : 'D'}
+                            hasPlus={attackAbilityKey ? (form.stage_plus || []).includes(attackAbilityKey) : false}
+                            damageRange={damageRange}
+                        />
+                    )}
 
                     {/* 投稿済み装備の紐づけ */}
                     <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(212, 175, 55, 0.04)', border: '1px solid rgba(212, 175, 55, 0.2)' }}>

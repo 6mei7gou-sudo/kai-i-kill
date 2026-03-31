@@ -9,6 +9,8 @@ import IdBadge from '@/components/IdBadge';
 import { getBackgroundSkill, getSkillTypeColor, getAxisColor, getAvailableSkills } from '@/data/skillData';
 import HunterLicense from '@/components/HunterLicense';
 import { exportAsImage } from '@/lib/exportImage';
+import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
+import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 
 const AFF_COLOR = { '祓部': '#4488ff', '傭兵': '#ffaa00', '無所属': '#ff6644' };
 const LANG_COLORS = { 'Igniscript': '#ff4444', 'Lupis Surf': '#4488ff', 'Ivyo': '#44cc44', 'NGT': '#ffcc00', 'Monyx': '#aaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
@@ -452,6 +454,35 @@ export default function CharacterDetail({ id }) {
                         <Field label="メーカー" value={linkedGear?.manufacturer || e.equipment_maker} />
                     </div>
                     <Field label="詳細" value={e.equipment_detail} />
+
+                    {/* 武器ステータスパネル */}
+                    {(() => {
+                        const wName = e.equipment_name === '_custom' ? null : e.equipment_name;
+                        if (!wName) return null;
+                        const wStats = calcWeaponStats({
+                            weaponName: wName,
+                            equipmentType: e.equipment_type,
+                            options: Array.isArray(e.equipment_options) ? e.equipment_options : [],
+                            gift: e.gift,
+                            weaponType: e.weapon_type,
+                        });
+                        if (!wStats) return null;
+                        const atkKey = getAttackAbility(e.weapon_type);
+                        const atkRank = atkKey ? (e[atkKey] || 'D') : 'D';
+                        const sp = Array.isArray(e.stage_plus) ? e.stage_plus : [];
+                        const hp = atkKey ? sp.includes(atkKey) : false;
+                        const dmg = calcExpectedDamage(atkRank, wStats.totalMod, hp);
+                        return (
+                            <WeaponStatsPanel
+                                stats={wStats}
+                                weaponType={e.weapon_type}
+                                abilityRank={atkRank}
+                                hasPlus={hp}
+                                damageRange={dmg}
+                                compact
+                            />
+                        );
+                    })()}
 
                     {/* CP予算 */}
                     {(() => {

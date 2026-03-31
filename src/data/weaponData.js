@@ -185,3 +185,25 @@ export const findWeapon = (name) => {
     }
     return null;
 };
+
+// メーカーで武器を絞り込み
+export const getWeaponsByMaker = (category, maker) => {
+    const list = BASE_WEAPONS_BY_CATEGORY[category] || [];
+    if (!maker || maker === 'その他') return list;
+    return list.filter(w => w.maker === maker);
+};
+
+// 装備種別に対応するオプション一覧（汎用＋専用）を返す
+export const getOptionsForType = (equipmentType) => {
+    const result = {};
+    for (const [catName, opts] of Object.entries(CUSTOM_OPTIONS)) {
+        const isExclusive = catName.endsWith('専用');
+        if (isExclusive) {
+            const matchType = catName.replace('専用', '');
+            if (matchType === equipmentType) result[catName] = opts;
+        } else {
+            result[catName] = opts;
+        }
+    }
+    return result;
+};
