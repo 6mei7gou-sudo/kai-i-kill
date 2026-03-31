@@ -6,6 +6,8 @@ import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
+import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
+import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 
 const CAT_COLOR = { '武装型': '#4488ff', '独立型': '#88cc44', '半装身型': '#ffaa00', '搭乗型': '#8844ff' };
 const RISK_COLOR = { '低': '#88cc44', '中': '#ffaa00', '高': '#ff6644', '非常に高': '#ff4444' };
@@ -57,6 +59,7 @@ export default function GearDetail({ id }) {
                     <h1 className="section__heading">{entry.gear_name}</h1>
                     <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
                         <span style={S.badge(CAT_COLOR[entry.category] || '#888')}>{entry.category}</span>
+                        {entry.weapon_type && <span style={S.badge('#ff6644')}>{entry.weapon_type}{entry.weapon_subtype ? ` — ${entry.weapon_subtype}` : ''}</span>}
                         <span style={S.badge(RISK_COLOR[entry.risk_level] || '#888')}>リスク: {entry.risk_level}</span>
                         <span style={S.badge('#888')}>{entry.manufacturer}</span>
                         {entry.affiliation_fit && entry.affiliation_fit !== 'どれでも' && <span className="badge badge--kai">{entry.affiliation_fit}</span>}
@@ -107,6 +110,21 @@ export default function GearDetail({ id }) {
                 </div>
                 <Field label="基礎修正" value={entry.base_modifier} />
                 <Field label="追加特性" value={entry.additional_traits} />
+                {/* 武器ステータスパネル */}
+                {entry.weapon_type && (() => {
+                    const wStats = calcWeaponStats({
+                        weaponType: entry.weapon_type,
+                        manufacturer: entry.manufacturer || '汎用品',
+                        equipmentType: entry.category,
+                        subtype: entry.weapon_subtype || '',
+                        options: [],
+                        gift: '',
+                    });
+                    if (!wStats) return null;
+                    const atkKey = getAttackAbility(entry.weapon_type);
+                    const dmg = calcExpectedDamage('C', wStats.totalMod, false);
+                    return <WeaponStatsPanel stats={wStats} weaponType={entry.weapon_type} abilityRank="C" hasPlus={false} damageRange={dmg} compact />;
+                })()}
             </div>
 
             {/* オプション */}

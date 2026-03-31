@@ -129,7 +129,9 @@ CREATE TABLE IF NOT EXISTS gear_posts (
   related_characters TEXT,
   related_anomalies TEXT,
   related_factions TEXT,
-  related_terms TEXT
+  related_terms TEXT,
+  weapon_type TEXT,
+  weapon_subtype TEXT
 );
 
 ALTER TABLE gear_posts ADD COLUMN IF NOT EXISTS user_id TEXT;
