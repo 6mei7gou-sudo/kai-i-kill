@@ -48,6 +48,11 @@ export default function WeaponStatsPanel({ stats, weaponType, abilityRank, hasPl
                             DMG {damageRange.min}~{damageRange.max}
                         </span>
                     )}
+                    {stats.reach && (
+                        <span style={{ padding: '2px 8px', fontSize: '10px', fontFamily: font, color: '#88aacc', border: '1px solid rgba(136,170,204,0.3)', background: 'rgba(136,170,204,0.08)' }}>
+                            {stats.reach}
+                        </span>
+                    )}
                     <span style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '10px', fontFamily: font, fontWeight: 700, color: riskColor, border: `1px solid ${riskColor}33`, background: `${riskColor}11` }}>
                         RISK: {stats.riskLevel}
                     </span>
@@ -88,7 +93,7 @@ export default function WeaponStatsPanel({ stats, weaponType, abilityRank, hasPl
             </div>
 
             {/* メインステータスグリッド */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: stats.reach ? '1fr 1fr 1fr 1fr' : '1fr 1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 {/* 武器修正 */}
                 <div style={{ padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', textAlign: 'center' }}>
                     <div style={{ fontFamily: font, fontSize: '10px', color: muted, marginBottom: '4px' }}>武器修正</div>
@@ -127,6 +132,16 @@ export default function WeaponStatsPanel({ stats, weaponType, abilityRank, hasPl
                         <div style={{ fontFamily: font, fontSize: '10px', color: '#ff4444', marginTop: '6px' }}>違法改造</div>
                     )}
                 </div>
+
+                {/* リーチ */}
+                {stats.reach && (
+                    <div style={{ padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)', textAlign: 'center' }}>
+                        <div style={{ fontFamily: font, fontSize: '10px', color: muted, marginBottom: '4px' }}>リーチ</div>
+                        <div style={{ fontFamily: font, fontSize: '16px', fontWeight: 700, color: '#88aacc', lineHeight: 1, marginTop: '6px' }}>
+                            {stats.reach}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* 条件付きボーナス */}

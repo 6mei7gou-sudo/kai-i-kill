@@ -2,6 +2,7 @@
 // 装備・クラス・背景・サイバネティクス・回復・状態異常を反映
 
 import { rollDicePool, resolveCheck, calculateDamage, calculateHP, rollInitiative, RANK_TO_HP_BONUS } from './dice';
+import { getWeaponSpec } from '@/data/weaponData';
 
 // 戦闘フェーズ
 const PHASE = {
@@ -16,7 +17,7 @@ const PHASE = {
 
 // ===== 装備・クラス・背景のボーナス計算 =====
 
-// 装備種別 → 武器修正
+// 装備種別 → 武器修正（フォールバック用。新システムでは getWeaponSpec を優先）
 const EQUIPMENT_MOD = {
   '武装型': 1,
   '独立型': 1,
@@ -25,6 +26,15 @@ const EQUIPMENT_MOD = {
   '搭乗型': 2,
   '戦闘用搭乗型': 5,
 };
+
+// 武器種×企業から実際の武器修正を取得
+function getActualWeaponMod(character) {
+  if (character.weapon_type) {
+    const spec = getWeaponSpec(character.weapon_type, character.equipment_maker || '汎用品', character.equipment_type || '武装型', character.equipment_name || '');
+    if (spec) return spec.mod;
+  }
+  return EQUIPMENT_MOD[character.equipment_type] || 0;
+}
 
 // クラスボーナスを計算
 function getClassBonus(className) {
@@ -95,7 +105,7 @@ export function createBattleState(character, mission) {
   const classBonus = getClassBonus(character.class);
   const bgBonus = getBackgroundBonus(character.background);
   const cyberBonus = getCyberBonus(character.cybernetics);
-  const weaponMod = (EQUIPMENT_MOD[character.equipment_type] || 0)
+  const weaponMod = getActualWeaponMod(character)
     + (bgBonus.weaponModBonus || 0)
     + (cyberBonus.attackMod || 0);
 
@@ -544,7 +554,7 @@ export function createCoopBattleState(characters, mission) {
     const classBonus = getClassBonus(character.class);
     const bgBonus = getBackgroundBonus(character.background);
     const cyberBonus = getCyberBonus(character.cybernetics);
-    const weaponMod = (EQUIPMENT_MOD[character.equipment_type] || 0)
+    const weaponMod = getActualWeaponMod(character)
       + (bgBonus.weaponModBonus || 0)
       + (cyberBonus.attackMod || 0);
 

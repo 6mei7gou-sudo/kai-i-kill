@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findWeapon, findOption } from '@/data/weaponData';
+import { MANUFACTURER_NAMES, WEAPON_TYPE_STATS, WEAPON_TYPE_NAMES, EQUIPMENT_TYPE_NAMES, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findOption, getWeaponSpec } from '@/data/weaponData';
 
 // フォームの初期値
 const INITIAL = {
@@ -26,7 +26,7 @@ const INITIAL = {
 
 // 選択肢
 const OPTIONS = {
-    categories: ['武装型', '独立型', '半装身型', '搭乗型'],
+    categories: EQUIPMENT_TYPE_NAMES,
     bodyParts: ['腕部', '脚部', '肩部', '胴部', 'その他'],
     manufacturers: MANUFACTURER_NAMES,
     affiliations: ['どれでも', '祓部', '傭兵', '無所属'],
@@ -284,36 +284,22 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                             <FormInput label="追加特性" value={form.additional_traits} onChange={v => set('additional_traits', v)} placeholder="例：怪異特効、隠匿可、調査持込可" />
                         </>
                     ) : (
-                        /* 一般ユーザー：ドロップダウンから選択 */
+                        /* 一般ユーザー：武器種×企業でスペック自動計算 */
                         <>
-                            <div style={S.fieldGroup}>
-                                <label style={S.label}>ベース装備を選択</label>
-                                <select
-                                    value={form.base_name}
-                                    onChange={e => {
-                                        const name = e.target.value;
-                                        set('base_name', name);
-                                        const w = findWeapon(name);
-                                        if (w) {
-                                            set('base_cp', w.cp);
-                                            set('slot_count', w.slot);
-                                            set('manufacturer', w.maker);
-                                            set('base_modifier', w.mod);
-                                            set('additional_traits', w.note);
-                                        }
-                                    }}
-                                    style={{ width: '100%', padding: '10px 36px 10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', appearance: 'none', WebkitAppearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '12px' }}
-                                >
-                                    <option value="" style={{ background: '#0a0c10', color: '#e8e6e3' }}>— ベース装備を選択 —</option>
-                                    {(BASE_WEAPONS_BY_CATEGORY[form.category] || []).map(w => (
-                                        <option key={w.name} value={w.name} style={{ background: '#0a0c10', color: '#e8e6e3' }}>{w.name}（{w.cp}CP / {w.maker}）</option>
-                                    ))}
-                                    <option value="_custom" style={{ background: '#0a0c10', color: '#e8e6e3' }}>自由入力…</option>
-                                </select>
+                            <div style={S.row}>
+                                <FormSelect label="武器種" value={form.weapon_type || ''} onChange={v => {
+                                    set('weapon_type', v);
+                                    const spec = getWeaponSpec(v, form.manufacturer, form.category);
+                                    if (spec) {
+                                        set('base_cp', spec.cp);
+                                        set('slot_count', spec.slot);
+                                        set('base_modifier', `+${spec.mod}`);
+                                        set('base_name', `${v}（${form.manufacturer || '汎用品'}）`);
+                                        set('additional_traits', spec.notes.join('。'));
+                                    }
+                                }} options={WEAPON_TYPE_NAMES} />
                             </div>
-                            {form.base_name === '_custom' && (
-                                <FormInput label="ベース名（自由入力）" value={form.custom_base_name || ''} onChange={v => set('custom_base_name', v)} placeholder="例：強化戦術銃【制式型】" />
-                            )}
+                            <FormInput label="武器名（自由記入）" value={form.base_name || ''} onChange={v => set('base_name', v)} placeholder="例：蒼鉄制式太刀、雷禽カスタムライフル…" />
                         </>
                     )}
                     <div style={S.row}>

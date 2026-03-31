@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, BASE_WEAPONS_BY_CATEGORY, CUSTOM_OPTIONS, findWeapon, findOption, getWeaponsByMaker } from '@/data/weaponData';
+import { MANUFACTURER_NAMES, MANUFACTURER_TIER, EQUIPMENT_TYPE_NAMES, EQUIPMENT_TYPE_STATS, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
@@ -78,7 +78,6 @@ const WEAPON_TYPES = [
 ];
 
 const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
-const EQUIPMENT_TYPES = ['武装型', '独立型', '半装身型', '搭乗型'];
 
 const AFFILIATION_INFO = {
     '祓部': { bonus: '識の調査+2（3回/セッション）＋援軍要請1回', constraint: '任務命令への服従が義務。装備・行動に法的制限' },
@@ -299,15 +298,16 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
     // --- 武器ステータス計算 ---
     const weaponStats = useMemo(() => {
-        if (!form.equipment_name || form.equipment_name === '_custom') return null;
+        if (!form.weapon_type) return null;
         return calcWeaponStats({
-            weaponName: form.equipment_name,
+            weaponType: form.weapon_type,
+            manufacturer: form.equipment_maker || '汎用品',
             equipmentType: form.equipment_type,
+            subtype: form.equipment_name || '',
             options: form.equipment_options,
             gift: form.gift,
-            weaponType: form.weapon_type,
         });
-    }, [form.equipment_name, form.equipment_type, form.equipment_options, form.gift, form.weapon_type]);
+    }, [form.weapon_type, form.equipment_maker, form.equipment_type, form.equipment_name, form.equipment_options, form.gift]);
 
     const attackAbilityKey = useMemo(() => getAttackAbility(form.weapon_type), [form.weapon_type]);
 
@@ -350,25 +350,23 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             const json = await res.json();
             if (!res.ok) throw new Error(json.error);
 
-            // 新規作成時、装備が選択されていたら自動で武器投稿
-            if (!isEdit && form.equipment_name && !form.linked_gear_id) {
+            // 新規作成時、武器種が選択されていたら自動で武器投稿
+            if (!isEdit && form.weapon_type && !form.linked_gear_id) {
                 try {
-                    const isCustom = form.equipment_name === '_custom';
-                    const baseWeapon = isCustom ? null : findWeapon(form.equipment_name);
-                    const actualBaseName = isCustom ? (form.custom_equipment_name || '自由装備') : form.equipment_name;
+                    const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
                     const optionsData = form.equipment_options.map(name => {
                         const o = findOption(name);
                         return o ? { name: o.name, cp: o.cp, resonance: o.resonance, risk: o.risk } : { name, cp: 0, resonance: '', risk: '低' };
                     });
-                    const baseCp = baseWeapon ? baseWeapon.cp : 0;
+                    const baseCp = spec ? spec.cp : 0;
                     const totalCp = baseCp + optionsData.reduce((s, o) => s + o.cp, 0);
                     const gearPayload = {
-                        gear_name: `【${form.character_name}】の武器`,
+                        gear_name: form.custom_equipment_name || `【${form.character_name}】の${form.weapon_type}武器`,
                         category: form.equipment_type,
-                        manufacturer: form.equipment_maker || (baseWeapon ? baseWeapon.maker : ''),
-                        base_name: actualBaseName,
+                        manufacturer: form.equipment_maker || '汎用品',
+                        base_name: `${form.weapon_type}（${form.equipment_maker || '汎用品'}）`,
                         base_cp: baseCp,
-                        slot_count: baseWeapon ? baseWeapon.slot : 0,
+                        slot_count: spec ? spec.slot : 2,
                         options: optionsData,
                         option_count: optionsData.length,
                         total_cp: totalCp,
@@ -909,61 +907,76 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         </p>
                     )}
                     <div style={S.row}>
-                        <FormSelect label="装備種別" value={form.equipment_type} onChange={v => { set('equipment_type', v); set('equipment_name', ''); }} options={EQUIPMENT_TYPES} />
-                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => {
-                            set('equipment_maker', v);
-                            // メーカー変更時、現在の武器が合わなければクリア
-                            const cur = findWeapon(form.equipment_name);
-                            if (cur && v && v !== 'その他' && cur.maker !== v) set('equipment_name', '');
-                        }} options={
+                        <FormSelect label="装備分類" value={form.equipment_type} onChange={v => set('equipment_type', v)} options={EQUIPMENT_TYPE_NAMES} />
+                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={
                             (form.affiliation === '祓部' && !isOfficial)
                                 ? MANUFACTURER_NAMES.filter(m => m === '蒼鉄機工' || m === '汎用品')
                                 : MANUFACTURER_NAMES
                         } />
                     </div>
-                    <div style={S.fieldGroup}>
-                        <label style={S.label}>装備名</label>
-                        <select
-                            value={form.equipment_name}
-                            onChange={e => {
-                                const name = e.target.value;
-                                set('equipment_name', name);
-                                const w = findWeapon(name);
-                                if (w) set('equipment_maker', w.maker);
-                            }}
-                            style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}
-                        >
-                            <option value="">— 装備を選択 —</option>
-                            {(BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).filter(w => {
-                                if (form.affiliation === '祓部' && !isOfficial) {
-                                    return w.maker === '蒼鉄機工' || w.maker === '汎用品';
-                                }
-                                if (form.equipment_maker && form.equipment_maker !== 'その他') {
-                                    return w.maker === form.equipment_maker;
-                                }
-                                return true;
-                            }).map(w => (
-                                <option key={w.name} value={w.name}>{w.name}（{w.cp}CP / 修正:{w.mod} / {w.maker}）</option>
-                            ))}
-                            {form.equipment_maker && form.equipment_maker !== 'その他' && (
-                                <option disabled>── 他メーカー ──</option>
-                            )}
-                            {form.equipment_maker && form.equipment_maker !== 'その他' &&
-                                (BASE_WEAPONS_BY_CATEGORY[form.equipment_type] || []).filter(w => {
-                                    if (form.affiliation === '祓部' && !isOfficial) {
-                                        return (w.maker === '蒼鉄機工' || w.maker === '汎用品') && w.maker !== form.equipment_maker;
-                                    }
-                                    return w.maker !== form.equipment_maker;
-                                }).map(w => (
-                                    <option key={`other_${w.name}`} value={w.name} style={{ color: '#666' }}>{w.name}（{w.cp}CP / 修正:{w.mod} / {w.maker}）</option>
-                                ))
-                            }
-                            <option value="_custom">自由入力…</option>
-                        </select>
-                    </div>
-                    {form.equipment_name === '_custom' && (
-                        <FormInput label="装備名（自由入力）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="装備名" />
+                    {/* メーカー情報 */}
+                    {form.equipment_maker && MANUFACTURER_TIER[form.equipment_maker] && (
+                        <div style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', marginBottom: 'var(--space-sm)' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                {MANUFACTURER_TIER[form.equipment_maker].desc}
+                                {MANUFACTURER_TIER[form.equipment_maker].modBonus > 0 && (
+                                    <span style={{ color: 'var(--accent-gold)', marginLeft: '8px' }}>修正+{MANUFACTURER_TIER[form.equipment_maker].modBonus}</span>
+                                )}
+                                {MANUFACTURER_TIER[form.equipment_maker].slotBonus > 0 && (
+                                    <span style={{ color: '#44ccff', marginLeft: '8px' }}>スロット+{MANUFACTURER_TIER[form.equipment_maker].slotBonus}</span>
+                                )}
+                            </span>
+                        </div>
                     )}
+                    {/* 武器サブタイプ選択（二段階目） */}
+                    {(() => {
+                        const weaponSubs = form.weapon_type ? (WEAPON_SUBTYPES[form.weapon_type] || []) : [];
+                        const equipSubs = EQUIPMENT_SUBTYPES[form.equipment_type] || [];
+                        const allSubs = [...weaponSubs, ...equipSubs];
+                        if (allSubs.length === 0) return null;
+                        return (
+                            <div style={S.fieldGroup}>
+                                <label style={S.label}>武器の種類（{form.weapon_type || form.equipment_type}）</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {allSubs.map(sub => {
+                                        const selected = form.equipment_name === sub.id;
+                                        return (
+                                            <button key={sub.id} type="button"
+                                                onClick={() => set('equipment_name', selected ? '' : sub.id)}
+                                                style={{
+                                                    padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
+                                                    border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+                                                    background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
+                                                    color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                                                    fontFamily: 'var(--font-mono)', fontSize: '12px',
+                                                }}
+                                                title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
+                                            >
+                                                <span style={{ fontWeight: 700 }}>{sub.id}</span>
+                                                {sub.modAdj !== 0 && (
+                                                    <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
+                                                        {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
+                                                    </span>
+                                                )}
+                                                {sub.reach && (
+                                                    <span style={{ marginLeft: '4px', fontSize: '9px', color: '#88aacc', opacity: 0.8 }}>{sub.reach}</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {form.equipment_name && (() => {
+                                    const sel = allSubs.find(s => s.id === form.equipment_name);
+                                    return sel ? (
+                                        <div style={{ marginTop: '6px', padding: '6px 10px', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                            {sel.note}
+                                        </div>
+                                    ) : null;
+                                })()}
+                            </div>
+                        );
+                    })()}
+                    <FormInput label="武器名（自由記入）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="例：蒼鉄制式太刀、雷禽カスタムライフル、自作の魔導杖…" />
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯など" />
 
                     {/* カスタムオプション選択 */}
@@ -1099,11 +1112,11 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         if (linkedGear && linkedGear.total_cp != null) {
                             usedCp = Number(linkedGear.total_cp);
                             cpSource = linkedGear.gear_name;
-                        } else {
-                            const selectedWeapon = form.equipment_name && form.equipment_name !== '_custom' ? findWeapon(form.equipment_name) : null;
-                            if (selectedWeapon) { usedCp = Number(selectedWeapon.cp || 0); cpSource = selectedWeapon.name; }
+                        } else if (form.weapon_type) {
+                            const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
+                            if (spec) { usedCp = spec.cp; cpSource = `${form.weapon_type}×${form.equipment_maker || '汎用品'}`; }
                             usedCp += optionsCp;
-                            if (optionsCp > 0) cpSource += ` +オプション${optionsCp}CP`;
+                            if (optionsCp > 0) cpSource += ` +OPT${optionsCp}CP`;
                         }
 
                         const remaining = cpBudget - usedCp;

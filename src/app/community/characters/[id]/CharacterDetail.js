@@ -444,27 +444,27 @@ export default function CharacterDetail({ id }) {
             )}
 
             {/* ===== 装備 ===== */}
-            {(e.equipment_type || e.equipment_name) && (
+            {(e.equipment_type || e.weapon_type) && (
                 <div style={SS.section}>
                     <div style={SS.sTitle}>EQUIPMENT</div>
                     <h2 style={SS.sHead}>主力装備</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
-                        <Field label="種別" value={linkedGear?.category || e.equipment_type} />
-                        <Field label="装備名" value={linkedGear?.gear_name || (e.equipment_name === '_custom' ? e.custom_equipment_name : e.equipment_name)} />
+                        <Field label="装備分類" value={linkedGear?.category || e.equipment_type} />
+                        <Field label="武器名" value={linkedGear?.gear_name || e.custom_equipment_name || e.equipment_name || '未命名'} />
                         <Field label="メーカー" value={linkedGear?.manufacturer || e.equipment_maker} />
                     </div>
                     <Field label="詳細" value={e.equipment_detail} />
 
                     {/* 武器ステータスパネル */}
                     {(() => {
-                        const wName = e.equipment_name === '_custom' ? null : e.equipment_name;
-                        if (!wName) return null;
+                        if (!e.weapon_type) return null;
                         const wStats = calcWeaponStats({
-                            weaponName: wName,
+                            weaponType: e.weapon_type,
+                            manufacturer: e.equipment_maker || '汎用品',
                             equipmentType: e.equipment_type,
+                            subtype: e.equipment_name || '',
                             options: Array.isArray(e.equipment_options) ? e.equipment_options : [],
                             gift: e.gift,
-                            weaponType: e.weapon_type,
                         });
                         if (!wStats) return null;
                         const atkKey = getAttackAbility(e.weapon_type);

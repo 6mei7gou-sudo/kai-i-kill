@@ -104,11 +104,25 @@
       ]
     },
     "weapon_types": [
-      { "id": "slash", "name": "斬撃型", "weapons": "刀・剣・斧・薙刀", "focus": "切れ味と手数" },
-      { "id": "strike", "name": "打撃型", "weapons": "槌・棍棒・鈍器", "focus": "一撃の破壊力" },
-      { "id": "ranged", "name": "射撃型", "weapons": "銃器・弓・投擲武器", "focus": "距離と精度" },
-      { "id": "arcane", "name": "魔導型", "weapons": "杖・魔導書・符術具", "focus": "魔法との連携" },
-      { "id": "martial", "name": "体術型", "weapons": "格闘・武道・肉体強化", "focus": "素手の技巧" }
+      { "id": "slash", "name": "斬撃型", "weapons": "刀・剣・斧・薙刀", "focus": "切れ味と手数", "mod": 2, "ability": "rank_tai", "note": "先制攻撃時+1" },
+      { "id": "strike", "name": "打撃型", "weapons": "槌・棍棒・鈍器", "focus": "一撃の破壊力", "mod": 3, "ability": "rank_tai", "note": "SP時ダメージ+1" },
+      { "id": "ranged", "name": "射撃型", "weapons": "銃器・弓・投擲武器", "focus": "距離と精度", "mod": 2, "ability": "rank_haya", "note": "遠距離時+1" },
+      { "id": "arcane", "name": "魔導型", "weapons": "杖・魔導書・符術具", "focus": "魔法との連携", "mod": 2, "ability": "rank_jutsu", "note": "魔法行使+1" },
+      { "id": "martial", "name": "体術型", "weapons": "格闘・武道・肉体強化", "focus": "素手の技巧", "mod": 1, "ability": "rank_tai", "note": "サブ行動で追加攻撃可" }
+    ],
+    "manufacturer_tiers": [
+      { "id": "generic", "name": "汎用品", "modBonus": 0, "cpMul": 1.0, "slotBonus": 0, "note": "量産型" },
+      { "id": "aotetsu", "name": "蒼鉄機工", "modBonus": 0, "cpMul": 1.2, "slotBonus": 0, "note": "安全装置付き。祓部標準", "fit": "祓部" },
+      { "id": "raikin", "name": "雷禽重工", "modBonus": 1, "cpMul": 1.6, "slotBonus": 1, "note": "素養C以上推奨", "fit": "傭兵" },
+      { "id": "karasuba", "name": "鴉羽技研", "modBonus": 1, "cpMul": 1.6, "slotBonus": 1, "note": "違法スロット。検知リスク", "fit": "無所属" },
+      { "id": "gintsuchi", "name": "銀鎚精機", "modBonus": 1, "cpMul": 2.4, "slotBonus": 1, "note": "個人専用品。他者使用不可" },
+      { "id": "shinkirou", "name": "蜃気楼工廠", "modBonus": 2, "cpMul": 2.4, "slotBonus": 1, "note": "侵食ロール。出所不明" }
+    ],
+    "equipment_types": [
+      { "id": "armed", "name": "武装型", "baseSlot": 2, "cpBase": 5, "desc": "手持ち武器。最も汎用的" },
+      { "id": "independent", "name": "独立型", "baseSlot": 2, "cpBase": 7, "desc": "自律機・ドローン。識判定で操作" },
+      { "id": "half_body", "name": "半装身型", "baseSlot": 3, "cpBase": 8, "desc": "身体装着型。防御と火力の両立" },
+      { "id": "mount", "name": "搭乗型", "baseSlot": 3, "cpBase": 10, "desc": "搭乗機動兵器。機動力に優れる" }
     ],
     "awakening_patterns": [
       { "id": "innate", "name": "先天覚醒型", "description": "生まれつき素養を持ち訓練で開花", "mechanic": "術または魂のランクがCでスタート（背景の昇格とは別）" },

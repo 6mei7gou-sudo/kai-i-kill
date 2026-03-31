@@ -1,114 +1,166 @@
 // =====================================================
-// 武器・装備 共有データモジュール
-// WeaponForm / CharacterForm の両方で使用
+// 武器・装備 共有データモジュール v2.0
+// 武器種×企業マトリクス方式
 // =====================================================
 
-// メーカー一覧
-export const MANUFACTURERS = [
-    { id: '汎用品', desc: 'メーカーを問わない量産型・市場流通品', fit: '全' },
-    { id: '蒼鉄機工', desc: '安全・信頼の国家系企業。祓部標準', fit: '祓部' },
-    { id: '雷禽重工', desc: '高出力・高リスク。傭兵向け市場を独占', fit: '傭兵' },
-    { id: '鴉羽技研', desc: 'グレーゾーン職人集団。違法改造・特注品', fit: '無所属' },
-    { id: '銀鎚精機', desc: '個人専用品の職人集団。世界に一つの専用機', fit: '全' },
-    { id: '蜃気楼工廠', desc: '実態不明の製造者。闇市場に流通する謎の魔導具', fit: '上級者向け' },
-    { id: 'その他', desc: '上記以外 / 自作 / 出所不明', fit: '自由' },
-];
-export const MANUFACTURER_NAMES = MANUFACTURERS.map(m => m.id);
+// ── 武器種ステータス（攻撃の基礎） ──
 
-// ----- 基礎武器リスト（分類別） -----
-
-// 武装型
-export const WEAPONS_ARMED = [
-    // ── 近接武器・片手 ──
-    { name: '剣', maker: '汎用品', cp: 4, slot: 2, mod: '+2', note: 'バランス型。標準近接武器' },
-    { name: '小刀', maker: '汎用品', cp: 2, slot: 1, mod: '+1', note: '隠匿携帯可。イニシアチブ+1' },
-    { name: '斧', maker: '汎用品', cp: 4, slot: 2, mod: '+2', note: 'スペシャル時ダメージ+1' },
-    { name: 'メイス', maker: '汎用品', cp: 4, slot: 2, mod: '+2', note: '命中時、対象の防御力-1（次Rまで）' },
-    { name: 'ナックル', maker: '汎用品', cp: 3, slot: 1, mod: '+1', note: 'サブ行動で追加攻撃可（判定-1）' },
-    // ── 近接武器・両手 ──
-    { name: '太刀', maker: '汎用品', cp: 5, slot: 2, mod: '+3', note: '先制攻撃時、武器修正+1' },
-    { name: '大剣', maker: '汎用品', cp: 7, slot: 2, mod: '+4', note: '攻撃判定-1。スペシャル時ダメージ+2' },
-    { name: '薙刀', maker: '汎用品', cp: 5, slot: 2, mod: '+2', note: '護衛2体に同時攻撃可（各ダメージ-1）' },
-    { name: '鎖鎌', maker: '汎用品', cp: 5, slot: 2, mod: '+2', note: '命中時、対象を1R行動遅延（行動値-3）' },
-    { name: '両手斧', maker: '汎用品', cp: 7, slot: 2, mod: '+4', note: '攻撃判定-1。護衛撃破時に余剰ダメージ+1' },
-    { name: 'ハルバード', maker: '汎用品', cp: 6, slot: 2, mod: '+3', note: '斬撃/打撃どちらの武器技能でも使用可' },
-    { name: '槍', maker: '汎用品', cp: 5, slot: 2, mod: '+2', note: 'リーチ。護衛の接近時にリアクション攻撃可' },
-    // ── 遠距離武器 ──
-    { name: '弓', maker: '汎用品', cp: 4, slot: 2, mod: '+2', note: '構え（サブ行動）後+1。無音' },
-    { name: '銃', maker: '汎用品', cp: 4, slot: 2, mod: '+2', note: '構え不要。片手使用可' },
-    { name: 'ボウガン', maker: '汎用品', cp: 5, slot: 2, mod: '+3', note: '攻撃後リロード必要（次Rのサブ行動）' },
-    { name: 'ライフル', maker: '汎用品', cp: 6, slot: 2, mod: '+3', note: '遠距離時+1追加。至近〜近接使用不可' },
-    { name: 'ショットガン', maker: '汎用品', cp: 5, slot: 2, mod: '+2', note: '至近距離で+2追加。中距離以遠使用不可' },
-    { name: '投擲武器', maker: '汎用品', cp: 2, slot: 1, mod: '+1', note: '使い捨て（3回分）。隠匿携帯可' },
-    // ── 魔導武器 ──
-    { name: '魔導杖', maker: '汎用品', cp: 5, slot: 2, mod: '+2', note: '術判定で攻撃。魔法行使+1' },
-    { name: '魔導書', maker: '汎用品', cp: 6, slot: 2, mod: '+2', note: '術判定で攻撃。1セッション1回追加魔法' },
-    { name: '符・結界具', maker: '汎用品', cp: 3, slot: 1, mod: '+0', note: '護衛特性を1R封印（1戦闘2回まで）' },
-    // ── メーカー製上位武装：蒼鉄機工 ──
-    { name: '蒼鉄制式剣', maker: '蒼鉄機工', cp: 6, slot: 2, mod: '+2', note: '祓部標準支給品。安全装置付き' },
-    { name: '蒼鉄戦術ナイフ・制式', maker: '蒼鉄機工', cp: 3, slot: 2, mod: '+1', note: '祓部標準支給。隠匿性能が高い' },
-    { name: '蒼鉄強化戦術銃【制式型】', maker: '蒼鉄機工', cp: 5, slot: 2, mod: '+2', note: '安全装置付き。素養なしでも安定使用可' },
-    { name: '蒼鉄制式ライフル', maker: '蒼鉄機工', cp: 7, slot: 2, mod: '+3', note: '祓部狙撃班支給品。スコープ付属' },
-    { name: '祓い用幣【神道術式】', maker: '蒼鉄機工', cp: 4, slot: 2, mod: '+0（古怪+3）', note: '古い怪異に特化' },
-    { name: '術式封印符×10', maker: '蒼鉄機工', cp: 2, slot: 0, mod: '護衛特性無効化', note: '使い捨て。設置が必要' },
-    // ── メーカー製上位武装：雷禽重工 ──
-    { name: '雷禽高出力ライフル', maker: '雷禽重工', cp: 8, slot: 3, mod: '+3', note: '素養C以上推奨。命中ブレが大きい' },
-    { name: '雷禽近接爆砕斧', maker: '雷禽重工', cp: 7, slot: 3, mod: '+3（連鎖+2）', note: '連鎖ダメージに特化' },
-    { name: '雷禽重ショットガン', maker: '雷禽重工', cp: 7, slot: 3, mod: '+3（至近+3）', note: '至近距離で凄まじい火力。反動大' },
-    { name: '高出力魔法砲【雷禽型】', maker: '雷禽重工', cp: 10, slot: 3, mod: '+4（素養B以上）', note: '最大出力の魔法砲撃' },
-    // ── メーカー製上位武装：銀鎚精機 ──
-    { name: '銀鎚特注刀【受注生産】', maker: '銀鎚精機', cp: 12, slot: 3, mod: '+3（専用+4）', note: '個人最適化。納期6ヶ月〜1年' },
-    { name: '銀鎚特注ボウガン', maker: '銀鎚精機', cp: 10, slot: 3, mod: '+4（専用）', note: 'リロード不要。専用矢のみ' },
-];
-
-// 独立型
-export const WEAPONS_INDEPENDENT = [
-    // ── ベース機体 ──
-    { name: 'ドローン', maker: '汎用品', cp: 5, slot: 2, mod: '+1', note: '偵察（察+1）と攻撃。識判定で操作' },
-    { name: '自立兵器', maker: '汎用品', cp: 7, slot: 2, mod: '+2', note: 'AI制御。指示なしでも基本行動。識判定で高度指示' },
-    // ── 偵察・索敵 ──
-    { name: '偵察球体型【蒼鉄G-01】', maker: '蒼鉄機工', cp: 5, slot: 2, mod: '±0', note: '祓部標準偵察機。護衛配置感知' },
-    { name: '小型索敵ドローン【蒼鉄D-03】', maker: '蒼鉄機工', cp: 6, slot: 2, mod: '+1（索敵時）', note: '察+1。怪異位置の質問可' },
-    { name: '電子妨害探機【雷禽E-07】', maker: '雷禽重工', cp: 7, slot: 3, mod: '±0（妨害+2）', note: '護衛特性を1R無効化' },
-    { name: '鴉羽式改造偵察虫', maker: '鴉羽技研', cp: 5, slot: 2, mod: '±0', note: '手のひらサイズ。隠密使用可' },
-    // ── 戦闘 ──
-    { name: '攻撃型自律機【蒼鉄A-05】', maker: '蒼鉄機工', cp: 8, slot: 3, mod: '+2', note: '護衛自動追尾。特務班愛用' },
-    { name: '高機動戦闘機【雷禽F-11】', maker: '雷禽重工', cp: 10, slot: 3, mod: '+3（素養B以上）', note: '高速機動。操作難度高' },
-    { name: '包囲展開型複合機×3【雷禽S-09】', maker: '雷禽重工', cp: 9, slot: 2, mod: '+1（全機+3）', note: '3機包囲攻撃' },
-];
-
-// 半装身型
-export const WEAPONS_HALF = [
-    { name: '蒼鉄腕部強化装甲', maker: '蒼鉄機工', cp: 6, slot: 3, mod: '+1（防御+1）', note: '祓部標準品。安定性が高い', part: '腕部' },
-    { name: '蒼鉄脚部高機動ブーツ', maker: '蒼鉄機工', cp: 5, slot: 2, mod: 'SPD+1', note: 'イニシアチブ優位', part: '脚部' },
-    { name: '羽衣腕部【雷禽】', maker: '雷禽重工', cp: 8, slot: 3, mod: '+2（素養+3）', note: 'モジュール換装容易', part: '腕部' },
-    { name: '羽衣肩部【雷禽】', maker: '雷禽重工', cp: 8, slot: 3, mod: '独立型展開可', note: '肩部から独立型展開', part: '肩部' },
-    { name: '羽衣脚部【雷禽】', maker: '雷禽重工', cp: 7, slot: 3, mod: 'SPD+1・回避+1', note: '高速移動特化', part: '脚部' },
-    { name: '銀鎚個人専用腕部', maker: '銀鎚精機', cp: 14, slot: 4, mod: '+3（専用）', note: '世界に一つ。他者使用不可', part: '腕部' },
-    { name: '鴉羽特注改造腕部', maker: '鴉羽技研', cp: 8, slot: 3, mod: '+3〜+4', note: '違法スロット+1。検知リスク', part: '腕部' },
-];
-
-// 搭乗型
-export const WEAPONS_MOUNT = [
-    // ── ベース機体 ──
-    { name: 'モービル', maker: '汎用品', cp: 8, slot: 3, mod: '機動力+2', note: '搭乗型機動兵器。搭乗・下車にサブ行動消費' },
-    // ── メーカー製 ──
-    { name: '蒼鉄軽装バイク【巡回型】', maker: '蒼鉄機工', cp: 8, slot: 3, mod: '機動力+2', note: '祓部巡回用。離脱が容易' },
-    { name: '蒼鉄機動車輌【指揮型】', maker: '蒼鉄機工', cp: 12, slot: 4, mod: '機動力+1（防御+2）', note: '移動指揮所。複数人搭乗可' },
-    { name: '雷禽高速滑走機【ライダー型】', maker: '雷禽重工', cp: 10, slot: 3, mod: '機動力+3（攻撃+1）', note: '傭兵向け高速突撃用' },
-    { name: '雷禽重装機動車【ブルドッグ】', maker: '雷禽重工', cp: 14, slot: 4, mod: '機動力+1（攻撃+2）', note: '車載砲搭載可。燃費が悪い' },
-    { name: '鴉羽改造二輪【闇鴉】', maker: '鴉羽技研', cp: 9, slot: 3, mod: '機動力+3（隠密+1）', note: '消音・消光。夜間特化。違法スロット+1' },
-    { name: '銀鎚特注機動三輪', maker: '銀鎚精機', cp: 16, slot: 4, mod: '機動力+2（専用+3）', note: '個人適合操縦系。他者操縦不可' },
-    { name: '蜃気楼製浮遊輪', maker: '蜃気楼工廠', cp: 12, slot: 3, mod: '機動力+4（3次元）', note: '不明な動力で浮遊。地形無視。侵食ロール' },
-];
-
-// 分類別にまとめたマップ
-export const BASE_WEAPONS_BY_CATEGORY = {
-    '武装型': WEAPONS_ARMED,
-    '独立型': WEAPONS_INDEPENDENT,
-    '半装身型': WEAPONS_HALF,
-    '搭乗型': WEAPONS_MOUNT,
+export const WEAPON_TYPE_STATS = {
+    '斬撃型': { mod: 2, ability: 'rank_tai', desc: '切れ味と手数', weapons: '刀・剣・斧・薙刀', note: '先制攻撃時+1' },
+    '打撃型': { mod: 3, ability: 'rank_tai', desc: '一撃の破壊力', weapons: '槌・棍棒・鈍器', note: 'SP時ダメージ+1' },
+    '射撃型': { mod: 2, ability: 'rank_haya', desc: '距離と精度', weapons: '銃器・弓・投擲武器', note: '遠距離時+1' },
+    '魔導型': { mod: 2, ability: 'rank_jutsu', desc: '魔法との連携', weapons: '杖・魔導書・符術具', note: '魔法行使+1' },
+    '体術型': { mod: 1, ability: 'rank_tai', desc: '素手の技巧', weapons: '格闘・武道・肉体強化', note: 'サブ行動で追加攻撃可' },
 };
+
+export const WEAPON_TYPE_NAMES = Object.keys(WEAPON_TYPE_STATS);
+
+// ── 企業ティア（品質グレード） ──
+
+export const MANUFACTURER_TIER = {
+    '汎用品':    { modBonus: 0, cpMul: 1.0, slotBonus: 0, desc: 'メーカーを問わない量産型・市場流通品', note: '量産型', fit: '全' },
+    '蒼鉄機工':  { modBonus: 0, cpMul: 1.2, slotBonus: 0, desc: '安全・信頼の国家系企業。祓部標準', note: '安全装置付き。祓部標準', fit: '祓部' },
+    '雷禽重工':  { modBonus: 1, cpMul: 1.6, slotBonus: 1, desc: '高出力・高リスク。傭兵向け市場を独占', note: '素養C以上推奨。高出力', fit: '傭兵' },
+    '鴉羽技研':  { modBonus: 1, cpMul: 1.6, slotBonus: 1, desc: 'グレーゾーン職人集団。違法改造・特注品', note: '違法スロット。検知リスク', fit: '無所属' },
+    '銀鎚精機':  { modBonus: 1, cpMul: 2.4, slotBonus: 1, desc: '個人専用品の職人集団。世界に一つの専用機', note: '個人専用品。他者使用不可', fit: '全' },
+    '蜃気楼工廠': { modBonus: 2, cpMul: 2.4, slotBonus: 1, desc: '実態不明の製造者。闇市場に流通する謎の魔導具', note: '侵食ロール。出所不明', fit: '上級者向け' },
+    'その他':    { modBonus: 0, cpMul: 1.0, slotBonus: 0, desc: '上記以外 / 自作 / 出所不明', note: '自作・出所不明', fit: '自由' },
+};
+
+export const MANUFACTURER_NAMES = Object.keys(MANUFACTURER_TIER);
+
+// 旧互換: MANUFACTURERS 配列形式
+export const MANUFACTURERS = MANUFACTURER_NAMES.map(id => ({
+    id,
+    desc: MANUFACTURER_TIER[id].desc,
+    fit: MANUFACTURER_TIER[id].fit,
+}));
+
+// ── 装備分類ステータス（スロット・CP基盤） ──
+
+export const EQUIPMENT_TYPE_STATS = {
+    '武装型':   { baseSlot: 2, cpBase: 5, desc: '手持ち武器。最も汎用的' },
+    '独立型':   { baseSlot: 2, cpBase: 7, desc: '自律機・ドローン。識判定で操作' },
+    '半装身型':  { baseSlot: 3, cpBase: 8, desc: '身体装着型。防御と火力の両立' },
+    '搭乗型':   { baseSlot: 3, cpBase: 10, desc: '搭乗機動兵器。機動力に優れる' },
+};
+
+export const EQUIPMENT_TYPE_NAMES = Object.keys(EQUIPMENT_TYPE_STATS);
+
+// ── 武器サブタイプ（二段階選択の第二階層） ──
+
+export const WEAPON_SUBTYPES = {
+    '斬撃型': [
+        { id: '剣', modAdj: 0, reach: '近接', note: 'バランス型。片手使用可' },
+        { id: '双剣', modAdj: -1, reach: '近接', note: '2回攻撃（各-1）。両手占有' },
+        { id: '小刀', modAdj: -1, reach: '至近', note: '隠匿携帯可。イニシアチブ+1' },
+        { id: '太刀', modAdj: 1, reach: '近接', note: '先制攻撃時+1。両手占有' },
+        { id: '大剣', modAdj: 2, reach: '近〜中', note: '攻撃判定-1。SP時ダメージ+2。両手占有' },
+        { id: '斧', modAdj: 0, reach: '近接', note: 'SP時ダメージ+1' },
+        { id: '薙刀', modAdj: 0, reach: '中近接', note: '護衛2体に同時攻撃可（各ダメージ-1）' },
+        { id: '鎖鎌', modAdj: 0, reach: '近〜中', note: '命中時、1R行動遅延（行動値-3）' },
+        { id: '槍', modAdj: 0, reach: '中近接', note: '護衛接近時にリアクション攻撃可' },
+        { id: 'ハルバード', modAdj: 1, reach: '中近接', note: '斬撃/打撃どちらの武器技能でも使用可。両手占有' },
+        { id: 'ガンブレード', modAdj: 0, reach: '近〜中', note: '近接/射撃を切替可（切替にサブ行動）' },
+    ],
+    '打撃型': [
+        { id: '棍棒', modAdj: 0, reach: '近接', note: 'バランス型。標準打撃武器' },
+        { id: 'メイス', modAdj: 0, reach: '近接', note: '命中時、対象の防御力-1（次Rまで）' },
+        { id: '槌', modAdj: 1, reach: '近接', note: '命中時、対象の防御力-2（次Rまで）。両手占有' },
+        { id: '両手斧', modAdj: 2, reach: '近接', note: '攻撃判定-1。護衛撃破時に余剰ダメージ+1。両手占有' },
+        { id: 'ナックル', modAdj: -1, reach: '至近', note: 'サブ行動で追加攻撃可（判定-1）' },
+        { id: '盾', modAdj: -2, reach: '至近', note: '防御+2。片手武器と併用可。攻撃は体術判定' },
+    ],
+    '射撃型': [
+        { id: '銃', modAdj: 0, reach: '中距離', note: '構え不要。片手使用可' },
+        { id: '二丁拳銃', modAdj: -1, reach: '中距離', note: '2回攻撃（各-1）。両手占有。リロード遅延' },
+        { id: 'ライフル', modAdj: 1, reach: '遠距離', note: '遠距離時+1追加。至近〜近接使用不可。両手占有' },
+        { id: 'ショットガン', modAdj: 0, reach: '近〜中', note: '至近距離で+2追加。中距離以遠使用不可' },
+        { id: '弓', modAdj: 0, reach: '遠距離', note: '構え（サブ行動）後+1。無音。両手占有' },
+        { id: 'ボウガン', modAdj: 1, reach: '遠距離', note: '攻撃後リロード必要（次Rサブ行動）' },
+        { id: '投擲武器', modAdj: -1, reach: '中距離', note: '使い捨て（3回分）。隠匿携帯可' },
+        { id: 'ガンブレード', modAdj: 0, reach: '近〜中', note: '近接/射撃を切替可（切替にサブ行動）' },
+    ],
+    '魔導型': [
+        { id: '魔導杖', modAdj: 0, reach: '中〜遠', note: '魔法行使+1。両手占有' },
+        { id: '魔導書', modAdj: 0, reach: '中〜遠', note: '1セッション1回、追加魔法使用可。両手占有' },
+        { id: '符・結界具', modAdj: -1, reach: '近〜中', note: '護衛特性を1R封印（1戦闘2回まで）。片手使用可' },
+        { id: '魔導短杖', modAdj: -1, reach: '中距離', note: '片手使用可。魔法行使+1' },
+        { id: '魔導砲', modAdj: 2, reach: '遠距離', note: '攻撃判定-1。広域攻撃可。両手占有。構え必要' },
+    ],
+    '体術型': [
+        { id: '格闘', modAdj: 0, reach: '至近', note: '標準体術。素手で戦う' },
+        { id: '武道', modAdj: 0, reach: '至近', note: '先制攻撃時+1。カウンター可' },
+        { id: '肉体強化', modAdj: 1, reach: '至近', note: 'サイバネティクス連動。HP判定時+1' },
+        { id: '体術・投げ', modAdj: 0, reach: '至近', note: '命中時、対象を1R行動遅延。次R先手確定' },
+    ],
+};
+
+// 装備分類ごとのサブタイプ（搭乗型/独立型/半装身型用）
+export const EQUIPMENT_SUBTYPES = {
+    '搭乗型': [
+        { id: 'モービル', modAdj: 0, reach: '機動', note: '汎用機動兵器。搭乗・下車にサブ行動消費' },
+        { id: 'バイク', modAdj: 0, reach: '高速機動', note: '高速移動。離脱が容易。機動力+1' },
+        { id: '機動車輌', modAdj: 0, reach: '機動', note: '複数人搭乗可。防御+1' },
+        { id: '浮遊機', modAdj: 1, reach: '3次元機動', note: '地形無視。3次元移動。機動力+2' },
+    ],
+    '独立型': [
+        { id: 'ドローン', modAdj: 0, reach: '中〜遠', note: '偵察+攻撃。識判定で操作' },
+        { id: '自律兵器', modAdj: 1, reach: '中距離', note: 'AI制御。指示なしでも基本行動' },
+        { id: '偵察機', modAdj: -1, reach: '遠距離', note: '察+1。非戦闘特化' },
+        { id: '複合機群', modAdj: 0, reach: '中距離', note: '3機包囲攻撃。全機命中時+2' },
+    ],
+    '半装身型': [
+        { id: '腕部装甲', modAdj: 0, reach: '近接', note: '防御+1。安定性が高い' },
+        { id: '脚部ブーツ', modAdj: 0, reach: '近接', note: 'SPD+1。イニシアチブ優位' },
+        { id: '肩部ユニット', modAdj: 0, reach: '中距離', note: '独立型展開可。肩部ドローン搭載' },
+        { id: '全身軽装甲', modAdj: 1, reach: '近接', note: '防御+1、SPD+1。全身占有' },
+    ],
+};
+
+// サブタイプ検索
+export function findSubtype(weaponType, subtypeId) {
+    const list = WEAPON_SUBTYPES[weaponType];
+    if (list) {
+        const found = list.find(s => s.id === subtypeId);
+        if (found) return found;
+    }
+    // 装備分類サブタイプも検索
+    for (const subs of Object.values(EQUIPMENT_SUBTYPES)) {
+        const found = subs.find(s => s.id === subtypeId);
+        if (found) return found;
+    }
+    return null;
+}
+
+// ── 武器スペック計算（マトリクスの交点） ──
+
+/**
+ * 武器種×企業×装備分類×サブタイプからスペックを算出
+ * @returns {{ mod: number, cp: number, slot: number, notes: string[], ability: string }}
+ */
+export function getWeaponSpec(weaponType, manufacturer, equipmentType, subtypeId) {
+    const wt = WEAPON_TYPE_STATS[weaponType];
+    if (!wt) return null;
+    const mf = MANUFACTURER_TIER[manufacturer] || MANUFACTURER_TIER['汎用品'];
+    const et = EQUIPMENT_TYPE_STATS[equipmentType] || EQUIPMENT_TYPE_STATS['武装型'];
+
+    // サブタイプの修正値
+    const sub = subtypeId ? findSubtype(weaponType, subtypeId) : null;
+    const modAdj = sub ? sub.modAdj : 0;
+
+    const mod = wt.mod + mf.modBonus + modAdj;
+    const cp = Math.round(et.cpBase * mf.cpMul);
+    const slot = et.baseSlot + mf.slotBonus;
+
+    const reach = sub ? (sub.reach || '') : '';
+    const notes = [];
+    if (sub && sub.note) notes.push(sub.note);
+    else if (wt.note) notes.push(wt.note);
+    if (mf.note && mf.note !== '量産型') notes.push(mf.note);
+
+    return { mod, cp, slot, notes, ability: wt.ability, reach, subtypeModAdj: modAdj };
+}
 
 // ----- カスタムオプション一覧 -----
 export const CUSTOM_OPTIONS = {
@@ -175,22 +227,6 @@ export const findOption = (name) => {
         if (found) return found;
     }
     return null;
-};
-
-// 基礎武器を名前で検索
-export const findWeapon = (name) => {
-    for (const list of Object.values(BASE_WEAPONS_BY_CATEGORY)) {
-        const found = list.find(w => w.name === name);
-        if (found) return found;
-    }
-    return null;
-};
-
-// メーカーで武器を絞り込み
-export const getWeaponsByMaker = (category, maker) => {
-    const list = BASE_WEAPONS_BY_CATEGORY[category] || [];
-    if (!maker || maker === 'その他') return list;
-    return list.filter(w => w.maker === maker);
 };
 
 // 装備種別に対応するオプション一覧（汎用＋専用）を返す
