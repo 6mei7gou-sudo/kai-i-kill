@@ -176,6 +176,9 @@ export default function CharacterDetail({ id }) {
                             <span style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 700, background: statusBadge.bg, border: `1px solid ${statusBadge.border}`, color: statusBadge.color, fontFamily: 'var(--font-mono)' }}>{statusBadge.label}</span>
                         </div>
 
+                        {e.character_name_kana && (
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: '2px' }}>{e.character_name_kana}</div>
+                        )}
                         <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                             {e.character_name}
                             <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--accent-gold)', verticalAlign: 'middle' }}>Lv.{e.level || 1}</span>

@@ -109,7 +109,7 @@ const LANGUAGES = [
 // 初期値
 const INITIAL = {
     author_name: '', visibility: '公開', thumbnail_url: '', icon_url: '', image_urls: ['', '', ''],
-    character_name: '', title: '', age: '', gender: '',
+    character_name: '', character_name_kana: '', title: '', age: '', gender: '',
     affiliation: '祓部', sub_affiliation: '', awakening: '先天覚醒型',
     background: '', weapon_type: '', gift: '',
     rank_tai: 'D', rank_haya: 'D', rank_shiki: 'D', rank_han: 'D',
@@ -487,6 +487,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     <h2 style={S.sectionHeading}>基本情報</h2>
                     <div style={S.row}>
                         <FormInput label="キャラ名 *" value={form.character_name} onChange={v => set('character_name', v)} placeholder="例：黒崎 蓮" />
+                        <FormInput label="フリガナ" value={form.character_name_kana} onChange={v => set('character_name_kana', v)} placeholder="例：くろさき れん" />
                         <FormInput label="二つ名（任意）" value={form.title} onChange={v => set('title', v)} placeholder="例：封印の名手" />
                     </div>
                     <div style={S.row}>

@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   approved_by TEXT,
   active_title TEXT,
   character_name TEXT NOT NULL,
+  character_name_kana TEXT DEFAULT '',
   title TEXT,
   age TEXT,
   gender TEXT,
