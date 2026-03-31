@@ -903,17 +903,29 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT</div>
                     <h2 style={S.sectionHeading}>主力装備</h2>
-                    {form.affiliation === '祓部' && !isOfficial && (
-                        <p style={{ fontSize: '11px', color: '#ffaa00', fontFamily: 'var(--font-mono)', marginBottom: 'var(--space-md)', padding: '8px 12px', background: 'rgba(255,170,0,0.06)', border: '1px solid rgba(255,170,0,0.15)' }}>
-                            祓部所属の装備は蒼鉄機工製または汎用品に限定されます。
-                        </p>
-                    )}
+                    {!isOfficial && form.affiliation && (() => {
+                        const msgs = {
+                            '祓部': '祓部所属の装備は蒼鉄機工製または汎用品に限定されます。',
+                            '傭兵': '傭兵所属は雷禽重工・汎用品・銀鎚精機を使用可能。鴉羽技研は闇ルートが必要。',
+                            '無所属': '無所属は鴉羽技研・汎用品・銀鎚精機を使用可能。正規企業品は入手困難。',
+                        };
+                        return msgs[form.affiliation] ? (
+                            <p style={{ fontSize: '11px', color: '#ffaa00', fontFamily: 'var(--font-mono)', marginBottom: 'var(--space-md)', padding: '8px 12px', background: 'rgba(255,170,0,0.06)', border: '1px solid rgba(255,170,0,0.15)' }}>
+                                {msgs[form.affiliation]}
+                            </p>
+                        ) : null;
+                    })()}
                     <div style={S.row}>
                         <FormSelect label="装備分類" value={form.equipment_type} onChange={v => set('equipment_type', v)} options={EQUIPMENT_TYPE_NAMES} />
                         <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={
-                            (form.affiliation === '祓部' && !isOfficial)
-                                ? MANUFACTURER_NAMES.filter(m => m === '蒼鉄機工' || m === '汎用品')
-                                : MANUFACTURER_NAMES
+                            isOfficial ? MANUFACTURER_NAMES : (() => {
+                                const allowed = {
+                                    '祓部': ['汎用品', '蒼鉄機工', '銀鎚精機'],
+                                    '傭兵': ['汎用品', '雷禽重工', '銀鎚精機'],
+                                    '無所属': ['汎用品', '鴉羽技研', '銀鎚精機'],
+                                };
+                                return allowed[form.affiliation] || MANUFACTURER_NAMES;
+                            })()
                         } />
                     </div>
                     {/* メーカー情報 */}
