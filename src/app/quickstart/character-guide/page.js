@@ -112,6 +112,7 @@ export default function CharacterGuidePage() {
                                 ['10', '全装身型・戦闘用搭乗型で開始', '全装身型はLv5、戦闘用搭乗型はLv7で解禁される装備'],
                                 ['11', 'サイバネティクス等級Ⅲで開始', '全身改造は代償が重い。物語の末に辿り着くもの'],
                                 ['12', '他PCの記憶を操作できる設定', '記憶操作はNPC権限。PCが持つとPvPの原因になる'],
+                                ['13', '企業所属のキャラクター', 'PCの所属は祓部・傭兵・無所属の3つのみ。蒼鉄機工・雷禽重工等の企業社員としてのPCは作成不可。企業の装備を使う傭兵や、企業と契約関係にある討伐者は可'],
                             ].map(([n, ng, reason]) => (
                                 <tr key={n}>
                                     <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-danger)', fontWeight: 700, whiteSpace: 'nowrap' }}>{n}</td>
