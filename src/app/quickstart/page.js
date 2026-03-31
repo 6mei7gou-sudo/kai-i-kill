@@ -664,6 +664,248 @@ export default function QuickstartPage() {
                 </div>
             </div>
 
+            {/* ===== 怪異システム ===== */}
+            <section className="section">
+                <div className="section__number">05 — ANOMALY SYSTEM</div>
+                <h2 className="section__heading">
+                    怪異システム
+                    <span className="section__heading-en">ANOMALY MECHANICS</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    怪異とは、集合的な噂・信念が臨界点を超えた時に現実へと侵食する<span className="text-gold">バグ</span>だ。全ての怪異は<strong style={{ color: 'var(--text-primary)' }}>核（コア）</strong>と<strong style={{ color: 'var(--text-primary)' }}>ルール</strong>を持つ。
+                </p>
+
+                <div className="two-col" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>CORE</div>
+                        <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>核（コア）</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                            怪異の存在の中心。物・場所・記録媒体に宿る。稀に人間に宿る。<span className="text-gold">破壊で怪異は消滅する。</span>
+                        </p>
+                    </div>
+                    <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-cyber)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>RULE</div>
+                        <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>ルール</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                            怪異が人を害する条件と行動原則。<span className="text-gold">ルールを破るほど怪異に捕捉される。</span>解明でルールを暴くことが討伐の鍵。
+                        </p>
+                    </div>
+                </div>
+
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>等級</th>
+                                <th>位置づけ</th>
+                                <th>解明</th>
+                                <th>概要</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#88cc44' }}>五級・四級</td>
+                                <td>雑魚</td>
+                                <td>不要</td>
+                                <td>日常的に湧く害獣。見つけ次第叩ける</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#ffaa00' }}>三級</td>
+                                <td>中ボス</td>
+                                <td>任意（推奨）</td>
+                                <td>力押しも可能だが、調べてから挑んだ方が確実に生き残れる</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#ff6644' }}>二級</td>
+                                <td>ボス</td>
+                                <td style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>必須</td>
+                                <td>解明なしでは核にダメージが通らない</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#ff4444' }}>一級</td>
+                                <td>大ボス</td>
+                                <td style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>必須</td>
+                                <td>解明完了なしでの核への攻撃は完全に無効</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#aa44ff' }}>特級</td>
+                                <td>災害</td>
+                                <td style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>必須</td>
+                                <td>討伐不可能。封印による管理封印を目指す</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* ===== 戦闘ルール ===== */}
+            <section className="section">
+                <div className="section__number">06 — COMBAT</div>
+                <h2 className="section__heading">
+                    戦闘ルール《核護衛戦》
+                    <span className="section__heading-en">CORE-GUARDIAN BATTLE</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    二級以上の怪異の核は<strong style={{ color: 'var(--text-primary)' }}>護衛（ガーディアン）</strong>に守られている。護衛を排除して初めて核への道が開く。
+                </p>
+
+                {/* 戦場構造 */}
+                <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', marginBottom: 'var(--space-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', lineHeight: 2.0, textAlign: 'center' }}>
+                    <div style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>【核（コア）】HP ██████████</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>↑ 護衛が1体でも残っていれば核は攻撃不可</div>
+                    <div style={{ color: '#ffaa00', fontWeight: 700 }}>【護衛1】HP ████　【護衛2】HP ████　【護衛3】HP ████</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>↕ PCたちが対峙する</div>
+                    <div style={{ color: 'var(--accent-cyber)', fontWeight: 700 }}>【討伐者チーム】</div>
+                </div>
+
+                {/* ラウンド進行 */}
+                <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="callout__label">ラウンド進行：</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                        <p><span className="text-gold">1. ラウンド開始</span> — 護衛の再生・状態異常の回復判定</p>
+                        <p><span className="text-gold">2. イニシアチブ</span> — 疾ランク順で行動順を決定（同値ならPCが先）</p>
+                        <p><span className="text-gold">3. ターン処理</span> — メイン行動×1 + サブ行動×1 + リアクション×1（ターン外）</p>
+                        <p><span className="text-gold">4. ラウンド終了</span> — 核HP確認・制限ラウンドカウント・共鳴臨界チェック</p>
+                    </div>
+                </div>
+
+                {/* 基本行動テーブル */}
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>種別</th>
+                                <th>行動</th>
+                                <th>能力値</th>
+                                <th>効果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td rowSpan={6} style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>メイン</td><td>攻撃</td><td>体/疾</td><td>護衛・核への物理ダメージ</td></tr>
+                            <tr><td>魔法行使</td><td>術</td><td>魔法による攻撃・支援</td></tr>
+                            <tr><td>解明</td><td>識/察</td><td>戦闘中に解明鍵を進める</td></tr>
+                            <tr><td>干渉</td><td>判</td><td>護衛の特性を1R無効化</td></tr>
+                            <tr><td>浄化</td><td>魂</td><td>共鳴メーター1種を−2</td></tr>
+                            <tr><td>異能発動</td><td>魂</td><td>異能を使用</td></tr>
+                            <tr><td rowSpan={4} style={{ fontWeight: 700, color: 'var(--accent-cyber)' }}>サブ</td><td>移動</td><td>—</td><td>射程・位置の調整</td></tr>
+                            <tr><td>アイテム</td><td>—</td><td>回復アイテム等の使用</td></tr>
+                            <tr><td>情報確認</td><td>—</td><td>護衛1体のHPを確認</td></tr>
+                            <tr><td>構え変更</td><td>—</td><td>次のリアクションに+1</td></tr>
+                            <tr><td rowSpan={3} style={{ fontWeight: 700, color: '#ff6644' }}>リアクション</td><td>回避</td><td>疾</td><td>成功でダメージ無効</td></tr>
+                            <tr><td>援護</td><td>体</td><td>味方のダメージを肩代わり（半減）</td></tr>
+                            <tr><td>カウンター</td><td>体/疾</td><td>回避成功時に反撃</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* ダメージ計算 */}
+                <div className="callout">
+                    <div className="callout__label">ダメージ計算：</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-gold)', fontSize: 'var(--font-size-md)' }}>ダメージ = 達成値 + 武器修正 − 対象の防御力</p>
+                        <p style={{ marginTop: 'var(--space-sm)' }}>達成値4で成功（1+武器修正）、5で（2+武器修正）、6でスペシャル（3+武器修正、防御力0扱い）</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* ===== 調査・解明・討伐 ===== */}
+            <section className="section">
+                <div className="section__number">07 — INVESTIGATION</div>
+                <h2 className="section__heading">
+                    調査・解明・討伐の三段階
+                    <span className="section__heading-en">THREE-STAGE PROCESS</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    二級以上の怪異を倒すには、<span className="text-gold">調べて、暴いて、討つ</span>の三段階を踏む必要がある。
+                </p>
+
+                {/* 三段階フロー */}
+                <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)', marginBottom: 'var(--space-lg)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', lineHeight: 2.2, textAlign: 'center' }}>
+                    <div style={{ color: 'var(--accent-cyber)', fontWeight: 700 }}>[第一段階] 調査プロセス — 四つの解明鍵の収集</div>
+                    <div style={{ color: 'var(--text-muted)' }}>↓</div>
+                    <div style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>[第二段階] 解明プロセス — 解明完了宣言</div>
+                    <div style={{ color: 'var(--text-muted)' }}>↓</div>
+                    <div style={{ color: 'var(--accent-danger)', fontWeight: 700 }}>[第三段階] 討伐プロセス —《核護衛戦》</div>
+                </div>
+
+                {/* 四つの解明鍵 */}
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>解明鍵</th>
+                                <th>内容</th>
+                                <th>判定</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>①怪異の正体</td>
+                                <td>古い/新しい怪異か、元になった噂の内容、発生時期</td>
+                                <td>識・察</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>②核の所在</td>
+                                <td>核が宿っている物・場所・人間</td>
+                                <td>察・識</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>③被害パターン</td>
+                                <td>ルールの構造、誰が狙われるか、条件</td>
+                                <td>判・識</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>④ルールの全容</td>
+                                <td>怪異のルールと弱点・例外条件</td>
+                                <td>判</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 解明完了宣言の効果 */}
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>達成鍵数</th>
+                                <th>効果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-gold)' }}>4鍵全て</td>
+                                <td>核の防御力半減・浄化+1・制限ラウンド+1延長権・護衛特性1つ無効化</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: '#ffaa00' }}>3鍵</td>
+                                <td>核の防御力−1（通常戦闘開始）</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontWeight: 700, color: 'var(--accent-danger)' }}>2鍵以下で強行</td>
+                                <td>全判定−1・護衛の防御力+2・核の防御力変化なし</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="callout" style={{ borderColor: 'var(--accent-danger)' }}>
+                    <div className="callout__label" style={{ color: 'var(--accent-danger)' }}>準備不足のペナルティ：</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                        <p>二級以上の怪異に対して解明完了宣言なしで挑むと、<strong style={{ color: 'var(--accent-danger)' }}>核へのダメージが0として扱われる</strong>。護衛を倒しても核は再生し、制限ラウンドに追い詰められる。</p>
+                    </div>
+                </div>
+            </div>
+
             {/* ===== リンク ===== */}
             <section className="section">
                 <div className="section__number">MORE — DEEP DIVE</div>
