@@ -30,6 +30,17 @@ const navGroups = [
     ],
   },
   {
+    label: 'TRPGルール',
+    items: [
+      { href: '/rules/', icon: '▶', text: 'ルール目次' },
+      { href: '/rules/dice/', icon: '◇', text: '判定システム' },
+      { href: '/rules/combat/', icon: '⚔', text: '戦闘ルール' },
+      { href: '/rules/investigation/', icon: '◈', text: '調査・解明・討伐' },
+      { href: '/rules/magic/', icon: '✦', text: '魔法システム' },
+      { href: '/rules/equipment/', icon: '⊕', text: '装備システム' },
+    ],
+  },
+  {
     label: '怪異システム',
     items: [
       { href: '/anomalies/about/', icon: '△', text: '怪異とは' },
