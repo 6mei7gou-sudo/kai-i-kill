@@ -293,6 +293,7 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                     <FormSelect label="武器種" value={form.weapon_type || ''} onChange={v => {
                         set('weapon_type', v);
                         set('weapon_subtype', '');
+                        set('base_name', v);
                         const spec = getWeaponSpec(v, form.manufacturer, form.category, '');
                         if (spec) {
                             set('base_cp', spec.cp);
@@ -318,6 +319,7 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                                                 onClick={() => {
                                                     const newSub = selected ? '' : sub.id;
                                                     set('weapon_subtype', newSub);
+                                                    set('base_name', newSub || form.weapon_type);
                                                     const spec = getWeaponSpec(form.weapon_type, form.manufacturer, form.category, newSub);
                                                     if (spec) {
                                                         set('base_cp', spec.cp);
