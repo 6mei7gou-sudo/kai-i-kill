@@ -12,7 +12,10 @@
       "Bash(npm run:*)",
       "WebFetch(domain:localhost)",
       "Bash(node:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(find /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill -type f \\\\\\(-name *.png -o -name *.jpg -o -name *.svg \\\\\\))",
+      "Bash(find /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill -type f -name README* -o -name ROADMAP* -o -name TODO*)",
+      "Bash(grep -l \"location\\\\|district\\\\|area\\\\|region\\\\|map\\\\|geography\\\\|Tokyo\\\\|東京\\\\|新宿\\\\|渋谷\\\\|池袋\" /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill/docs/public/*.md)"
     ]
   }
 }
