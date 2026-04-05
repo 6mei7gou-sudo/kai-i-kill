@@ -3,9 +3,34 @@
 // エクスポートパネル — PDF / PNG / 印刷 の出力ボタン群
 import { useRef, useCallback, useState } from 'react';
 import CharacterCard from './CharacterCard';
+import RpIdCard from '@/components/RpIdCard';
+
+// ExportPanel の state を RpIdCard の character 形式に変換
+function stateToRpCharacter(state) {
+    return {
+        id: state.name || 'draft',
+        character_name: state.name,
+        affiliation: state.affiliation,
+        sub_affiliation: '',
+        awakening: state.awakening,
+        background: state.background,
+        brief_history: state.notes,
+        image_url: state.characterImage,
+        thumbnail_url: state.characterImage,
+        age: '',
+        gender: '',
+        active_title: '',
+        title: '',
+        approved_status: 'pending',
+        author_name: '',
+        fanart_policy: null,
+        created_at: new Date().toISOString(),
+    };
+}
 
 export default function ExportPanel({ state, sheetRef }) {
     const cardRef = useRef(null);
+    const rpCardRef = useRef(null);
     const [exporting, setExporting] = useState(null);
 
     // PDF出力
@@ -51,6 +76,20 @@ export default function ExportPanel({ state, sheetRef }) {
         setExporting(null);
     }, [state.name]);
 
+    // PNG出力（RP用IDカード）
+    const handlePngRp = useCallback(async () => {
+        if (!rpCardRef.current) return;
+        setExporting('png-rp');
+        try {
+            const { exportPng } = await import('../utils/exportPng');
+            await exportPng(rpCardRef.current, `${state.name || 'character'}_rpid`);
+        } catch (err) {
+            console.error('RP用IDカードPNG出力エラー:', err);
+            alert('RP用IDカード出力に失敗しました');
+        }
+        setExporting(null);
+    }, [state.name]);
+
     // 印刷
     const handlePrint = useCallback(() => {
         window.print();
@@ -89,6 +128,13 @@ export default function ExportPanel({ state, sheetRef }) {
                     </button>
                     <button
                         className="export-panel__btn"
+                        onClick={handlePngRp}
+                        disabled={!!exporting}
+                    >
+                        {exporting === 'png-rp' ? '⏳ 生成中...' : '🪪 RP用IDカード出力'}
+                    </button>
+                    <button
+                        className="export-panel__btn"
                         onClick={handlePrint}
                         disabled={!!exporting}
                     >
@@ -101,6 +147,13 @@ export default function ExportPanel({ state, sheetRef }) {
                     <div className="export-panel__card-label">キャラカード プレビュー</div>
                     <div ref={cardRef}>
                         <CharacterCard state={state} />
+                    </div>
+                </div>
+
+                {/* RP用IDカード（画面外に配置してキャプチャ用） */}
+                <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+                    <div ref={rpCardRef}>
+                        <RpIdCard character={stateToRpCharacter(state)} />
                     </div>
                 </div>
             </div>

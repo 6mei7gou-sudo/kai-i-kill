@@ -8,6 +8,7 @@ import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
 import { getBackgroundSkill, getSkillTypeColor, getAxisColor, getAvailableSkills } from '@/data/skillData';
 import HunterLicense from '@/components/HunterLicense';
+import RpIdCard from '@/components/RpIdCard';
 import { exportAsImage } from '@/lib/exportImage';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
@@ -61,6 +62,7 @@ export default function CharacterDetail({ id }) {
     const [levelUpMsg, setLevelUpMsg] = useState(null);
     const [levelingUp, setLevelingUp] = useState(false);
     const licenseRef = useRef(null);
+    const rpCardRef = useRef(null);
     const [serialLoading, setSerialLoading] = useState(false);
     const [linkedGear, setLinkedGear] = useState(null);
     const isOwner = user && e?.user_id && user.id === e.user_id;
@@ -625,9 +627,10 @@ export default function CharacterDetail({ id }) {
                 );
             })()}
 
-            {/* 討伐者資格証（画面外に配置してキャプチャ用） */}
+            {/* 討伐者資格証・RP用IDカード（画面外に配置してキャプチャ用） */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                 <HunterLicense ref={licenseRef} character={{ ...e, equipment_name: linkedGear?.gear_name || e.equipment_name, equipment_maker: linkedGear?.manufacturer || e.equipment_maker }} />
+                <RpIdCard ref={rpCardRef} character={e} />
             </div>
 
             {/* フッター */}
@@ -646,6 +649,20 @@ export default function CharacterDetail({ id }) {
                     style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', background: 'rgba(212,175,55,0.05)', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)', cursor: 'pointer' }}
                 >
                     {exporting ? '生成中...' : '資格証をダウンロード'}
+                </button>
+                <button
+                    onClick={async () => {
+                        if (!rpCardRef.current || exporting) return;
+                        setExporting(true);
+                        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                        const idShort = (e.id || '').substring(0, 8);
+                        await exportAsImage(rpCardRef.current, `kaiii_rpid_${idShort}_${dateStr}`, { width: 1200, height: 630 });
+                        setExporting(false);
+                    }}
+                    disabled={exporting}
+                    style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', background: 'rgba(212,175,55,0.05)', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)', cursor: 'pointer' }}
+                >
+                    {exporting ? '生成中...' : 'RP用IDカード'}
                 </button>
                 {isOwner && <Link href={`/create/character/${id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', padding: '4px 12px', border: '1px solid rgba(255,170,0,0.3)', textDecoration: 'none' }}>編集</Link>}
                 <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', padding: '4px 12px', border: 'var(--border-subtle)', textDecoration: 'none' }}>← 一覧</Link>

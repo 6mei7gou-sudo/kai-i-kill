@@ -1,0 +1,342 @@
+/* RP用IDカード — 免許証風（1200×630px） */
+/* html2canvas キャプチャ用、全値px固定 */
+
+.rp-id {
+    position: relative;
+    width: 1200px;
+    height: 630px;
+    background: #05070a;
+    color: #e8e6e3;
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* 走査線オーバーレイ */
+.rp-id::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* 所属色グロー */
+.rp-id__glow {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 60px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.rp-id__left-line {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    z-index: 2;
+}
+
+/* ===== HEADER ===== */
+.rp-id__header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a0c10;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    z-index: 2;
+}
+
+.rp-id__header-left {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+    letter-spacing: 0.05em;
+}
+
+.rp-id__header-right {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+}
+
+.rp-id__header-accent {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+}
+
+/* ===== PORTRAIT ===== */
+.rp-id__portrait {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+    width: 240px;
+    height: 320px;
+    background: #0a0c10;
+    overflow: hidden;
+}
+
+.rp-id__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+
+.rp-id__portrait-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    font-weight: 700;
+    opacity: 0.3;
+}
+
+/* ===== ID META ===== */
+.rp-id__meta {
+    position: absolute;
+    top: 378px;
+    left: 20px;
+    width: 240px;
+    padding: 10px 0;
+}
+
+.rp-id__meta-label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    color: #555566;
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+}
+
+.rp-id__meta-value {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+    margin-bottom: 10px;
+}
+
+.rp-id__meta-info {
+    font-size: 12px;
+    color: #9a9a9a;
+    margin-bottom: 4px;
+}
+
+.rp-id__meta-author {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+    margin-top: 6px;
+}
+
+/* ===== NAME BLOCK ===== */
+.rp-id__name {
+    position: absolute;
+    top: 50px;
+    left: 280px;
+    right: 20px;
+    height: 100px;
+}
+
+.rp-id__name-row1 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.rp-id__name-bar {
+    display: inline-block;
+    width: 4px;
+    height: 36px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.rp-id__name-text {
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.rp-id__name-title {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.rp-id__name-row2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.rp-id__name-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.rp-id__name-sub {
+    font-size: 14px;
+    color: #e8e6e3;
+}
+
+.rp-id__name-awakening {
+    font-size: 14px;
+    color: #9a9a9a;
+}
+
+/* ===== PROFILE ===== */
+.rp-id__profile {
+    position: absolute;
+    top: 158px;
+    left: 280px;
+    right: 20px;
+}
+
+.rp-id__profile-label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.rp-id__profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+}
+
+.rp-id__profile-key {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 10px;
+    color: #555566;
+}
+
+.rp-id__profile-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: #e8e6e3;
+    margin-top: 1px;
+}
+
+/* ===== BRIEF HISTORY ===== */
+.rp-id__history {
+    position: absolute;
+    top: 230px;
+    left: 280px;
+    right: 20px;
+    height: 140px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.rp-id__history-label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+}
+
+.rp-id__history-text {
+    font-size: 13px;
+    color: #9a9a9a;
+    line-height: 1.8;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+}
+
+/* ===== FANART POLICY ===== */
+.rp-id__fanart {
+    position: absolute;
+    top: 500px;
+    left: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.rp-id__fanart-label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}
+
+.rp-id__fanart-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px 8px;
+}
+
+.rp-id__fanart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1px 0;
+}
+
+.rp-id__fanart-name {
+    font-size: 9px;
+    color: #9a9a9a;
+}
+
+.rp-id__fanart-val {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    min-width: 28px;
+    text-align: right;
+}
+
+.rp-id__fanart-note {
+    margin-top: 4px;
+    font-size: 8px;
+    color: #555566;
+    font-style: italic;
+}
+
+/* ===== FOOTER ===== */
+.rp-id__footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 24px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    color: #555566;
+    z-index: 2;
+}
+
+.rp-id__footer-status {
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 8px;
+}

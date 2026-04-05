@@ -56,7 +56,7 @@ export default function HomePage() {
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.15em', marginBottom: 'var(--space-xs)' }}>
               FOR TRPG PLAYERS
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-md)' }}>TRPGで遊びたい</h3>
+            <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-md)' }}>RPで遊びたい</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-md)', lineHeight: 2.0, flex: 1 }}>
               キャラクターの作り方、ダイスの振り方、戦闘の流れを順番に解説します。はじめてTRPGに触れる人でも大丈夫。
             </p>
