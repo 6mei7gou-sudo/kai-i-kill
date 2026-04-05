@@ -1,8 +1,10 @@
-// 戦闘ステートマシン — KAI-I//KILL シミュレーション型ゲームエンジン v2
-// 装備・クラス・背景・サイバネティクス・回復・状態異常を反映
+// 戦闘ステートマシン — KAI-I//KILL シミュレーション型ゲームエンジン v3
+// 装備・クラス・背景・サイバネティクス・スキル・武器詳細ステータスを反映
 
 import { rollDicePool, resolveCheck, calculateDamage, calculateHP, rollInitiative, RANK_TO_HP_BONUS } from './dice';
 import { getWeaponSpec } from '@/data/weaponData';
+import { calcWeaponStats, getAttackAbility } from './weaponCalc';
+import { getAvailableSkills, getBackgroundSkill } from '@/data/skillData';
 
 // 戦闘フェーズ
 const PHASE = {
@@ -105,7 +107,13 @@ export function createBattleState(character, mission) {
   const classBonus = getClassBonus(character.class);
   const bgBonus = getBackgroundBonus(character.background);
   const cyberBonus = getCyberBonus(character.cybernetics);
-  const weaponMod = getActualWeaponMod(character)
+
+  // 武器詳細ステータス読み込み
+  const weaponDetails = loadWeaponDetails(character);
+
+  // 武器修正: 詳細計算 > フォールバック
+  const baseWeaponMod = weaponDetails ? weaponDetails.totalMod : getActualWeaponMod(character);
+  const weaponMod = baseWeaponMod
     + (bgBonus.weaponModBonus || 0)
     + (cyberBonus.attackMod || 0);
 
@@ -118,6 +126,9 @@ export function createBattleState(character, mission) {
 
   // 信念ポイント（回復用）
   const beliefPoints = character.belief_points || 5;
+
+  // スキル読み込み
+  const skills = loadBattleSkills(character);
 
   const enemies = mission.battle.guardians.map(g => ({
     ...g,
@@ -133,39 +144,61 @@ export function createBattleState(character, mission) {
 
   // ボーナスログ生成
   const bonusLog = [];
-  if (weaponMod > 0) bonusLog.push(`装備修正: +${weaponMod}`);
+  if (weaponDetails) {
+    bonusLog.push(`武器: ${weaponDetails.weaponType}（${weaponDetails.manufacturer}）+${weaponDetails.totalMod}`);
+    if (weaponDetails.conditions.length > 0) {
+      bonusLog.push(`条件ボーナス: ${weaponDetails.conditions.map(c => `${c.label}+${c.value}`).join(', ')}`);
+    }
+    if (weaponDetails.resonance.length > 0) {
+      bonusLog.push(`武器共鳴: ${weaponDetails.resonance.map(r => `${r.emotion}${r.value > 0 ? '+' : ''}${r.value}`).join(', ')}`);
+    }
+  } else if (weaponMod > 0) {
+    bonusLog.push(`装備修正: +${weaponMod}`);
+  }
   if (classBonus.label) bonusLog.push(classBonus.label);
   if (bgBonus.label) bonusLog.push(bgBonus.label);
   if (cyberBonus.label.length > 0) bonusLog.push(`サイバネ: ${cyberBonus.label.join(', ')}`);
+  const activeSkills = skills.filter(s => s.type !== 'パッシブ');
+  const passiveSkills = skills.filter(s => s.type === 'パッシブ');
+  if (passiveSkills.length > 0) bonusLog.push(`パッシブ: ${passiveSkills.map(s => s.id).join(', ')}`);
+  if (activeSkills.length > 0) bonusLog.push(`スキル: ${activeSkills.map(s => s.id).join(', ')}`);
+
+  let player = {
+    name: character.character_name,
+    hp: totalHP,
+    maxHp: totalHP,
+    rank_tai: character.rank_tai,
+    rank_haya: character.rank_haya,
+    rank_shiki: character.rank_shiki,
+    rank_han: character.rank_han,
+    rank_shiya: character.rank_shiya,
+    rank_jutsu: character.rank_jutsu,
+    rank_kon: character.rank_kon,
+    class: character.class,
+    background: character.background,
+    equipment_type: character.equipment_type,
+    weaponMod,
+    weaponDetails,
+    classBonus,
+    bgBonus,
+    cyberBonus,
+    beliefPoints,
+    maxHealUses: 2,
+    healUsesLeft: 2,
+    defense: cyberBonus.defenseMod || 0,
+    firstAttackDone: false,
+    skills,
+    skillUses: {},
+  };
+
+  // パッシブスキル適用
+  player = applyPassiveSkills(player, null);
 
   return {
     phase: PHASE.INIT,
     round: 1,
     maxRounds,
-    player: {
-      name: character.character_name,
-      hp: totalHP,
-      maxHp: totalHP,
-      rank_tai: character.rank_tai,
-      rank_haya: character.rank_haya,
-      rank_shiki: character.rank_shiki,
-      rank_han: character.rank_han,
-      rank_shiya: character.rank_shiya,
-      rank_jutsu: character.rank_jutsu,
-      rank_kon: character.rank_kon,
-      class: character.class,
-      background: character.background,
-      equipment_type: character.equipment_type,
-      weaponMod,
-      classBonus,
-      bgBonus,
-      cyberBonus,
-      beliefPoints,
-      maxHealUses: 2,
-      healUsesLeft: 2,
-      defense: cyberBonus.defenseMod || 0,
-      firstAttackDone: false,
-    },
+    player,
     enemies,
     core,
     log: bonusLog.length > 0
@@ -230,9 +263,24 @@ export function playerAttack(state, targetId) {
   // 修正値計算
   let attackMod = state.player.weaponMod;
 
+  // スキルバフ（一時的な判定ボーナス）
+  if (state.player._skillBuff) {
+    attackMod += state.player._skillBuff;
+  }
+
   // 鋼の肉体: 初回攻撃+1
   if (!state.player.firstAttackDone && state.player.bgBonus.firstAttackMod) {
     attackMod += state.player.bgBonus.firstAttackMod;
+  }
+
+  // パッシブ: 1ラウンド目攻撃ボーナス
+  if (state.round === 1 && state.player._round1AttackBonus) {
+    attackMod += state.player._round1AttackBonus;
+  }
+
+  // パッシブ: HP50%以下で攻撃+1（傭兵の矜持）
+  if (state.player._lowHpAttackBonus && state.player.hp <= state.player.maxHp * 0.5) {
+    attackMod += state.player._lowHpAttackBonus;
   }
 
   // 祓士: 核攻撃+2
@@ -243,11 +291,24 @@ export function playerAttack(state, targetId) {
   // 機甲士: 護衛ダメージ+2
   const guardianDmgBonus = (!isCore && state.player.classBonus.guardianDamageMod) || 0;
 
+  // パッシブ: 怒り4以上で攻撃+1
+  const rageDmgBonus = (state.player._rageAttackBonus && state.resonance.rage >= 4) ? 1 : 0;
+
   // 学者肌: 核防御1無視
   const defIgnore = isCore ? (state.player.bgBonus.coreDefIgnore || 0) : 0;
   const effectiveDefense = Math.max((target.defense || 0) - defIgnore, 0);
 
-  const check = resolveCheck(state.player.rank_shiki, attackMod, effectiveDefense + 4);
+  // 武器詳細の条件付きボーナス（例: 核攻撃時+N）
+  let condBonus = 0;
+  if (state.player.weaponDetails?.conditions) {
+    for (const cond of state.player.weaponDetails.conditions) {
+      if (isCore && (cond.label.includes('核') || cond.label.includes('コア'))) {
+        condBonus += cond.value;
+      }
+    }
+  }
+
+  const check = resolveCheck(state.player.rank_shiki, attackMod + condBonus, effectiveDefense + 4);
   let damage = 0;
   let message = '';
 
@@ -255,7 +316,7 @@ export function playerAttack(state, targetId) {
     message = `ファンブル！ ${state.player.name}の攻撃は大きく外れた`;
     state = addResonance(state, 'haste', 1);
   } else if (check.success) {
-    damage = calculateDamage(check.maxDie, guardianDmgBonus, effectiveDefense);
+    damage = calculateDamage(check.maxDie, guardianDmgBonus + rageDmgBonus, effectiveDefense);
     if (check.isSpecial) {
       damage = Math.floor(damage * 1.5);
       state = addResonance(state, 'purge', 1);
@@ -270,11 +331,36 @@ export function playerAttack(state, targetId) {
 
   let newState = {
     ...state,
-    player: { ...state.player, firstAttackDone: true },
+    player: { ...state.player, firstAttackDone: true, _skillBuff: 0, _skillDefense: 0 },
   };
 
   if (damage > 0) {
     newState = applyDamageToTarget(newState, targetId, isCore, damage);
+
+    // パッシブ: 護衛撃破時、余剰ダメージが核に伝播
+    if (!isCore && newState.player._overflowToCore) {
+      const enemy = newState.enemies.find(e => e.id === targetId);
+      if (enemy && enemy.hp <= 0) {
+        const overflow = Math.abs(enemy.hp);
+        if (overflow > 0 && newState.core.exposed === false) {
+          // 撃破後に核が露出するか確認
+          const aliveAfter = newState.enemies.filter(e => e.hp > 0);
+          if (aliveAfter.length === 0) {
+            newState = { ...newState, core: { ...newState.core, exposed: true, hp: Math.max(newState.core.hp - overflow, 0) } };
+            newState.totalDamageDealt += overflow;
+            message += `（余剰${overflow}が核に伝播！）`;
+          }
+        }
+      }
+    }
+  }
+
+  // 武器の共鳴効果を適用
+  if (damage > 0 && newState.player.weaponDetails?.resonance?.length > 0) {
+    for (const res of newState.player.weaponDetails.resonance) {
+      const emoKey = { '怒り': 'rage', '恐怖': 'fear', '渇望': 'thirst', '哀愁': 'sorrow', '焦燥': 'haste', '浄化': 'purge' }[res.emotion];
+      if (emoKey) newState = addResonance(newState, emoKey, res.value);
+    }
   }
 
   const log = { type: 'player_attack', target: target.name, check, damage, message };
@@ -360,7 +446,7 @@ export function playerMagic(state, targetId) {
 
 // ===== プレイヤー回避 =====
 export function playerEvade(state) {
-  const evadeBonus = 2 + (state.player.bgBonus.evadeMod || 0) + (state.player.cyberBonus.evadeBonus || 0);
+  const evadeBonus = 2 + (state.player.bgBonus.evadeMod || 0) + (state.player.cyberBonus.evadeBonus || 0) + (state.player._skillBuff || 0);
   const log = {
     type: 'player_evade',
     message: `${state.player.name}は回避態勢をとった（回避+${evadeBonus}）`,
@@ -432,8 +518,11 @@ export function processEnemyTurn(state) {
         const log = { type: 'enemy_attack_miss', enemy: enemy.name, message: `${enemy.name}の攻撃を回避した` };
         newState = { ...newState, log: [...newState.log, log] };
       } else {
-        // ダメージ = 敵攻撃力 - プレイヤー防御（サイバネ）
-        const rawDamage = Math.max(enemy.attack + 1 - playerDef, 1);
+        // ダメージ = 敵攻撃力 - プレイヤー防御（サイバネ + スキル）
+        const skillDef = newState.player._skillDefense || 0;
+        // パッシブ: HP50%以下で防御+1
+        const lowHpDef = (newState.player._lowHpDefenseBonus && newState.player.hp <= newState.player.maxHp * 0.5) ? 1 : 0;
+        const rawDamage = Math.max(enemy.attack + 1 - playerDef - skillDef - lowHpDef, 1);
         // 回避専念時はダメージ半減
         const damage = evadeBonus > 0 ? Math.max(Math.ceil(rawDamage / 2), 1) : rawDamage;
         const newHp = Math.max(newState.player.hp - damage, 0);
@@ -496,6 +585,269 @@ export function endRound(state) {
   }
 
   return { ...state, round: nextRound, phase: PHASE.INIT };
+}
+
+// ===== プレイヤースキル使用 =====
+export function playerSkill(state, skillId, targetId) {
+  const skill = state.player.skills?.find(s => s.id === skillId);
+  if (!skill) return { state, result: { success: false, message: 'スキルが見つからない' } };
+
+  // 使用回数チェック
+  const uses = state.player.skillUses || {};
+  const maxUses = skill.type === 'メイン' ? 1 : (skill.maxUses || 2);
+  if ((uses[skillId] || 0) >= maxUses) {
+    return { state, result: { success: false, message: `${skill.id}は使用回数上限に達した` } };
+  }
+
+  let newState = { ...state };
+  let damage = 0;
+  let message = '';
+  let success = true;
+  const rankKey = `rank_${ATTR_TO_RANK[skill.attr] || 'shiki'}`;
+  const rank = newState.player[rankKey] || 'D';
+
+  // --- スキル効果の解決 ---
+  const effect = skill.effect || '';
+
+  // ダメージ系スキル
+  if (effect.includes('ダメージ+')) {
+    const dmgMatch = effect.match(/ダメージ[+＋](\d+)/);
+    const bonusDmg = dmgMatch ? parseInt(dmgMatch[1], 10) : 0;
+
+    // HP条件チェック（例：HP50%以下時）
+    if (effect.includes('HP50%以下') && newState.player.hp > newState.player.maxHp * 0.5) {
+      return { state, result: { success: false, message: 'HP50%以上のため使用できない' } };
+    }
+    if (effect.includes('HP4以下') && newState.player.hp > 4) {
+      return { state, result: { success: false, message: 'HP4以下でないと使用できない' } };
+    }
+
+    let target;
+    let isCore = false;
+    if (targetId === 'core' && newState.core.exposed) {
+      target = newState.core; isCore = true;
+    } else {
+      target = newState.enemies.find(e => e.id === targetId && e.hp > 0);
+    }
+    if (!target) return { state, result: { success: false, message: '対象が見つからない' } };
+
+    const check = resolveCheck(rank, newState.player.weaponMod, (target.defense || 0) + 4);
+    if (check.isFumble) {
+      message = `ファンブル！ ${skill.id}は失敗した`;
+      success = false;
+      // 反動チェック
+      if (effect.includes('反動')) {
+        const recoilMatch = effect.match(/反動(\d+)/);
+        const recoil = recoilMatch ? parseInt(recoilMatch[1], 10) : 2;
+        newState = { ...newState, player: { ...newState.player, hp: Math.max(newState.player.hp - recoil, 0) } };
+        message += `（反動${recoil}ダメージ）`;
+      }
+    } else if (check.success) {
+      damage = calculateDamage(check.maxDie, newState.player.weaponMod + bonusDmg, target.defense || 0);
+      if (effect.includes('防御無視') || effect.includes('防御力を無視')) {
+        damage = check.maxDie + newState.player.weaponMod + bonusDmg;
+      }
+      if (effect.includes('2倍')) damage = damage * 2;
+      if (check.isSpecial) damage = Math.floor(damage * 1.5);
+      message = `${skill.id}！ ${target.name}に${damage}ダメージ`;
+      if (check.isSpecial) message = `スペシャル！ ` + message;
+    } else {
+      message = `${skill.id}は${target.name}に避けられた`;
+      success = false;
+    }
+
+    if (damage > 0) {
+      newState = applyDamageToTarget(newState, targetId, isCore, damage);
+    }
+    // 反動ダメージ（成功時）
+    if (success && effect.includes('反動') && !check.isFumble) {
+      const recoilMatch = effect.match(/反動(\d+)/);
+      const recoil = recoilMatch ? parseInt(recoilMatch[1], 10) : 0;
+      if (recoil > 0) {
+        newState = { ...newState, player: { ...newState.player, hp: Math.max(newState.player.hp - recoil, 0) } };
+        message += `（反動${recoil}）`;
+      }
+    }
+
+    if (isCore && newState.core.hp <= 0) {
+      newState = { ...newState, phase: PHASE.VICTORY };
+      newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
+    }
+  }
+  // 回復系スキル
+  else if (effect.includes('HP') && effect.includes('回復')) {
+    const healMatch = effect.match(/HP.*?(\d+)回復/);
+    const healAmt = healMatch ? parseInt(healMatch[1], 10) : 2;
+    const newHp = Math.min(newState.player.hp + healAmt, newState.player.maxHp);
+    message = `${skill.id}でHP${newHp - newState.player.hp}回復`;
+    newState = { ...newState, player: { ...newState.player, hp: newHp } };
+  }
+  // バフ系スキル（次の判定+N）
+  else if (effect.includes('判定+') || effect.includes('行使+') || effect.includes('攻撃判定+')) {
+    const buffMatch = effect.match(/[+＋](\d+)/);
+    const buffVal = buffMatch ? parseInt(buffMatch[1], 10) : 1;
+    newState = { ...newState, player: { ...newState.player, _skillBuff: (newState.player._skillBuff || 0) + buffVal } };
+    message = `${skill.id} — 次の判定+${buffVal}`;
+  }
+  // 防御系スキル（ダメージ-N）
+  else if (effect.includes('ダメージ-') || effect.includes('受けるダメージ')) {
+    const defMatch = effect.match(/ダメージ[-−](\d+)/);
+    const defVal = defMatch ? parseInt(defMatch[1], 10) : 2;
+    newState = { ...newState, player: { ...newState.player, _skillDefense: (newState.player._skillDefense || 0) + defVal } };
+    message = `${skill.id} — 次の被ダメージ-${defVal}`;
+  }
+  // 回避系スキル
+  else if (effect.includes('回避+') || effect.includes('リアクション判定+')) {
+    const evMatch = effect.match(/[+＋](\d+)/);
+    const evVal = evMatch ? parseInt(evMatch[1], 10) : 2;
+    newState = { ...newState, player: { ...newState.player, _skillBuff: (newState.player._skillBuff || 0) + evVal } };
+    message = `${skill.id} — リアクション+${evVal}`;
+  }
+  // 共鳴メーター操作
+  else if (effect.includes('共鳴メーター')) {
+    const resMatch = effect.match(/共鳴メーター[-−](\d+)/);
+    const resVal = resMatch ? parseInt(resMatch[1], 10) : 2;
+    // 浄化以外で最も高い共鳴を下げる
+    const maxEmo = Object.entries(newState.resonance)
+      .filter(([k]) => k !== 'purge')
+      .sort((a, b) => b[1] - a[1])[0];
+    if (maxEmo && maxEmo[1] > 0) {
+      newState = addResonance(newState, maxEmo[0], -resVal);
+      message = `${skill.id} — ${maxEmo[0]}を${resVal}軽減`;
+    } else {
+      message = `${skill.id} — 共鳴メーターに変化なし`;
+    }
+  }
+  // 信念消費系
+  else if (effect.includes('信念') && effect.includes('消費')) {
+    if (newState.player.beliefPoints <= 0) {
+      return { state, result: { success: false, message: '信念ポイントが足りない' } };
+    }
+    newState = { ...newState, player: { ...newState.player, beliefPoints: newState.player.beliefPoints - 1 } };
+    // 効果本体を処理（核ダメージ等）
+    if (effect.includes('ダメージ')) {
+      const dmgMatch = effect.match(/ダメージ[+＋](\d+)/);
+      const bonusDmg = dmgMatch ? parseInt(dmgMatch[1], 10) : 4;
+      if (targetId === 'core' && newState.core.exposed) {
+        newState = applyDamageToTarget(newState, 'core', true, bonusDmg);
+        message = `${skill.id}！ 信念消費 — 核に${bonusDmg}ダメージ`;
+      } else {
+        message = `${skill.id} — 信念を消費`;
+      }
+    } else {
+      message = `${skill.id} — 信念を消費して発動`;
+    }
+  }
+  // 護衛特性開示
+  else if (effect.includes('特性') && (effect.includes('開示') || effect.includes('把握'))) {
+    message = `${skill.id} — 護衛の特性を開示した`;
+  }
+  // その他の汎用効果
+  else {
+    message = `${skill.id}を使用した — ${effect}`;
+  }
+
+  // 共鳴コスト処理（渇望+N）
+  if (effect.includes('渇望+')) {
+    const thirstMatch = effect.match(/渇望[+＋](\d+)/);
+    const thirst = thirstMatch ? parseInt(thirstMatch[1], 10) : 1;
+    newState = addResonance(newState, 'thirst', thirst);
+    if (thirst > 0) message += `（渇望+${thirst}）`;
+  }
+
+  // 使用回数を記録
+  const newUses = { ...(newState.player.skillUses || {}), [skillId]: ((newState.player.skillUses || {})[skillId] || 0) + 1 };
+  newState = {
+    ...newState,
+    player: { ...newState.player, skillUses: newUses },
+    phase: PHASE.ENEMY_TURN,
+    log: [...newState.log, { type: 'player_skill', skill: skill.id, message }],
+  };
+
+  return { state: newState, result: { success, damage, message } };
+}
+
+// 属性名 → ランクキーのマッピング
+const ATTR_TO_RANK = {
+  '体': 'tai', '疾': 'haya', '識': 'shiki', '判': 'han', '察': 'shiya', '術': 'jutsu', '魂': 'kon',
+};
+
+// パッシブスキル効果をプレイヤーステートに適用
+function applyPassiveSkills(player, state) {
+  let p = { ...player };
+  const passives = (p.skills || []).filter(s => s.type === 'パッシブ');
+
+  for (const skill of passives) {
+    const eff = skill.effect || '';
+    // 攻撃判定+1系
+    if (eff.includes('攻撃判定+1') && eff.includes('1ラウンド目')) {
+      p._round1AttackBonus = 1;
+    }
+    // HP50%以下で攻撃+1（傭兵の矜持）
+    if (eff.includes('HP50%以下') && eff.includes('攻撃判定+1')) {
+      p._lowHpAttackBonus = 1;
+    }
+    // HP50%以下で防御+1（独立生存術）
+    if (eff.includes('HP50%以下') && eff.includes('防御修正+1')) {
+      p._lowHpDefenseBonus = 1;
+    }
+    // 護衛HP常時把握（観察眼）
+    if (eff.includes('HP') && eff.includes('常に把握')) {
+      p._canSeeEnemyHp = true;
+    }
+    // 怒りメーター4以上で攻撃+1
+    if (eff.includes('怒りメーター') && eff.includes('ダメージ+1')) {
+      p._rageAttackBonus = 1;
+    }
+    // 護衛撃破時余剰ダメージ核伝播
+    if (eff.includes('余剰ダメージ') && eff.includes('核')) {
+      p._overflowToCore = true;
+    }
+    // 怪異誘発改善
+    if (eff.includes('怪異誘発') && eff.includes('改善')) {
+      p._reducedAnomalyRisk = true;
+    }
+  }
+
+  return p;
+}
+
+// スキル一覧を取得してバトル用に変換
+function loadBattleSkills(character) {
+  const skills = getAvailableSkills({
+    affiliation: character.affiliation,
+    assignment: character.sub_affiliation || character.assignment,
+    awakening: character.awakening,
+    weaponType: character.weapon_skill_type || character.weapon_type,
+  });
+
+  const bgSkill = getBackgroundSkill(character.background);
+  if (bgSkill) {
+    skills.push({ ...bgSkill, axis: '背景', level: 0 });
+  }
+
+  // 使用回数上限を設定
+  return skills.map(s => ({
+    ...s,
+    maxUses: s.type === 'メイン' ? 1 : (s.type === 'サブ' ? 2 : 99),
+  }));
+}
+
+// 武器詳細ステータスを取得
+function loadWeaponDetails(character) {
+  try {
+    const stats = calcWeaponStats({
+      weaponType: character.weapon_type,
+      manufacturer: character.equipment_maker || '汎用品',
+      equipmentType: character.equipment_type || '武装型',
+      subtype: character.equipment_name || '',
+      options: Array.isArray(character.weapon_options) ? character.weapon_options : [],
+      gift: character.gift,
+    });
+    return stats;
+  } catch (e) {
+    return null;
+  }
 }
 
 // ===== ユーティリティ =====

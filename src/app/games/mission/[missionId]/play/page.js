@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
-  createBattleState, startRound, playerAttack, playerMagic,
+  createBattleState, startRound, playerAttack, playerMagic, playerSkill,
   playerEvade, playerHeal, processEnemyTurn, endRound, getBattleResult, PHASE,
   createCoopBattleState, startCoopRound, coopPlayerAttack, coopPlayerMagic,
   coopPlayerEvade, coopPlayerHeal, processCoopEnemyTurn, endCoopRound,
@@ -35,6 +35,7 @@ function BattleLog({ log }) {
   const logColor = (entry) => {
     if (entry.type === 'round_start') return 'var(--accent-gold)';
     if (entry.type === 'result') return entry.message.includes('成功') || entry.message.includes('破壊') ? 'var(--accent-gold)' : 'var(--accent-danger)';
+    if (entry.type === 'player_skill') return '#ff8844';
     if (entry.type?.startsWith('player_')) return 'var(--accent-blue)';
     if (entry.type?.startsWith('enemy_')) return 'var(--accent-danger)';
     return 'var(--text-secondary)';
@@ -100,7 +101,7 @@ export default function BattlePage() {
   const activePlayer = isCoop ? state.players?.[state.activePlayerIndex] : null;
 
   // 行動ハンドラ
-  const handleAction = (action, targetId) => {
+  const handleAction = (action, targetId, skillId) => {
     let result;
     if (isCoop) {
       switch (action) {
@@ -114,6 +115,7 @@ export default function BattlePage() {
       switch (action) {
         case 'attack': result = playerAttack(state, targetId); break;
         case 'magic': result = playerMagic(state, targetId); break;
+        case 'skill': result = playerSkill(state, skillId, targetId); break;
         case 'evade': result = playerEvade(state); break;
         case 'heal': result = playerHeal(state); break;
         default: return;
@@ -245,8 +247,14 @@ export default function BattlePage() {
                 {state.player.class} | 体{state.player.rank_tai} 疾{state.player.rank_haya} 識{state.player.rank_shiki} 術{state.player.rank_jutsu}
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
-                武器+{state.player.weaponMod} | 防御{state.player.defense} | 信念{state.player.beliefPoints}
+                武器+{state.player.weaponMod}{state.player.weaponDetails ? ` (${state.player.weaponDetails.weaponType})` : ''} | 防御{state.player.defense} | 信念{state.player.beliefPoints}
               </div>
+              {/* パッシブスキル表示 */}
+              {state.player.skills?.filter(s => s.type === 'パッシブ').length > 0 && (
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#44cc88', marginTop: 4 }}>
+                  {state.player.skills.filter(s => s.type === 'パッシブ').map(s => s.id).join(' / ')}
+                </div>
+              )}
             </div>
           )}
 
@@ -340,7 +348,7 @@ export default function BattlePage() {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
             <button
               onClick={() => handleAction('evade')}
               style={actionBtnStyle('var(--text-secondary)')}
@@ -359,6 +367,63 @@ export default function BattlePage() {
               );
             })()}
           </div>
+
+          {/* スキル使用 */}
+          {!isCoop && state.player.skills?.filter(s => s.type !== 'パッシブ').length > 0 && (
+            <div style={{ marginTop: 'var(--space-md)' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>
+                スキル:
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
+                {state.player.skills.filter(s => s.type !== 'パッシブ').map(skill => {
+                  const uses = state.player.skillUses?.[skill.id] || 0;
+                  const maxUses = skill.maxUses || (skill.type === 'メイン' ? 1 : 2);
+                  const exhausted = uses >= maxUses;
+                  const needsTarget = skill.effect?.includes('ダメージ') || skill.effect?.includes('攻撃');
+                  const typeColor = skill.type === 'メイン' ? '#ff8844' : skill.type === 'サブ' ? '#44aaff' : '#aa44ff';
+
+                  // 対象不要なスキルは直接発動
+                  if (!needsTarget) {
+                    return (
+                      <button
+                        key={skill.id}
+                        onClick={() => !exhausted && handleAction('skill', null, skill.id)}
+                        disabled={exhausted}
+                        style={{
+                          ...actionBtnStyle(exhausted ? 'var(--text-muted)' : typeColor),
+                          opacity: exhausted ? 0.4 : 1,
+                          fontSize: 'var(--font-size-xs)',
+                          padding: '4px 10px',
+                        }}
+                        title={`${skill.effect}（${skill.type} / ${skill.attr}）`}
+                      >
+                        {skill.id} {uses > 0 ? `(${uses}/${maxUses})` : ''}
+                      </button>
+                    );
+                  }
+
+                  // 対象が必要なスキルは最初の敵に発動（護衛 > 核）
+                  const defaultTarget = aliveEnemies.length > 0 ? aliveEnemies[0].id : (state.core.exposed ? 'core' : null);
+                  return (
+                    <button
+                      key={skill.id}
+                      onClick={() => !exhausted && defaultTarget && handleAction('skill', defaultTarget, skill.id)}
+                      disabled={exhausted || !defaultTarget}
+                      style={{
+                        ...actionBtnStyle(exhausted ? 'var(--text-muted)' : typeColor),
+                        opacity: exhausted ? 0.4 : 1,
+                        fontSize: 'var(--font-size-xs)',
+                        padding: '4px 10px',
+                      }}
+                      title={`${skill.effect}（${skill.type} / ${skill.attr}）`}
+                    >
+                      {skill.id} {uses > 0 ? `(${uses}/${maxUses})` : ''}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
