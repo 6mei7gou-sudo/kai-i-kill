@@ -10,7 +10,7 @@ const DATA = {
     { id: 'mind',     name: '精神', desc: '意志力・集中力・記憶' },
     { id: 'skill',    name: '技巧', desc: '技術・精密操作・工作' },
     { id: 'social',   name: '社会', desc: '交渉・情報収集・人脈' },
-    { id: 'kaiki',    name: '怪異', desc: '異能・霊力・怪異の理解' },
+    { id: 'kaiki',    name: '怪異', desc: '霊力・怪異の理解' },
     { id: 'survival', name: '生存', desc: '危機回避・本能・適応力' }
   ],
 

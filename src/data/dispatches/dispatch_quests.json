@@ -41,7 +41,7 @@
   {
     "id": "recon_forbidden",
     "name": "禁域偵察",
-    "description": "立入禁止区域に単独潜入し、怪異核の位置情報を収集する。帰還が保証されない危険任務。",
+    "description": "立入禁止区域に単独潜入し、未知の脅威の位置情報を収集する。帰還が保証されない危険任務。",
     "duration_hours": 8,
     "recommended_rank": "A",
     "rewards": {

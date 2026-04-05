@@ -14,7 +14,6 @@ const CHAPTERS = [
     { slug: 'skills',        num: '04', title: 'スキルシステム',       desc: '6軸スキル・所属/配属/覚醒/背景/武器技能', icon: '▤' },
     { slug: 'investigation',  num: '05', title: '調査・解明・討伐',     desc: '三段階プロセス・四つの解明鍵・予兆カード', icon: '△' },
     { slug: 'magic',         num: '06', title: '魔法システム',         desc: '8つの魔法言語・怪異誘発判定・得意/苦手', icon: '✦' },
-    { slug: 'innate',        num: '07', title: '異能',               desc: '異能の発現・使用制限・変質リスク', icon: '◆' },
     { slug: 'creation',      num: '08', title: 'キャラクター作成',     desc: '10ステップの作成手順・初期値・制限', icon: '☖' },
     { slug: 'affiliation',   num: '09', title: '所属システム',         desc: '祓部・傭兵・無所属の詳細・配属選択肢', icon: '✕' },
     { slug: 'equipment',     num: '10', title: '装備システム',         desc: '武器種×企業マトリクス・CP・スロット・カスタム', icon: '⊕' },
@@ -54,6 +53,42 @@ export default function RulesHubPage() {
                         </div>
                     </Link>
                 ))}
+            </div>
+
+            {/* ===== 関連ページ ===== */}
+            <section className="section">
+                <div className="section__number">SEE ALSO</div>
+                <h2 className="section__heading">
+                    関連ページ
+                    <span className="section__heading-en">RELATED</span>
+                </h2>
+            </section>
+
+            <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
+                <Link href="/quickstart/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">▶</div>
+                        <div className="card__title-en">QUICKSTART</div>
+                        <h3 className="card__title">クイックスタート</h3>
+                        <p className="card__desc">ルールを読む前に全体像をつかむ。</p>
+                    </div>
+                </Link>
+                <Link href="/anomalies/about/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">△</div>
+                        <div className="card__title-en">ANOMALY SYSTEM</div>
+                        <h3 className="card__title">怪異とは</h3>
+                        <p className="card__desc">怪異の発生原理・分類・等級の詳細。</p>
+                    </div>
+                </Link>
+                <Link href="/organizations/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">✕</div>
+                        <div className="card__title-en">FACTIONS</div>
+                        <h3 className="card__title">組織・人物</h3>
+                        <p className="card__desc">三勢力の解説と権力構造。</p>
+                    </div>
+                </Link>
             </div>
         </div>
     );

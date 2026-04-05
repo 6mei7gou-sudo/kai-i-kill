@@ -4,7 +4,7 @@ import path from 'path';
 import MdRenderer from '@/components/MarkdownRenderer';
 
 function loadWorldBible() {
-    const filePath = path.join(process.cwd(), 'docs', 'public', 'player_bible_v1.0.md');
+    const filePath = path.join(process.cwd(), 'docs', 'player', 'world_bible_v1.0.md');
     if (fs.existsSync(filePath)) {
         return fs.readFileSync(filePath, 'utf-8');
     }
@@ -13,7 +13,7 @@ function loadWorldBible() {
 
 export const metadata = {
     title: '世界観 — 電脳怪異譚 KAI-I//KILL',
-    description: '近未来の架空日本、怪異の定義、魔法と異能の体系、装備分類、討伐プロセスなど世界観バイブルの全文を公開。',
+    description: '近未来の架空日本、怪異の定義、魔法の体系、装備分類、討伐プロセスなど世界観バイブルの全文を公開。',
 };
 
 export default function WorldPage() {

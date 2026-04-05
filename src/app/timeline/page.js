@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 function loadTimeline() {
-    const filePath = path.join(process.cwd(), 'docs', 'public', 'player_timeline_v1.0.md');
+    const filePath = path.join(process.cwd(), 'docs', 'player', 'timeline_v1.0.md');
     if (fs.existsSync(filePath)) {
         return fs.readFileSync(filePath, 'utf-8');
     }

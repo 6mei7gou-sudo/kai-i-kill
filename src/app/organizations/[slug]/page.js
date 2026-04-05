@@ -6,22 +6,22 @@ import MdRenderer from '@/components/MarkdownRenderer';
 // スラッグとファイル名・メタデータの対応
 const ORG_META = {
     haraebe: {
-        file: 'player_detail_haraebe.md',
+        file: 'haraebe.md',
         title: '祓部（はらえべ）詳細',
         badge: 'HARAEBE — PUBLIC AGENCY',
     },
     companies: {
-        file: 'player_detail_companies.md',
+        file: 'companies.md',
         title: '企業詳細',
         badge: 'COMPANIES — CORPORATE ENTITIES',
     },
     mercenaries: {
-        file: 'player_detail_mercenaries.md',
+        file: 'mercenaries.md',
         title: '傭兵詳細',
         badge: 'MERCENARIES — INDEPENDENT FORCES',
     },
     unaffiliated: {
-        file: 'player_detail_unaffiliated.md',
+        file: 'unaffiliated.md',
         title: '無所属詳細',
         badge: 'UNAFFILIATED — LONE OPERATORS',
     },
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }) {
 function loadOrgContent(slug) {
     const meta = ORG_META[slug];
     if (!meta) return '';
-    const filePath = path.join(process.cwd(), 'docs', 'public', meta.file);
+    const filePath = path.join(process.cwd(), 'docs', 'player', 'factions', meta.file);
     if (fs.existsSync(filePath)) {
         return fs.readFileSync(filePath, 'utf-8');
     }

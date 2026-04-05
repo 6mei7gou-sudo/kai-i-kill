@@ -21,23 +21,29 @@
 ## ファイル構成
 
 ```
-kai-i-kill/docs/gm/          ← GM向け世界観資料（すべて読み済み）
-kai-i-kill/docs/public/      ← プレイヤー向け世界観資料（すべて読み済み）
-kai-i-kill/docs/raw/trpg/
-├── CONTEXT.md               ← このファイル（引き継ぎ用）
-├── rules_unified.md         ← ★主文書★ 統合ルールブック v4.0
-├── combat_hp_v2.md          ← 戦闘ルール補遺 v4.0（HP制対応）
-├── cybernetics_v1.md        ← サイバネティクス補遺 v1.0
-├── weapon_custom_data.md    ← 武器カスタムデータ
-├── expansion_v1.md          ← 追加データブック《禁域解放》 v1.0
-├── system_data.json         ← 構造化JSON（v4.0対応済み）
-├── README.md                ← 索引・利用ガイド
-└── archive/                 ← 旧版（参照用）
-    ├── rulebook_v1.md           旧版ルールブック v1.0
-    ├── rulebook_v3.md           旧版ルールブック v3.0
-    ├── combat_hp_v1.md          戦闘ルール補遺 v1.0
-    ├── combat_hp_v2.md          戦闘ルール補遺 v2.0（クロック制）
-    └── system_data_v1.json      旧版構造化データ v1.0
+kai-i-kill/docs/
+├── gm/                      ← GM専用資料（秘匿情報含む）
+│   ├── world_bible, glossary, geography
+│   └── factions/            ← 勢力別詳細
+├── player/                  ← プレイヤー向け資料（秘匿除去済み）
+│   ├── world_bible, glossary, timeline, character_creation_guide
+│   └── factions/
+├── rules/                   ← TRPGルール
+│   ├── rules_unified.md     ← ★主文書★ v4.0
+│   ├── combat_hp.md         ← 戦闘補遺 v4.0
+│   ├── cybernetics.md       ← サイバネ補遺 v1.0
+│   ├── weapon_custom_data.md
+│   ├── expansion.md         ← 禁域解放 v1.0
+│   ├── system_data.json     ← 構造化データ v4.0
+│   ├── chapters/            ← Web表示用チャプター分割（15章）
+│   └── archive/             ← 旧版（参照用）
+├── templates/               ← テンプレート集
+├── design/                  ← デザインシステム・ガイド
+├── pdf/gm-beta/             ← PDF出力物
+├── _build/                  ← ビルドスクリプト
+├── site/                    ← サイト設計
+├── CONTEXT.md               ← このファイル
+└── README.md                ← 索引
 ```
 
 ---

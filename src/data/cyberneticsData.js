@@ -39,8 +39,6 @@ export const CYBERNETICS = {
     // 等級Ⅲ 全置換
     'III': [
         { name: '全身義体【汎用型】', part: '全部位', cp: 8, effect: '体・疾+1ランク。HP+5。魂−1', resonance: '渇望+2', maker: '雷禽重工' },
-        { name: '脊髄魔導回路', part: '胴体', cp: 5, effect: '術+1ランク。反動ダメージ半減', resonance: '渇望+2', maker: '蜃気楼工廠' },
-        { name: '怪異核インプラント', part: '頭部', cp: 6, effect: '察+1ランク。ルール直感感知', resonance: '渇望+3・恐怖+1', maker: '蜃気楼工廠' },
         { name: '四肢全交換【戦闘特化】', part: '両腕・脚部', cp: 7, effect: '体+2ランク。素手+4。術−1ランク', resonance: '怒り+2', maker: '雷禽重工' },
         { name: '全身装甲皮膚', part: '胴体', cp: 5, effect: '物理−2。耐火耐電。触覚喪失、交渉−1', resonance: '渇望+1', maker: '銀鎚精機' },
         { name: '電脳直結ジャック', part: '頭部', cp: 4, effect: 'ネット怪異直接介入。識+1ランク', resonance: '焦燥+2', maker: '鴉羽技研' },

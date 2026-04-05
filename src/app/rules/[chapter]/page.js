@@ -12,7 +12,6 @@ const CHAPTERS = {
     skills:        { file: 'skills.md',        title: 'スキルシステム',       badge: 'CHAPTER 5 — SKILLS',          num: '04' },
     investigation: { file: 'investigation.md', title: '調査・解明・討伐',     badge: 'CHAPTER 6 — INVESTIGATION',   num: '05' },
     magic:         { file: 'magic.md',         title: '魔法システム',         badge: 'CHAPTER 7 — MAGIC',           num: '06' },
-    innate:        { file: 'innate.md',        title: '異能',               badge: 'CHAPTER 8 — INNATE ABILITY',  num: '07' },
     creation:      { file: 'creation.md',      title: 'キャラクター作成',     badge: 'CHAPTER 9 — CREATION',        num: '08' },
     affiliation:   { file: 'affiliation.md',   title: '所属システム',         badge: 'CHAPTER 10 — AFFILIATION',    num: '09' },
     equipment:     { file: 'equipment.md',     title: '装備システム',         badge: 'CHAPTER 11 — EQUIPMENT',      num: '10' },
@@ -38,7 +37,7 @@ export async function generateMetadata({ params }) {
 function loadChapterContent(chapter) {
     const meta = CHAPTERS[chapter];
     if (!meta) return '';
-    const filePath = path.join(process.cwd(), 'docs', 'rules', meta.file);
+    const filePath = path.join(process.cwd(), 'docs', 'rules', 'chapters', meta.file);
     if (fs.existsSync(filePath)) {
         return fs.readFileSync(filePath, 'utf-8');
     }

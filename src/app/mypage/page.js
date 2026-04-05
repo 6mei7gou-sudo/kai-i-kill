@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
+import { useUser, Show, RedirectToSignIn } from '@clerk/nextjs';
 import Link from 'next/link';
 
 // 共通カードスタイル
@@ -127,10 +127,10 @@ export default function MyPage() {
 
     return (
         <>
-            <SignedOut>
+            <Show when="signed-out">
                 <RedirectToSignIn />
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
                 <div className="container">
                     <section className="section">
                         <span className="section__title">// MY PAGE</span>
@@ -304,7 +304,7 @@ export default function MyPage() {
                         </>
                     )}
                 </div>
-            </SignedIn>
+            </Show>
         </>
     );
 }

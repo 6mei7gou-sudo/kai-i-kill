@@ -25,6 +25,13 @@ const threatTypes = [
 export default function AnomalyAboutPage() {
     return (
         <div className="container">
+            {/* パンくず */}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+                <Link href="/anomalies/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', textDecoration: 'none' }}>
+                    ← 怪異・能力・装備
+                </Link>
+            </div>
+
             {/* ページヘッダー */}
             <div className="page-header">
                 <div className="page-header__badge">ANOMALY SYSTEM</div>

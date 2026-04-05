@@ -81,7 +81,6 @@
   --corp-sotetsu: #3a5a8a;
   --corp-raikin: #c06020;
   --corp-karasuha: #3a3a4a;
-  --corp-shinkirou: #6a3060;
 
   /* タイポグラフィ */
   --font-body: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
@@ -272,7 +271,7 @@ h6 {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 6px var(--space-lg);
+  padding: 8px var(--space-lg);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   transition: all var(--transition-fast);
@@ -418,7 +417,7 @@ h6 {
 .card__desc {
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-  line-height: 1.8;
+  line-height: 2.0;
 }
 
 /* --- カードグリッド --- */
@@ -1084,6 +1083,104 @@ h6 {
   color: var(--text-muted);
   font-size: var(--font-size-xs);
   letter-spacing: 0.05em;
+}
+
+/* --- サイト内検索 --- */
+.site-search {
+  position: relative;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-subtle);
+}
+
+.site-search__input {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.site-search__input::placeholder {
+  color: var(--text-muted);
+}
+
+.site-search__input:focus {
+  border-color: var(--accent-gold-border);
+}
+
+.site-search__results {
+  position: absolute;
+  top: 100%;
+  left: var(--space-md);
+  right: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.site-search__item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.site-search__item:hover,
+.site-search__item--active {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.site-search__item-title {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-heading);
+  margin-bottom: 2px;
+}
+
+.site-search__item-desc {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.site-search__empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.site-footer__links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.site-footer__links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  transition: color var(--transition-fast);
+}
+
+.site-footer__links a:hover {
+  color: var(--accent-gold);
 }
 
 /* --- モバイル対応 --- */

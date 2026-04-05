@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
+import { useUser, Show, RedirectToSignIn } from '@clerk/nextjs';
 import Link from 'next/link';
 
 // 管理者ID
@@ -165,8 +165,8 @@ export default function AdminPage() {
 
     return (
         <>
-            <SignedOut><RedirectToSignIn /></SignedOut>
-            <SignedIn>
+            <Show when="signed-out"><RedirectToSignIn /></Show>
+            <Show when="signed-in">
                 <div className="container">
                     {!isAdmin ? (
                         <section className="section">
@@ -398,7 +398,7 @@ export default function AdminPage() {
                         </>
                     )}
                 </div>
-            </SignedIn>
+            </Show>
         </>
     );
 }

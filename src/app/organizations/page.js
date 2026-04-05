@@ -127,6 +127,41 @@ export default function OrganizationsPage() {
                     祓部の《御柱》・傭兵のSランク《冠名》はいずれもPLが初期作成で選べる枠ではない。物語の果てに辿り着くか、NPCとして出会うか——そういう領域の存在だ。
                 </p>
             </div>
+            {/* ===== 関連ページ ===== */}
+            <section className="section">
+                <div className="section__number">SEE ALSO</div>
+                <h2 className="section__heading">
+                    関連ページ
+                    <span className="section__heading-en">RELATED</span>
+                </h2>
+            </section>
+
+            <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
+                <Link href="/quickstart/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">▶</div>
+                        <div className="card__title-en">QUICKSTART</div>
+                        <h3 className="card__title">クイックスタート</h3>
+                        <p className="card__desc">所属・配属の選び方をステップで解説。</p>
+                    </div>
+                </Link>
+                <Link href="/world/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">◉</div>
+                        <div className="card__title-en">WORLD BIBLE</div>
+                        <h3 className="card__title">世界観バイブル</h3>
+                        <p className="card__desc">三勢力が生まれた歴史的背景を読む。</p>
+                    </div>
+                </Link>
+                <Link href="/rules/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">▶</div>
+                        <div className="card__title-en">RULEBOOK</div>
+                        <h3 className="card__title">ルール目次</h3>
+                        <p className="card__desc">所属システム・スキルの詳細ルール。</p>
+                    </div>
+                </Link>
+            </div>
         </div>
     );
 }

@@ -70,7 +70,7 @@ function parseGlossaryMd(content) {
 }
 
 function loadGlossary() {
-    const filePath = path.join(process.cwd(), 'docs', 'public', 'player_glossary_v1.0.md');
+    const filePath = path.join(process.cwd(), 'docs', 'player', 'glossary_v1.0.md');
     if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf-8');
         return parseGlossaryMd(content);

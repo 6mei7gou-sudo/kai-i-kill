@@ -741,6 +741,12 @@ export default function QuickstartPage() {
                 </div>
             </div>
 
+            <div style={{ marginBottom: 'var(--space-xl)' }}>
+                <Link href="/anomalies/about/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                    → 怪異の分類・等級・討伐プロセスを詳しく見る
+                </Link>
+            </div>
+
             {/* ===== 戦闘ルール ===== */}
             <section className="section">
                 <div className="section__number">06 — COMBAT</div>
@@ -792,7 +798,6 @@ export default function QuickstartPage() {
                             <tr><td>解明</td><td>識/察</td><td>戦闘中に解明鍵を進める</td></tr>
                             <tr><td>干渉</td><td>判</td><td>護衛の特性を1R無効化</td></tr>
                             <tr><td>浄化</td><td>魂</td><td>共鳴メーター1種を−2</td></tr>
-                            <tr><td>異能発動</td><td>魂</td><td>異能を使用</td></tr>
                             <tr><td rowSpan={4} style={{ fontWeight: 700, color: 'var(--accent-cyber)' }}>サブ</td><td>移動</td><td>—</td><td>射程・位置の調整</td></tr>
                             <tr><td>アイテム</td><td>—</td><td>回復アイテム等の使用</td></tr>
                             <tr><td>情報確認</td><td>—</td><td>護衛1体のHPを確認</td></tr>
@@ -906,6 +911,12 @@ export default function QuickstartPage() {
                 </div>
             </div>
 
+            <div style={{ marginBottom: 'var(--space-xl)' }}>
+                <Link href="/rules/combat/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                    → 戦闘ルールの詳細を見る
+                </Link>
+            </div>
+
             {/* ===== リンク ===== */}
             <section className="section">
                 <div className="section__number">MORE — DEEP DIVE</div>
@@ -953,6 +964,16 @@ export default function QuickstartPage() {
                         <h3 className="card__title">世界観バイブル</h3>
                         <p className="card__desc">
                             世界の成り立ち・魔法インフラ・怪異のメカニズムの全文。
+                        </p>
+                    </div>
+                </Link>
+                <Link href="/rules/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="card">
+                        <div className="card__icon">▶</div>
+                        <div className="card__title-en">RULEBOOK</div>
+                        <h3 className="card__title">ルール目次</h3>
+                        <p className="card__desc">
+                            統合ルールブック v4.0 の全14章。判定・戦闘・スキル・魔法・装備を網羅。
                         </p>
                     </div>
                 </Link>

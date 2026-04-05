@@ -9,48 +9,51 @@ GM専用資料（秘匿情報含む）とプレイヤー向け資料（秘匿除
 
 ```
 docs/
-├── gm/                  ← GM専用ファイル（秘匿設定・内部対立・真相を含む）
-│   ├── world_bible_v1.1.md        世界観バイブル（完全版）
-│   ├── glossary_v1.0.md           用語集（GM版・秘匿情報あり）
-│   ├── detail_haraebe.md          祓部 詳細設定
-│   ├── detail_mercenaries.md      傭兵 詳細設定
-│   ├── detail_companies.md        企業 詳細設定
-│   └── detail_unaffiliated.md     無所属 詳細設定
+├── gm/                      ← GM専用（秘匿設定・内部対立・真相を含む）
+│   ├── world_bible_v1.1.md      世界観バイブル（完全版）
+│   ├── glossary_v1.0.md         用語集（GM版・秘匿情報あり）
+│   ├── geography_v1.0.md        地理設定
+│   └── factions/                勢力別詳細
+│       ├── haraebe.md               祓部
+│       ├── mercenaries.md           傭兵
+│       ├── companies.md             企業
+│       └── unaffiliated.md          無所属
 │
-├── public/              ← プレイヤー向けファイル（GMのみが知る情報は除去済み）
-│   ├── player_bible_v1.0.md       世界観バイブル（公開版）
-│   ├── player_glossary_v1.0.md    用語集（プレイヤー版）
-│   ├── player_timeline_v1.0.md    年表（プレイヤー版）
-│   ├── player_detail_haraebe.md   祓部 公開設定
-│   ├── player_detail_mercenaries.md  傭兵 公開設定
-│   ├── player_detail_companies.md    企業 公開設定
-│   └── player_detail_unaffiliated.md 無所属 公開設定
+├── player/                  ← プレイヤー向け（秘匿除去済み）
+│   ├── world_bible_v1.0.md      世界観バイブル（公開版）
+│   ├── glossary_v1.0.md         用語集
+│   ├── timeline_v1.0.md         年表
+│   ├── character_creation_guide_v1.0.md  キャラ作成ガイド
+│   └── factions/                勢力別詳細
+│       ├── haraebe.md               祓部
+│       ├── mercenaries.md           傭兵
+│       ├── companies.md             企業
+│       └── unaffiliated.md          無所属
 │
-└── raw/                 ← 原本・ルールブック・テンプレート
-    ├── trpg/
-    │   ├── rules_unified.md         ★主文書★ 統合ルールブック v3.0
-    │   ├── combat_hp_v2.md          戦闘ルール補遺 v2.0（拡充版）
-    │   ├── cybernetics_v1.md        サイバネティクス補遺 v1.0
-    │   ├── weapon_custom_data.md    武器カスタムデータ
-    │   ├── expansion_v1.md         追加データブック《禁域解放》 v1.0（教団・怪異核・全装身型・搭乗型）
-    │   ├── system_data.json         構造化データ（v3.0対応）
-    │   ├── CONTEXT.md               引き継ぎ用コンテキスト
-    │   ├── README.md                索引・利用ガイド
-    │   └── archive/                 旧版（参照用）
-    │       ├── rulebook_v1.md           旧版ルールブック v1.0
-    │       ├── combat_hp_v1.md          戦闘ルール補遺 v1.0
-    │       └── system_data_v1.json      旧版構造化データ v1.0
-    ├── create/
-    │   ├── anomaly_investigation_template_TMP_v1.0.md  怪異調査書テンプレート
-    │   ├── weapon_gear_post_template.md                武器投稿テンプレート
-    │   ├── ia_site_structure_simple_v0.1.md            サイト構造設計
-    │   └── official_pc_template_v1.0.md               公式PC記入フォーマット v1.0
-    ├── haraebe/          ← public/と同内容（整形済み）
-    ├── mercenaries/
-    ├── companies/
-    ├── unaffiliated/
-    ├── glossary/
-    └── timeline/
+├── rules/                   ← TRPGルール
+│   ├── rules_unified.md        ★主文書★ 統合ルールブック v4.0
+│   ├── combat_hp.md            戦闘補遺 v4.0
+│   ├── cybernetics.md          サイバネティクス補遺 v1.0
+│   ├── weapon_custom_data.md   武器データ
+│   ├── expansion.md            追加データブック《禁域解放》 v1.0
+│   ├── system_data.json        構造化データ（v4.0対応）
+│   ├── chapters/               Web表示用チャプター分割（15章）
+│   └── archive/                旧版（参照用）
+│
+├── templates/               ← テンプレート集
+│   ├── anomaly_investigation.md   怪異調査書
+│   ├── weapon_gear_post.md        武器投稿
+│   └── official_pc.md             公式PC記入フォーマット
+│
+├── design/                  ← デザイン関連
+│   ├── system/                  デザインシステム・トークン
+│   └── guides/                  デザインガイド（勢力・ロゴ・ライセンス等）
+│
+├── pdf/gm-beta/             ← PDF出力物
+├── _build/                  ← ビルドスクリプト
+├── site/                    ← サイト設計
+├── CONTEXT.md               ← 引き継ぎコンテキスト
+└── README.md                ← 索引
 ```
 
 ## 編集の鉄則
@@ -79,7 +82,7 @@ docs/
 - **セッション構造**：調査フェーズ → 解明完了宣言 → 討伐フェーズ（核護衛戦）
 - **感情システム**：《共鳴記録》— 恐怖/怒り/哀愁/焦燥/渇望/浄化の6メーター
 - **侵食率**：拡張ルール（《禁域解放》EX-5.5）で導入。基本ルールでは使用しない
-- **主文書**：`docs/raw/trpg/rules_unified.md`（v3.0）が最新版
+- **主文書**：`docs/raw/trpg/rules_unified.md`（v4.0）が最新版
 
 ## Webサイト（Next.js）
 

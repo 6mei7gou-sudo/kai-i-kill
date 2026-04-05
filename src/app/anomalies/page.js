@@ -87,6 +87,12 @@ export default function IntroAnomaliesPage() {
                         雑魚を狩って満足しているうちはいい。だが本物の怪異は、調べて、暴いて、弱点を突かなければ殺せない。
                     </p>
                 </div>
+
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                    <Link href="/anomalies/about/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                        → 怪異の発生原理・分類・等級を詳しく見る
+                    </Link>
+                </div>
             </div>
 
             {/* ===== 能力 ===== */}
@@ -135,6 +141,12 @@ export default function IntroAnomaliesPage() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
                         魔法は外から世界を書き換える。異能は内側から力を引き出す。魔法は怪異を生み、異能は使用者を変質させる。どちらの力も無代償ではない。
                     </p>
+                </div>
+
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                    <Link href="/rules/magic/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                        → 魔法システムの詳細ルール
+                    </Link>
                 </div>
             </div>
 
@@ -191,6 +203,12 @@ export default function IntroAnomaliesPage() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
                         蒼鉄機工（国家系・安定品質）、雷禽重工（独立系・高出力）、銀鎚精機（カスタムメイド）など複数の企業が装備を製造している。出自不明の闇市場品も流通している。
                     </p>
+                </div>
+
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                    <Link href="/rules/equipment/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
+                        → 装備システムの詳細ルール
+                    </Link>
                 </div>
             </div>
 

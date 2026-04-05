@@ -1,7 +1,8 @@
 import './globals.css';
 import Link from 'next/link';
 import MobileMenuButton from './MobileMenuButton';
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import SiteSearch from '@/components/SiteSearch';
+import { ClerkProvider, Show, SignInButton, UserButton } from '@clerk/nextjs';
 
 // メタデータ（SEO対応）
 export const metadata = {
@@ -10,90 +11,55 @@ export const metadata = {
   keywords: ['電脳怪異譚', 'KAI-I//KILL', 'TRPG', 'Webゲーム', '怪異', 'サイバーパンク', '和風ホラー'],
 };
 
-// サイドバーのナビゲーション構造
+// サイドバーのナビゲーション構造（6グループ・20項目）
 const navGroups = [
   {
-    label: '導入',
+    label: 'はじめに',
     items: [
       { href: '/', icon: '◉', text: 'トップ' },
       { href: '/quickstart/', icon: '▶', text: 'クイックスタート' },
-      { href: '/quickstart/character-guide/', icon: '☖', text: 'キャラ製作ガイドライン' },
       { href: '/anomalies/', icon: '△', text: '怪異・能力・装備' },
-      { href: '/organizations/', icon: '✕', text: '組織・人物' },
     ],
   },
   {
-    label: '世界観',
+    label: '世界を知る',
     items: [
-      { href: '/world/', icon: '◉', text: '世界概要' },
+      { href: '/world/', icon: '◉', text: '世界観バイブル' },
       { href: '/timeline/', icon: '◈', text: '世界年表' },
+      { href: '/glossary/', icon: '▤', text: '用語集' },
+    ],
+  },
+  {
+    label: '組織',
+    items: [
+      { href: '/organizations/haraebe/', icon: '⊙', text: '祓部' },
+      { href: '/organizations/mercenaries/', icon: '✕', text: '傭兵' },
+      { href: '/organizations/companies/', icon: '目', text: '企業' },
+      { href: '/organizations/unaffiliated/', icon: '◈', text: '無所属' },
     ],
   },
   {
     label: 'TRPGルール',
     items: [
       { href: '/rules/', icon: '▶', text: 'ルール目次' },
-      { href: '/rules/dice/', icon: '◇', text: '判定システム' },
-      { href: '/rules/combat/', icon: '⚔', text: '戦闘ルール' },
-      { href: '/rules/investigation/', icon: '◈', text: '調査・解明・討伐' },
-      { href: '/rules/magic/', icon: '✦', text: '魔法システム' },
-      { href: '/rules/equipment/', icon: '⊕', text: '装備システム' },
+      { href: '/quickstart/character-guide/', icon: '☖', text: 'キャラ製作ガイドライン' },
     ],
   },
   {
-    label: '怪異システム',
-    items: [
-      { href: '/anomalies/about/', icon: '△', text: '怪異とは' },
-      { href: '/glossary/', icon: '▤', text: '用語集' },
-    ],
-  },
-  {
-    label: '組織・人物',
-    items: [
-      { href: '/organizations/haraebe/', icon: '⊙', text: '祓部詳細' },
-      { href: '/organizations/mercenaries/', icon: '✕', text: '傭兵詳細' },
-      { href: '/organizations/companies/', icon: '目', text: '企業詳細' },
-      { href: '/organizations/unaffiliated/', icon: '◈', text: '無所属詳細' },
-    ],
-  },
-  {
-    label: '投稿ツール',
-    items: [
-      { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
-      { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
-      { href: '/create/character/', icon: '☖', text: 'キャラシート作成' },
-    ],
-  },
-  {
-    label: 'Webゲーム',
+    label: '遊ぶ',
     items: [
       { href: '/games/', icon: '▶', text: 'ゲームハブ' },
-      { href: '/games/mission/', icon: '⚔', text: '怪異討伐ミッション' },
-      { href: '/games/adv/', icon: '◈', text: '怪異譚ADV' },
-      { href: '/games/dispatch/', icon: '◇', text: '派遣クエスト' },
-    ],
-  },
-  {
-    label: 'SNS',
-    items: [
       { href: '/sns/', icon: '◎', text: 'MirrorLine' },
-      { href: '/sns/meta/', icon: '▤', text: 'メタスレッド' },
-      { href: '/sns/rp/', icon: '◈', text: 'RPスレッド' },
     ],
   },
   {
-    label: 'コミュニティDB',
+    label: 'つくる・共有する',
     items: [
+      { href: '/create/character/', icon: '☖', text: 'キャラシート作成' },
+      { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
+      { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
       { href: '/mypage/', icon: '◆', text: 'マイページ' },
-      { href: '/community/anomalies/', icon: '◇', text: '怪異調査書一覧' },
-      { href: '/community/gear/', icon: '⊕', text: '武器・装備一覧' },
-      { href: '/community/characters/', icon: '☖', text: 'キャラシート一覧' },
-    ],
-  },
-  {
-    label: 'サポート',
-    items: [
-      { href: '/contact/', icon: '✉', text: 'お問い合わせ' },
+      { href: '/community/anomalies/', icon: '◇', text: 'コミュニティDB' },
     ],
   },
 ];
@@ -137,7 +103,7 @@ export default function RootLayout({ children }) {
 
               {/* 認証ボタン */}
               <div style={{ padding: '0 var(--space-md) var(--space-md)', borderBottom: 'var(--border-subtle)' }}>
-                <SignedOut>
+                <Show when="signed-out">
                   <SignInButton mode="modal">
                     <button style={{
                       width: '100%', padding: '10px', fontFamily: 'var(--font-mono)',
@@ -146,8 +112,8 @@ export default function RootLayout({ children }) {
                       cursor: 'pointer', transition: 'all 0.2s',
                     }}>▶ ログイン / 登録</button>
                   </SignInButton>
-                </SignedOut>
-                <SignedIn>
+                </Show>
+                <Show when="signed-in">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                     <UserButton
                       appearance={{
@@ -160,8 +126,10 @@ export default function RootLayout({ children }) {
                       ログイン中
                     </span>
                   </div>
-                </SignedIn>
+                </Show>
               </div>
+
+              <SiteSearch />
 
               <nav>
                 {navGroups.map((group, gi) => (
@@ -188,6 +156,13 @@ export default function RootLayout({ children }) {
 
               {/* フッター */}
               <footer className="site-footer">
+                <div className="site-footer__links">
+                  <Link href="/quickstart/">クイックスタート</Link>
+                  <Link href="/rules/">ルール</Link>
+                  <Link href="/world/">世界観</Link>
+                  <Link href="/community/anomalies/">コミュニティ</Link>
+                  <Link href="/contact/">お問い合わせ</Link>
+                </div>
                 <p>© 電脳怪異譚 KAI-I//KILL Project</p>
               </footer>
             </main>
