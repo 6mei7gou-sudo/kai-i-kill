@@ -237,7 +237,7 @@ export default function HomePage() {
           </div>
         </Link>
 
-        <Link href="/community/anomalies/" style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link href="/community/" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="card">
             <div className="card__icon">◇</div>
             <div className="card__title-en">COMMUNITY</div>

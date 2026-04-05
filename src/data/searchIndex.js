@@ -52,6 +52,9 @@ export const SEARCH_INDEX = [
   { title: '武器・装備を投稿', desc: '武器や装備の投稿フォーム', path: '/create/weapon/', keywords: ['武器', '装備', '投稿', 'カスタム'] },
   { title: '怪異調査書を作成', desc: 'オリジナル怪異の投稿フォーム', path: '/create/anomaly/', keywords: ['怪異', '調査書', '投稿', 'オリジナル'] },
   { title: 'マイページ', desc: '投稿一覧・実績・リソース管理', path: '/mypage/', keywords: ['マイページ', 'プロフィール', '投稿', '実績'] },
-  { title: 'コミュニティDB', desc: 'プレイヤー投稿の閲覧', path: '/community/anomalies/', keywords: ['コミュニティ', '投稿', '一覧', '閲覧'] },
+  { title: 'コミュニティDB', desc: '怪異調査書・武器装備・キャラシートの投稿一覧', path: '/community/', keywords: ['コミュニティ', '投稿', '一覧', '閲覧'] },
+  { title: '怪異調査書一覧', desc: 'コミュニティ投稿の怪異調査書', path: '/community/anomalies/', keywords: ['怪異', '調査書', 'TMP', '投稿'] },
+  { title: '武器・装備一覧', desc: 'コミュニティ投稿の武器・装備データ', path: '/community/gear/', keywords: ['武器', '装備', 'ギア', '投稿'] },
+  { title: 'キャラクターシート一覧', desc: 'コミュニティ投稿のキャラシート', path: '/community/characters/', keywords: ['キャラ', 'シート', 'PC', '投稿'] },
   { title: 'お問い合わせ', desc: 'フィードバック・バグ報告', path: '/contact/', keywords: ['問い合わせ', '連絡', 'バグ', 'フィードバック'] },
 ];

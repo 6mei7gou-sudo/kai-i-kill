@@ -59,7 +59,7 @@ const navGroups = [
       { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
       { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
       { href: '/mypage/', icon: '◆', text: 'マイページ' },
-      { href: '/community/anomalies/', icon: '◇', text: 'コミュニティDB' },
+      { href: '/community/', icon: '◇', text: 'コミュニティDB' },
     ],
   },
 ];
@@ -160,7 +160,7 @@ export default function RootLayout({ children }) {
                   <Link href="/quickstart/">クイックスタート</Link>
                   <Link href="/rules/">ルール</Link>
                   <Link href="/world/">世界観</Link>
-                  <Link href="/community/anomalies/">コミュニティ</Link>
+                  <Link href="/community/">コミュニティ</Link>
                   <Link href="/contact/">お問い合わせ</Link>
                 </div>
                 <p>© 電脳怪異譚 KAI-I//KILL Project</p>
