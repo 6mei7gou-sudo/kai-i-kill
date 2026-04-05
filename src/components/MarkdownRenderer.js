@@ -127,7 +127,7 @@ function headingToId(text) {
  * @param {string} pageBadge - ページバッジテキスト
  * @param {string} pageSubtitle - サブタイトル
  */
-export default function MdRenderer({ content, showToc = false, pageTitle, pageBadge, pageSubtitle }) {
+export default function MdRenderer({ content, showToc = false, pageTitle, pageBadge, pageSubtitle, bare = false }) {
     const blocks = parseMd(content);
 
     // ## レベルの見出しを抽出（目次用＋セクション番号用）
@@ -137,8 +137,8 @@ export default function MdRenderer({ content, showToc = false, pageTitle, pageBa
     const sectionMap = {};
     h2Headings.forEach((h, i) => { sectionMap[h.text] = getSectionNumber(i); });
 
-    return (
-        <div className="container">
+    const inner = (
+        <>
             {/* ページヘッダー */}
             {pageTitle && (
                 <div className="page-header">
@@ -166,8 +166,12 @@ export default function MdRenderer({ content, showToc = false, pageTitle, pageBa
                     </nav>
                 )}
             </div>
-        </div>
+        </>
     );
+
+    // bare=true のとき .container ラップを省略（呼び出し元が既にラップしている場合）
+    if (bare) return inner;
+    return <div className="container">{inner}</div>;
 }
 
 /**
