@@ -1,13 +1,26 @@
 // News & Release フィード — トップページ用クライアントコンポーネント
+// DB投稿 + 静的サイトニュースを統合表示
 'use client';
 
 import { useState, useEffect } from 'react';
+import { SITE_NEWS } from '@/data/siteNews';
 
 const CATEGORY_STYLE = {
     news: { label: 'NEWS', color: '#d4af37', bg: 'rgba(212,175,55,0.1)', border: 'rgba(212,175,55,0.3)' },
     release: { label: 'RELEASE', color: '#00ffaa', bg: 'rgba(0,255,170,0.1)', border: 'rgba(0,255,170,0.3)' },
     event: { label: 'EVENT', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.3)' },
 };
+
+// 静的ニュースをDB形式に変換
+function toPostFormat(item, idx) {
+    return {
+        id: `site_${idx}`,
+        title: item.title,
+        body: item.body || '',
+        category: item.category || 'news',
+        created_at: item.date + 'T00:00:00Z',
+    };
+}
 
 export default function NewsFeed() {
     const [posts, setPosts] = useState([]);
@@ -17,8 +30,16 @@ export default function NewsFeed() {
     useEffect(() => {
         fetch('/api/news?limit=20')
             .then(res => res.json())
-            .then(json => setPosts(json.data || []))
-            .catch(() => setPosts([]))
+            .then(json => {
+                const dbPosts = json.data || [];
+                const sitePosts = SITE_NEWS.map(toPostFormat);
+                // 統合して日付降順ソート
+                const all = [...dbPosts, ...sitePosts].sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                );
+                setPosts(all);
+            })
+            .catch(() => setPosts(SITE_NEWS.map(toPostFormat)))
             .finally(() => setLoading(false));
     }, []);
 
