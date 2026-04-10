@@ -1,7 +1,7 @@
 // 管理者用ダッシュボード — 全投稿の閲覧・編集・削除・公認承認 + News投稿
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUser, Show, RedirectToSignIn } from '@clerk/nextjs';
 import Link from 'next/link';
 
@@ -33,6 +33,10 @@ export default function AdminPage() {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('all');
 
+    const [userProfiles, setUserProfiles] = useState({});
+    const [userFilter, setUserFilter] = useState('');
+    const [searchText, setSearchText] = useState('');
+
     const isAdmin = isLoaded && user && ADMIN_IDS.includes(user.id);
     const tab = TABS.find(t => t.key === activeTab);
 
@@ -53,7 +57,10 @@ export default function AdminPage() {
                 setNewsPosts(json.data || []);
                 setItems([]);
             } else {
-                const res = await fetch(`/api/posts?table=${activeTab}`);
+                const url = userFilter
+                    ? `/api/posts?table=${activeTab}&user_id=${encodeURIComponent(userFilter)}`
+                    : `/api/posts?table=${activeTab}`;
+                const res = await fetch(url);
                 const json = await res.json();
                 setItems(json.data || []);
             }
@@ -62,11 +69,27 @@ export default function AdminPage() {
         } finally {
             setLoading(false);
         }
-    }, [activeTab]);
+    }, [activeTab, userFilter]);
 
     useEffect(() => {
         if (isAdmin) fetchData();
     }, [isAdmin, fetchData]);
+
+    // Clerkユーザープロフィールを一括取得
+    useEffect(() => {
+        if (!isAdmin || items.length === 0) return;
+        const newIds = [...new Set(items.map(i => i.user_id).filter(Boolean))]
+            .filter(id => !userProfiles[id]);
+        if (newIds.length === 0) return;
+        fetch(`/api/admin/users?ids=${newIds.join(',')}`)
+            .then(res => res.json())
+            .then(json => {
+                if (json.ok && json.users) {
+                    setUserProfiles(prev => ({ ...prev, ...json.users }));
+                }
+            })
+            .catch(() => {});
+    }, [isAdmin, items]);
 
     // News投稿
     const handleNewsSubmit = async () => {
@@ -158,8 +181,27 @@ export default function AdminPage() {
         }
     };
 
-    // フィルタリング
-    const filtered = filter === 'all' ? items : items.filter(i => (i.approved_status || 'pending') === filter);
+    // フィルタリング（ステータス + テキスト検索）
+    const filtered = useMemo(() => {
+        return items.filter(item => {
+            if (filter !== 'all' && (item.approved_status || 'pending') !== filter) return false;
+            if (searchText) {
+                const q = searchText.toLowerCase();
+                const profile = userProfiles[item.user_id];
+                const searchable = [
+                    item.author_name,
+                    item.user_id,
+                    item[tab?.nameField],
+                    profile?.username,
+                    profile?.firstName,
+                    profile?.lastName,
+                    profile?.email,
+                ].filter(Boolean).join(' ').toLowerCase();
+                if (!searchable.includes(q)) return false;
+            }
+            return true;
+        });
+    }, [items, filter, searchText, userProfiles, tab]);
 
     if (!isLoaded) return null;
 
@@ -199,7 +241,7 @@ export default function AdminPage() {
                             </div>
 
                             {/* フィルタ */}
-                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>FILTER:</span>
                                 {FILTERS.map(f => (
                                     <button key={f} onClick={() => setFilter(f)}
@@ -215,6 +257,41 @@ export default function AdminPage() {
                                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginLeft: 'auto' }}>
                                     {loading ? '読み込み中...' : `${filtered.length} / ${items.length} 件`}
                                 </span>
+                            </div>
+
+                            {/* 検索バー＋アカウントフィルタ */}
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <input
+                                    type="text"
+                                    placeholder="検索（投稿者名・アカウント名・ID...）"
+                                    value={searchText}
+                                    onChange={e => setSearchText(e.target.value)}
+                                    style={{
+                                        flex: '1 1 200px', padding: '6px 12px',
+                                        background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+                                        color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '12px',
+                                    }}
+                                />
+                                {userFilter && (() => {
+                                    const p = userProfiles[userFilter];
+                                    const displayName = p?.deleted ? '削除済み' : (p?.username || p?.firstName || userFilter.slice(0, 12) + '...');
+                                    return (
+                                        <span style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            padding: '4px 10px',
+                                            background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)',
+                                            fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#b794f6',
+                                        }}>
+                                            {p?.imageUrl && <img src={p.imageUrl} alt="" style={{ width: '16px', height: '16px', borderRadius: '50%' }} />}
+                                            ACCOUNT: {displayName}
+                                            <button onClick={() => setUserFilter('')}
+                                                style={{
+                                                    background: 'none', border: 'none', color: '#ff4d4d',
+                                                    cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '11px', padding: '0 2px',
+                                                }}>x</button>
+                                        </span>
+                                    );
+                                })()}
                             </div>
 
                             {/* === News管理パネル === */}
@@ -344,18 +421,31 @@ export default function AdminPage() {
                                                             </Link>
                                                         </td>
                                                         <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{item.author_name || '—'}</td>
-                                                        <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '10px' }}>
-                                                            {item.user_id ? (
-                                                                <span title={item.user_id} style={{
-                                                                    padding: '2px 6px',
-                                                                    background: 'rgba(255,255,255,0.03)',
-                                                                    border: '1px solid rgba(255,255,255,0.06)',
-                                                                    cursor: 'default',
-                                                                    userSelect: 'all',
-                                                                }}>
-                                                                    {item.user_id.length > 16 ? item.user_id.slice(0, 16) + '…' : item.user_id}
-                                                                </span>
-                                                            ) : '—'}
+                                                        <td style={{ ...tdStyle, fontSize: '10px' }}>
+                                                            {item.user_id ? (() => {
+                                                                const p = userProfiles[item.user_id];
+                                                                const name = p?.deleted ? '削除済み' : (p?.username || p?.firstName || null);
+                                                                const tooltip = p?.email
+                                                                    ? `${item.user_id}\n${p.email}${p.lastSignInAt ? '\n最終ログイン: ' + new Date(p.lastSignInAt).toLocaleDateString('ja-JP') : ''}`
+                                                                    : item.user_id;
+                                                                return (
+                                                                    <button
+                                                                        title={tooltip}
+                                                                        onClick={() => setUserFilter(item.user_id)}
+                                                                        style={{
+                                                                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                                            padding: '2px 6px', cursor: 'pointer',
+                                                                            background: userFilter === item.user_id ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.03)',
+                                                                            border: userFilter === item.user_id ? '1px solid rgba(139,92,246,0.4)' : '1px solid rgba(255,255,255,0.06)',
+                                                                            color: p?.deleted ? 'var(--text-muted)' : 'var(--text-primary)',
+                                                                            fontFamily: 'var(--font-mono)', fontSize: '10px',
+                                                                        }}
+                                                                    >
+                                                                        {p?.imageUrl && <img src={p.imageUrl} alt="" style={{ width: '14px', height: '14px', borderRadius: '50%' }} />}
+                                                                        {name || (item.user_id.length > 14 ? item.user_id.slice(0, 14) + '...' : item.user_id)}
+                                                                    </button>
+                                                                );
+                                                            })() : '—'}
                                                         </td>
                                                         <td style={tdStyle}>
                                                             <button
