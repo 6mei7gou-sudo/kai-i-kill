@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea, FormDynamicList } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, WEAPON_TYPE_STATS, WEAPON_TYPE_NAMES, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, EQUIPMENT_TYPE_NAMES, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findOption, getWeaponSpec } from '@/data/weaponData';
+import { ORIGIN_NAMES, COMBAT_STYLE_NAMES, BASE_WEAPONS, FORM_OPTIONS, EQUIPMENT_FORM_NAMES, STYLE_TO_OLD, OLD_TO_STYLE, FORM_TO_OLD, OLD_TO_FORM, WEAPON_TYPE_NAMES, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, EQUIPMENT_TYPE_NAMES, CUSTOM_OPTIONS, ALL_OPTION_NAMES, findOption, getWeaponSpec } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 
@@ -29,8 +29,9 @@ const INITIAL = {
 // 選択肢
 const OPTIONS = {
     categories: EQUIPMENT_TYPE_NAMES,
+    forms: EQUIPMENT_FORM_NAMES,
     bodyParts: ['腕部', '脚部', '肩部', '胴部', 'その他'],
-    manufacturers: MANUFACTURER_NAMES,
+    manufacturers: ORIGIN_NAMES,
     affiliations: ['どれでも', '祓部', '傭兵', '無所属'],
     roles: ['攻撃', '防御', '支援', '解明', '封鎖', '逃走'],
     qualities: ['標準', '高品質', '試作品', '特注'],
@@ -237,14 +238,14 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                     </div>
                 </div>
 
-                {/* セクション1：装備カテゴリ */}
+                {/* セクション1：装備形態＆出自 */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 1 — CATEGORY</div>
-                    <h2 style={S.sectionHeading}>装備カテゴリ</h2>
+                    <div style={S.sectionTitle}>SECTION 1 — FORM & ORIGIN</div>
+                    <h2 style={S.sectionHeading}>装備形態・出自</h2>
                     <div style={S.row}>
-                        <FormSelect label="分類 *" value={form.category} onChange={v => set('category', v)} options={OPTIONS.categories} />
+                        <FormSelect label="装備形態 *" value={form.category} onChange={v => set('category', v)} options={OPTIONS.categories} />
                         {form.category === '半装身型' && <FormSelect label="装着部位" value={form.body_part} onChange={v => set('body_part', v)} options={OPTIONS.bodyParts} />}
-                        <FormSelect label="メーカー" value={form.manufacturer} onChange={v => {
+                        <FormSelect label="出自" value={form.manufacturer} onChange={v => {
                             set('manufacturer', v);
                             if (form.weapon_type) {
                                 const spec = getWeaponSpec(form.weapon_type, v, form.category, form.weapon_subtype);
@@ -269,7 +270,7 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 2 — OVERVIEW</div>
                     <h2 style={S.sectionHeading}>概要</h2>
-                    <FormInput label="武器名 / 型式 *" value={form.gear_name} onChange={v => set('gear_name', v)} placeholder="例：強化戦術銃【制式型】" />
+                    <FormInput label="固有名 / 型式 *" value={form.gear_name} onChange={v => set('gear_name', v)} placeholder="例：強化戦術銃【制式型】" />
                     <FormTextArea label="一行要約" value={form.summary} onChange={v => set('summary', v)} placeholder="例：核を狙うための曲射機構付き制式ライフル" />
                     <div style={S.fieldGroup}>
                         <label style={S.label}>想定役割</label>
@@ -285,12 +286,12 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                         onUpdate={(i, v) => updateListItem('weaknesses', i, v)} onAdd={() => addListItem('weaknesses')} onRemove={(i) => removeListItem('weaknesses', i)} />
                 </div>
 
-                {/* セクション3：ベース装備 */}
+                {/* セクション3：戦闘流派＆ベース武器 */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 3 — BASE</div>
-                    <h2 style={S.sectionHeading}>ベース装備</h2>
-                    {/* 武器種選択 */}
-                    <FormSelect label="武器種" value={form.weapon_type || ''} onChange={v => {
+                    <div style={S.sectionTitle}>SECTION 3 — COMBAT STYLE & BASE WEAPON</div>
+                    <h2 style={S.sectionHeading}>戦闘流派・ベース武器</h2>
+                    {/* 戦闘流派選択 */}
+                    <FormSelect label="戦闘流派" value={form.weapon_type || ''} onChange={v => {
                         set('weapon_type', v);
                         set('weapon_subtype', '');
                         set('base_name', v);
@@ -310,7 +311,7 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                         if (allSubs.length === 0) return null;
                         return (
                             <div style={{ marginBottom: 'var(--space-md)' }}>
-                                <label style={S.label}>武器の種類</label>
+                                <label style={S.label}>ベース武器</label>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                     {allSubs.map(sub => {
                                         const selected = form.weapon_subtype === sub.id;

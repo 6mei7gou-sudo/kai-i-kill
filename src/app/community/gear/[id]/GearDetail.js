@@ -58,10 +58,10 @@ export default function GearDetail({ id }) {
                     <span className="section__title">// GEAR — EQUIPMENT DATA</span>
                     <h1 className="section__heading">{entry.gear_name}</h1>
                     <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
-                        <span style={S.badge(CAT_COLOR[entry.category] || '#888')}>{entry.category}</span>
-                        {entry.weapon_type && <span style={S.badge('#ff6644')}>{entry.weapon_type}{entry.weapon_subtype ? ` — ${entry.weapon_subtype}` : ''}</span>}
+                        <span style={S.badge(CAT_COLOR[entry.category] || '#888')}>{(entry.category || '').replace('型', '')}</span>
+                        {entry.weapon_type && <span style={S.badge('#ff6644')}>{(entry.weapon_type || '').replace('型', '')}{entry.weapon_subtype ? ` — ${entry.weapon_subtype}` : ''}</span>}
                         <span style={S.badge(RISK_COLOR[entry.risk_level] || '#888')}>リスク: {entry.risk_level}</span>
-                        <span style={S.badge('#888')}>{entry.manufacturer}</span>
+                        <span style={S.badge('#888')}>{entry.manufacturer || '出自不明'}</span>
                         {entry.affiliation_fit && entry.affiliation_fit !== 'どれでも' && <span className="badge badge--kai">{entry.affiliation_fit}</span>}
                     </div>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
@@ -97,10 +97,10 @@ export default function GearDetail({ id }) {
                 {weaknesses.length > 0 && <div style={{ marginBottom: 'var(--space-md)' }}><div style={S.label}>弱点</div>{weaknesses.map((w, i) => <div key={i} style={{ color: 'var(--accent-danger)', fontSize: 'var(--font-size-sm)', padding: '4px 0' }}>− {w}</div>)}</div>}
             </div>
 
-            {/* ベース装備 */}
+            {/* ベース武器 */}
             <div style={S.section}>
-                <div style={S.sectionTitle}>BASE EQUIPMENT</div>
-                <h2 style={S.sectionHeading}>ベース装備</h2>
+                <div style={S.sectionTitle}>BASE WEAPON</div>
+                <h2 style={S.sectionHeading}>ベース武器・スペック</h2>
                 <div style={S.row}>
                     <Field label="ベース名" value={entry.base_name} />
                     <Field label="品質" value={entry.quality} />

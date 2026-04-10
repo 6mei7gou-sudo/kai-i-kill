@@ -64,11 +64,11 @@ export default function GearList() {
             </section>
 
             <div style={S.filterBar}>
-                <input style={S.searchInput} placeholder="武器名・投稿者・メーカーで検索..."
+                <input style={S.searchInput} placeholder="武器名・投稿者・出自で検索..."
                     value={search} onChange={e => setSearch(e.target.value)} />
                 <select style={S.select} value={catFilter} onChange={e => setCatFilter(e.target.value)}>
                     {['すべて', '武装型', '独立型', '半装身型', '搭乗型'].map(o =>
-                        <option key={o} value={o}>{o === 'すべて' ? 'カテゴリ: すべて' : o}</option>)}
+                        <option key={o} value={o}>{o === 'すべて' ? '装備形態: すべて' : o.replace('型', '')}</option>)}
                 </select>
             </div>
 
@@ -85,10 +85,10 @@ export default function GearList() {
                         onMouseLeave={e => { e.currentTarget.style.borderColor = ''; e.currentTarget.style.background = 'var(--bg-card)'; }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-sm)' }}>
                             <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 700 }}>{entry.gear_name || '（無題）'}</h3>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{entry.manufacturer}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{entry.manufacturer || '出自不明'}</span>
                         </div>
                         <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginBottom: 'var(--space-sm)' }}>
-                            <span style={S.badge(CAT_COLOR[entry.category] || '#888')}>{entry.category}</span>
+                            <span style={S.badge(CAT_COLOR[entry.category] || '#888')}>{(entry.category || '').replace('型', '')}</span>
                             <span style={S.badge(RISK_COLOR[entry.risk_level] || '#888')}>リスク: {entry.risk_level}</span>
                             {entry.affiliation_fit && entry.affiliation_fit !== 'どれでも' && (
                                 <span className="badge badge--kai">{entry.affiliation_fit}</span>
