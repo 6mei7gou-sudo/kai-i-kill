@@ -316,6 +316,7 @@ export default function AdminPage() {
                                                 <th style={thStyle}></th>
                                                 <th style={thStyle}>名前</th>
                                                 <th style={thStyle}>投稿者</th>
+                                                <th style={thStyle}>アカウント</th>
                                                 <th style={thStyle}>公式</th>
                                                 <th style={thStyle}>ステータス</th>
                                                 <th style={thStyle}>日付</th>
@@ -343,6 +344,19 @@ export default function AdminPage() {
                                                             </Link>
                                                         </td>
                                                         <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{item.author_name || '—'}</td>
+                                                        <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '10px' }}>
+                                                            {item.user_id ? (
+                                                                <span title={item.user_id} style={{
+                                                                    padding: '2px 6px',
+                                                                    background: 'rgba(255,255,255,0.03)',
+                                                                    border: '1px solid rgba(255,255,255,0.06)',
+                                                                    cursor: 'default',
+                                                                    userSelect: 'all',
+                                                                }}>
+                                                                    {item.user_id.length > 16 ? item.user_id.slice(0, 16) + '…' : item.user_id}
+                                                                </span>
+                                                            ) : '—'}
+                                                        </td>
                                                         <td style={tdStyle}>
                                                             <button
                                                                 onClick={() => handleOfficialToggle(item.id, !!item.is_official)}
