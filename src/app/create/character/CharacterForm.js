@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
-import { MANUFACTURER_NAMES, MANUFACTURER_TIER, EQUIPMENT_TYPE_NAMES, EQUIPMENT_TYPE_STATS, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
+import { COMBAT_STYLE_STATS, COMBAT_STYLE_NAMES, BASE_WEAPONS, FORM_OPTIONS, EQUIPMENT_FORM_STATS, EQUIPMENT_FORM_NAMES, ORIGIN_TIER, ORIGIN_NAMES, STYLE_TO_OLD, OLD_TO_STYLE, FORM_TO_OLD, OLD_TO_FORM, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
@@ -68,14 +68,12 @@ const AWAKENINGS = [
     { id: '接触覚醒型', desc: '怪異の核や特殊素材への長期接触', effect: '察判定に常時+1（怪異の気配への鋭敏さ）' },
 ];
 
-// 武器型
-const WEAPON_TYPES = [
-    { id: '斬撃型', desc: '切れ味と手数', weapons: '刀・剣・斧・薙刀' },
-    { id: '打撃型', desc: '一撃の破壊力', weapons: '槌・棍棒・鈍器' },
-    { id: '射撃型', desc: '距離と精度', weapons: '銃器・弓・投擲武器' },
-    { id: '魔導型', desc: '魔法との連携', weapons: '杖・魔導書・符術具' },
-    { id: '体術型', desc: '素手の技巧', weapons: '格闘・武道・肉体強化' },
-];
+// 戦闘流派（新用語）— form.weapon_type にはDB互換で「斬撃型」等を格納
+const COMBAT_STYLES = COMBAT_STYLE_NAMES.map(name => ({
+    id: name,                          // 表示用: 斬撃, 打撃, ...
+    storeId: STYLE_TO_OLD[name],       // DB格納用: 斬撃型, 打撃型, ...
+    ...COMBAT_STYLE_STATS[name],
+}));
 
 const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
 
@@ -324,7 +322,15 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         if (!form.character_name.trim()) { setResult({ ok: false, msg: 'キャラ名は必須です' }); return; }
         if (!form.background) { setResult({ ok: false, msg: '背景を選択してください' }); return; }
         if (!form.sub_affiliation) { setResult({ ok: false, msg: '配属を選択してください' }); return; }
-        if (!form.weapon_type) { setResult({ ok: false, msg: '武器型を選択してください' }); return; }
+        if (!form.weapon_type) { setResult({ ok: false, msg: '戦闘流派を選択してください' }); return; }
+
+        // サイバネティクス：等級選択時はパーツ必須＋レベル制限
+        if (form.cyber_grade && form.cyber_grade !== 'none') {
+            const hasCyber = (form.cybernetics || []).some(c => c.name);
+            if (!hasCyber) { setResult({ ok: false, msg: `サイバネティクス等級${form.cyber_grade}を選択していますが、パーツが未選択です。最低1つ選択してください` }); return; }
+            if (form.cyber_grade === 'II' && form.level < 4) { setResult({ ok: false, msg: 'サイバネティクス等級Ⅱの施術にはレベル4以上が必要です' }); return; }
+            if (form.cyber_grade === 'III' && form.level < 9) { setResult({ ok: false, msg: 'サイバネティクス等級Ⅲの施術にはレベル9以上が必要です' }); return; }
+        }
 
         const profLen = (form.proficient_languages || []).length;
         const weakLen = (form.weak_languages || []).length;
@@ -614,23 +620,90 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     )}
                 </div>
 
-                {/* ====== SEC 5: 武器型 ====== */}
+                {/* ====== SEC 5: 主力装備（カスケード方式） ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 5 — WEAPON TYPE</div>
-                    <h2 style={S.sectionHeading}>武器型 *</h2>
-                    <p style={sectionNote}>所属・配属・覚醒とは独立。どの組み合わせでも自由に選択できます。</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
-                        {WEAPON_TYPES.map(wt => {
-                            const selected = form.weapon_type === wt.id;
-                            return (
-                                <button key={wt.id} type="button" onClick={() => set('weapon_type', selected ? '' : wt.id)} style={cardStyle(selected)}>
-                                    <div style={{ ...cardTitle(selected), color: selected ? '#ff6644' : 'var(--text-primary)' }}>{wt.id}</div>
-                                    <div style={{ fontSize: 'var(--font-size-xs)', color: '#ff6644', marginBottom: '2px' }}>{wt.desc}</div>
-                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{wt.weapons}</div>
-                                </button>
-                            );
-                        })}
+                    <div style={S.sectionTitle}>SECTION 5 — ARMAMENT</div>
+                    <h2 style={S.sectionHeading}>主力装備 *</h2>
+                    <p style={sectionNote}>上から順に選んでいくと、武器のスペックが自動で決まります。</p>
+
+                    {/* STEP 1: 戦闘流派 */}
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
+                            STEP 1 — 戦闘流派（どう戦う？）
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                            {COMBAT_STYLES.map(cs => {
+                                const selected = form.weapon_type === cs.storeId;
+                                return (
+                                    <button key={cs.id} type="button"
+                                        onClick={() => {
+                                            if (selected) {
+                                                set('weapon_type', '');
+                                                set('equipment_name', '');
+                                            } else {
+                                                set('weapon_type', cs.storeId);
+                                                set('equipment_name', '');
+                                            }
+                                        }}
+                                        style={cardStyle(selected)}>
+                                        <div style={{ ...cardTitle(selected), color: selected ? '#ff6644' : 'var(--text-primary)' }}>{cs.id}</div>
+                                        <div style={{ fontSize: 'var(--font-size-xs)', color: '#ff6644', marginBottom: '2px' }}>{cs.desc}</div>
+                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cs.weapons}</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
+
+                    {/* STEP 2: ベース武器 */}
+                    {form.weapon_type && (() => {
+                        const styleName = OLD_TO_STYLE[form.weapon_type] || form.weapon_type;
+                        const weapons = BASE_WEAPONS[styleName] || [];
+                        if (weapons.length === 0) return null;
+                        return (
+                            <div style={{ marginBottom: 'var(--space-lg)' }}>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
+                                    STEP 2 — ベース武器（何を持つ？）
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {weapons.map(sub => {
+                                        const selected = form.equipment_name === sub.id;
+                                        return (
+                                            <button key={sub.id} type="button"
+                                                onClick={() => set('equipment_name', selected ? '' : sub.id)}
+                                                style={{
+                                                    padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
+                                                    border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
+                                                    background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
+                                                    color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                                                    fontFamily: 'var(--font-mono)', fontSize: '12px',
+                                                }}
+                                                title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
+                                            >
+                                                <span style={{ fontWeight: 700 }}>{sub.id}</span>
+                                                {sub.modAdj !== 0 && (
+                                                    <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
+                                                        {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
+                                                    </span>
+                                                )}
+                                                {sub.reach && (
+                                                    <span style={{ marginLeft: '4px', fontSize: '9px', color: '#88aacc', opacity: 0.8 }}>{sub.reach}</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {form.equipment_name && (() => {
+                                    const sel = weapons.find(s => s.id === form.equipment_name);
+                                    return sel ? (
+                                        <div style={{ marginTop: '6px', padding: '6px 10px', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                            {sel.note}
+                                        </div>
+                                    ) : null;
+                                })()}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* ====== 公式キャラ用レベル設定 ====== */}
@@ -900,77 +973,99 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
-                {/* ====== SEC 10: 装備 ====== */}
+                {/* ====== SEC 10: 装備（STEP 3〜6 — SEC 5の続き） ====== */}
                 <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT</div>
-                    <h2 style={S.sectionHeading}>主力装備</h2>
-                    <div style={S.row}>
-                        <FormSelect label="装備分類" value={form.equipment_type} onChange={v => set('equipment_type', v)} options={EQUIPMENT_TYPE_NAMES} />
-                        <FormSelect label="メーカー" value={form.equipment_maker} onChange={v => set('equipment_maker', v)} options={MANUFACTURER_NAMES} />
-                    </div>
-                    {/* メーカー情報 */}
-                    {form.equipment_maker && MANUFACTURER_TIER[form.equipment_maker] && (
-                        <div style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', marginBottom: 'var(--space-sm)' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                {MANUFACTURER_TIER[form.equipment_maker].desc}
-                                {MANUFACTURER_TIER[form.equipment_maker].modBonus > 0 && (
-                                    <span style={{ color: 'var(--accent-gold)', marginLeft: '8px' }}>修正+{MANUFACTURER_TIER[form.equipment_maker].modBonus}</span>
-                                )}
-                                {MANUFACTURER_TIER[form.equipment_maker].slotBonus > 0 && (
-                                    <span style={{ color: '#44ccff', marginLeft: '8px' }}>スロット+{MANUFACTURER_TIER[form.equipment_maker].slotBonus}</span>
-                                )}
-                            </span>
+                    <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT DETAIL</div>
+                    <h2 style={S.sectionHeading}>装備構成</h2>
+
+                    {/* STEP 3: 装備形態 */}
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
+                            STEP 3 — 装備形態（どう装備する？）
                         </div>
-                    )}
-                    {/* 武器サブタイプ選択（二段階目） */}
-                    {(() => {
-                        const weaponSubs = form.weapon_type ? (WEAPON_SUBTYPES[form.weapon_type] || []) : [];
-                        const equipSubs = EQUIPMENT_SUBTYPES[form.equipment_type] || [];
-                        const allSubs = [...weaponSubs, ...equipSubs];
-                        if (allSubs.length === 0) return null;
-                        return (
-                            <div style={S.fieldGroup}>
-                                <label style={S.label}>武器の種類（{form.weapon_type || form.equipment_type}）</label>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {allSubs.map(sub => {
-                                        const selected = form.equipment_name === sub.id;
-                                        return (
-                                            <button key={sub.id} type="button"
-                                                onClick={() => set('equipment_name', selected ? '' : sub.id)}
-                                                style={{
-                                                    padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
-                                                    border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                                    background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
-                                                    color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                                    fontFamily: 'var(--font-mono)', fontSize: '12px',
-                                                }}
-                                                title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
-                                            >
-                                                <span style={{ fontWeight: 700 }}>{sub.id}</span>
-                                                {sub.modAdj !== 0 && (
-                                                    <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
-                                                        {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
-                                                    </span>
-                                                )}
-                                                {sub.reach && (
-                                                    <span style={{ marginLeft: '4px', fontSize: '9px', color: '#88aacc', opacity: 0.8 }}>{sub.reach}</span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+                            {EQUIPMENT_FORM_NAMES.map(formName => {
+                                const storeVal = FORM_TO_OLD[formName];
+                                const selected = form.equipment_type === storeVal;
+                                const ef = EQUIPMENT_FORM_STATS[formName];
+                                return (
+                                    <button key={formName} type="button"
+                                        onClick={() => set('equipment_type', storeVal)}
+                                        style={cardStyle(selected)}>
+                                        <div style={{ ...cardTitle(selected), color: selected ? '#44ccff' : 'var(--text-primary)' }}>{formName}</div>
+                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{ef.desc}</div>
+                                        <div style={{ fontSize: '10px', color: '#44ccff', marginTop: '2px' }}>CP:{ef.cpBase} / スロット:{ef.baseSlot}</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        {/* 形態固有サブオプション（搭乗/独立/半装身） */}
+                        {(() => {
+                            const formKey = OLD_TO_FORM[form.equipment_type] || form.equipment_type;
+                            const formSubs = FORM_OPTIONS[formKey] || [];
+                            if (formSubs.length === 0) return null;
+                            return (
+                                <div style={{ marginTop: '8px' }}>
+                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>形態オプション</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {formSubs.map(sub => {
+                                            const selected = form.equipment_name === sub.id;
+                                            return (
+                                                <button key={sub.id} type="button"
+                                                    onClick={() => set('equipment_name', selected ? '' : sub.id)}
+                                                    style={{
+                                                        padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
+                                                        border: selected ? '1px solid #44ccff' : 'var(--border-subtle)',
+                                                        background: selected ? 'rgba(68,204,255,0.12)' : 'rgba(0,0,0,0.3)',
+                                                        color: selected ? '#44ccff' : 'var(--text-secondary)',
+                                                        fontFamily: 'var(--font-mono)', fontSize: '12px',
+                                                    }}
+                                                    title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
+                                                >
+                                                    <span style={{ fontWeight: 700 }}>{sub.id}</span>
+                                                    {sub.modAdj !== 0 && (
+                                                        <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
+                                                            {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                {form.equipment_name && (() => {
-                                    const sel = allSubs.find(s => s.id === form.equipment_name);
-                                    return sel ? (
-                                        <div style={{ marginTop: '6px', padding: '6px 10px', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                            {sel.note}
+                            );
+                        })()}
+                    </div>
+
+                    {/* STEP 4: 出自 */}
+                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
+                            STEP 4 — 出自（どこの？）
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+                            {ORIGIN_NAMES.map(name => {
+                                const selected = form.equipment_maker === name;
+                                const ot = ORIGIN_TIER[name];
+                                return (
+                                    <button key={name} type="button"
+                                        onClick={() => set('equipment_maker', selected ? '' : name)}
+                                        style={cardStyle(selected)}>
+                                        <div style={{ ...cardTitle(selected), color: selected ? '#bb88ff' : 'var(--text-primary)' }}>{name}</div>
+                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>{ot.desc}</div>
+                                        <div style={{ fontSize: '10px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                            {ot.modBonus > 0 && <span style={{ color: 'var(--accent-gold)' }}>修正+{ot.modBonus}</span>}
+                                            {ot.slotBonus > 0 && <span style={{ color: '#44ccff' }}>スロット+{ot.slotBonus}</span>}
+                                            <span style={{ color: ot.cpMul > 1 ? '#ff8844' : 'var(--text-muted)' }}>CP×{ot.cpMul}</span>
+                                            <span style={{ color: '#88aacc' }}>{ot.fit}</span>
                                         </div>
-                                    ) : null;
-                                })()}
-                            </div>
-                        );
-                    })()}
-                    <FormInput label="武器名（自由記入）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="例：蒼鉄制式太刀、雷禽カスタムライフル、自作の魔導杖…" />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* STEP 5: 固有名 */}
+                    <FormInput label="固有名（自由記入）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="例：蒼鉄制式太刀、雷禽カスタムライフル、自作の魔導杖…" />
                     <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯など" />
 
                     {/* カスタムオプション選択 */}
@@ -1108,7 +1203,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                             cpSource = linkedGear.gear_name;
                         } else if (form.weapon_type) {
                             const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
-                            if (spec) { usedCp = spec.cp; cpSource = `${form.weapon_type}×${form.equipment_maker || '汎用品'}`; }
+                            if (spec) { usedCp = spec.cp; cpSource = `${OLD_TO_STYLE[form.weapon_type] || form.weapon_type}×${form.equipment_maker || '汎用品'}`; }
                             usedCp += optionsCp;
                             if (optionsCp > 0) cpSource += ` +OPT${optionsCp}CP`;
                         }
@@ -1153,6 +1248,16 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         一度施術すると取り外せません。慎重に選択してください。
                     </div>
                     <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
+                    {form.cyber_grade === 'II' && form.level < 4 && (
+                        <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,170,0,0.1)', border: '1px solid rgba(255,170,0,0.3)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ffaa00' }}>
+                            等級Ⅱにはレベル4以上が必要です（現在 Lv.{form.level}）
+                        </div>
+                    )}
+                    {form.cyber_grade === 'III' && form.level < 9 && (
+                        <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,170,0,0.1)', border: '1px solid rgba(255,170,0,0.3)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ffaa00' }}>
+                            等級Ⅲにはレベル9以上が必要です（現在 Lv.{form.level}）
+                        </div>
+                    )}
                     {form.cyber_grade !== 'none' && (() => {
                         const grade = CYBER_GRADES.find(g => g.id === form.cyber_grade);
                         const availList = [];
