@@ -177,6 +177,7 @@ export function createBattleState(character, mission) {
     class: character.class,
     background: character.background,
     equipment_type: character.equipment_type,
+    _weaponType: character.weapon_type,
     weaponMod,
     weaponDetails,
     classBonus,
@@ -308,7 +309,14 @@ export function playerAttack(state, targetId) {
     }
   }
 
-  const check = resolveCheck(state.player.rank_shiki, attackMod + condBonus, effectiveDefense + 4);
+  // 武器型に応じた判定属性を使用（斬撃型/打撃型→体、射撃型→疾、魔導型→術、体術型→体）
+  const attackRankKey = getAttackRankKey(state.player);
+  const attackRank = state.player[attackRankKey] || 'D';
+
+  // 負傷ペナルティ（HP50%以下で判定-1）
+  const woundPenalty = state.player.hp <= Math.floor(state.player.maxHp / 2) ? -1 : 0;
+
+  const check = resolveCheck(attackRank, attackMod + condBonus + woundPenalty, effectiveDefense + 4);
   let damage = 0;
   let message = '';
 
@@ -398,7 +406,10 @@ export function playerMagic(state, targetId) {
   const defIgnore = isCore ? (state.player.bgBonus.coreDefIgnore || 0) : 0;
   const effectiveDefense = Math.max((target.defense || 0) - defIgnore, 0);
 
-  const check = resolveCheck(state.player.rank_jutsu, magicMod, effectiveDefense + 3);
+  // 負傷ペナルティ
+  const woundPenalty = state.player.hp <= Math.floor(state.player.maxHp / 2) ? -1 : 0;
+
+  const check = resolveCheck(state.player.rank_jutsu, magicMod + woundPenalty, effectiveDefense + 3);
   let damage = 0;
   let message = '';
 
@@ -552,10 +563,14 @@ export function processEnemyTurn(state) {
         }
       }
     } else if (action.type === 'defend') {
-      const log = { type: 'enemy_defend', enemy: enemy.name, message: `${enemy.name}は防御態勢をとった` };
+      // 防御態勢: この敵の防御力を一時的に+2
+      enemy._defending = true;
+      const log = { type: 'enemy_defend', enemy: enemy.name, message: `${enemy.name}は防御態勢をとった（防御+2）` };
       newState = { ...newState, log: [...newState.log, log] };
     } else if (action.type === 'guard') {
-      const log = { type: 'enemy_guard', enemy: enemy.name, message: `${enemy.name}は核を守っている` };
+      // 核守護: この敵が生存中は核へのダメージを2軽減
+      enemy._guarding = true;
+      const log = { type: 'enemy_guard', enemy: enemy.name, message: `${enemy.name}は核を守っている（核ダメージ-2）` };
       newState = { ...newState, log: [...newState.log, log] };
     }
   }
@@ -606,6 +621,9 @@ export function playerSkill(state, skillId, targetId) {
   const rankKey = `rank_${ATTR_TO_RANK[skill.attr] || 'shiki'}`;
   const rank = newState.player[rankKey] || 'D';
 
+  // 負傷ペナルティ（HP50%以下で-1）— resolveCheckの修正値に反映
+  const woundPenalty = newState.player.hp <= Math.floor(newState.player.maxHp / 2) ? -1 : 0;
+
   // --- スキル効果の解決 ---
   const effect = skill.effect || '';
 
@@ -648,9 +666,9 @@ export function playerSkill(state, skillId, targetId) {
 
     // 武器修正2倍（全力打撃等）
     const doubleWeaponMod = effect.includes('武器修正2倍');
-    const effectiveWeaponMod = doubleWeaponMod
+    const effectiveWeaponMod = (doubleWeaponMod
       ? newState.player.weaponMod * 2
-      : newState.player.weaponMod;
+      : newState.player.weaponMod) + woundPenalty;
 
     // 防御無視
     const ignoreDefense = effect.includes('防御無視') || effect.includes('防御力を無視');
@@ -921,6 +939,17 @@ const ATTR_TO_RANK = {
   '体': 'tai', '疾': 'haya', '識': 'shiki', '判': 'han', '察': 'shiya', '術': 'jutsu', '魂': 'kon',
 };
 
+// 武器型から通常攻撃の判定ランクキーを取得
+function getAttackRankKey(player) {
+  if (player.weaponDetails?.ability) {
+    return player.weaponDetails.ability;  // 例: 'rank_tai'
+  }
+  // weaponDetailsがない場合、getAttackAbilityでフォールバック
+  const weaponType = player._weaponType || '';
+  const ability = getAttackAbility(weaponType);
+  return ability || 'rank_tai';
+}
+
 // パッシブスキル効果をプレイヤーステートに適用
 function applyPassiveSkills(player, state) {
   let p = { ...player };
@@ -961,11 +990,20 @@ function applyPassiveSkills(player, state) {
   return p;
 }
 
+// 所属→デフォルト配属の推定（配属が空の場合のフォールバック）
+const DEFAULT_ASSIGNMENT = {
+  '祓部': '機動班',
+  '傭兵': '突撃型',
+  '無所属': '野良討伐者',
+};
+
 // スキル一覧を取得してバトル用に変換
 function loadBattleSkills(character) {
+  const assignment = character.sub_affiliation || character.assignment
+    || DEFAULT_ASSIGNMENT[character.affiliation] || '';
   const skills = getAvailableSkills({
     affiliation: character.affiliation,
-    assignment: character.sub_affiliation || character.assignment,
+    assignment,
     awakening: character.awakening,
     weaponType: character.weapon_skill_type || character.weapon_type,
   });
@@ -1003,18 +1041,26 @@ function loadWeaponDetails(character) {
 
 function applyDamageToTarget(state, targetId, isCore, damage) {
   if (isCore) {
+    // 核守護中の護衛がいればダメージ-2
+    const guardCount = (state.enemies || []).filter(e => e.hp > 0 && e._guarding).length;
+    const guardReduction = guardCount * 2;
+    const effectiveDmg = Math.max(damage - guardReduction, 0);
     return {
       ...state,
-      core: { ...state.core, hp: Math.max(state.core.hp - damage, 0) },
-      totalDamageDealt: state.totalDamageDealt + damage,
+      core: { ...state.core, hp: Math.max(state.core.hp - effectiveDmg, 0) },
+      totalDamageDealt: state.totalDamageDealt + effectiveDmg,
     };
   }
+  // 防御態勢の敵はダメージ-2（防御態勢は消費される）
+  const target = state.enemies.find(e => e.id === targetId);
+  const defBonus = (target && target._defending) ? 2 : 0;
+  const effectiveDmg = Math.max(damage - defBonus, 0);
   return {
     ...state,
     enemies: state.enemies.map(e =>
-      e.id === targetId ? { ...e, hp: Math.max(e.hp - damage, 0) } : e
+      e.id === targetId ? { ...e, hp: Math.max(e.hp - effectiveDmg, 0), _defending: false } : e
     ),
-    totalDamageDealt: state.totalDamageDealt + damage,
+    totalDamageDealt: state.totalDamageDealt + effectiveDmg,
   };
 }
 
@@ -1063,7 +1109,10 @@ export function createCoopBattleState(characters, mission) {
     const totalHP = baseHP + (bgBonus.hpBonus || 0) + (cyberBonus.hpBonus || 0);
     const beliefPoints = character.belief_points || 5;
 
-    return {
+    // スキル読み込み（Coop対応）
+    const skills = loadBattleSkills(character);
+
+    let playerObj = {
       id: character.id || `player_${idx}`,
       name: character.character_name,
       hp: totalHP,
@@ -1078,6 +1127,7 @@ export function createCoopBattleState(characters, mission) {
       class: character.class,
       background: character.background,
       equipment_type: character.equipment_type,
+      _weaponType: character.weapon_type,
       weaponMod,
       classBonus,
       bgBonus,
@@ -1089,7 +1139,14 @@ export function createCoopBattleState(characters, mission) {
       firstAttackDone: false,
       alive: true,
       hate: 0,
+      skills,
+      skillUses: {},
     };
+
+    // パッシブスキル適用
+    playerObj = applyPassiveSkills(playerObj, null);
+
+    return playerObj;
   });
 
   // イニシアチブ順にソート（疾ランクが高い順）
