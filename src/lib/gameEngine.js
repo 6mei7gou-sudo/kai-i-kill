@@ -609,72 +609,217 @@ export function playerSkill(state, skillId, targetId) {
   // --- スキル効果の解決 ---
   const effect = skill.effect || '';
 
-  // ダメージ系スキル
-  if (effect.includes('ダメージ+')) {
-    const dmgMatch = effect.match(/ダメージ[+＋](\d+)/);
-    const bonusDmg = dmgMatch ? parseInt(dmgMatch[1], 10) : 0;
+  // スキルが攻撃系かどうかを判定（テキストパースではなくスキルIDと効果の総合判断）
+  const isAttackSkill = (
+    effect.includes('ダメージ+') || effect.includes('ダメージ2倍') ||
+    effect.includes('防御力を無視') || effect.includes('防御無視') ||
+    effect.includes('武器修正2倍') ||
+    effect.includes('達成値を採用') || effect.includes('達成値+') ||
+    effect.match(/\d+回攻撃/) || effect.includes('同時攻撃') ||
+    effect.includes('に攻撃') || effect.includes('魔法攻撃') ||
+    effect.includes('全体に') || effect.includes('反撃') ||
+    effect.includes('核に直接')
+  );
 
-    // HP条件チェック（例：HP50%以下時）
+  // HP条件チェック（攻撃スキル共通）
+  if (isAttackSkill) {
     if (effect.includes('HP50%以下') && newState.player.hp > newState.player.maxHp * 0.5) {
       return { state, result: { success: false, message: 'HP50%以上のため使用できない' } };
     }
     if (effect.includes('HP4以下') && newState.player.hp > 4) {
       return { state, result: { success: false, message: 'HP4以下でないと使用できない' } };
     }
+  }
 
-    let target;
-    let isCore = false;
-    if (targetId === 'core' && newState.core.exposed) {
-      target = newState.core; isCore = true;
-    } else {
-      target = newState.enemies.find(e => e.id === targetId && e.hp > 0);
+  // 信念消費チェック（先に処理）
+  if (effect.includes('信念') && effect.includes('消費')) {
+    if (newState.player.beliefPoints <= 0) {
+      return { state, result: { success: false, message: '信念ポイントが足りない' } };
     }
-    if (!target) return { state, result: { success: false, message: '対象が見つからない' } };
+    newState = { ...newState, player: { ...newState.player, beliefPoints: newState.player.beliefPoints - 1 } };
+  }
 
-    const check = resolveCheck(rank, newState.player.weaponMod, (target.defense || 0) + 4);
-    if (check.isFumble) {
-      message = `ファンブル！ ${skill.id}は失敗した`;
-      success = false;
-      // 反動チェック
-      if (effect.includes('反動')) {
-        const recoilMatch = effect.match(/反動(\d+)/);
-        const recoil = recoilMatch ? parseInt(recoilMatch[1], 10) : 2;
-        newState = { ...newState, player: { ...newState.player, hp: Math.max(newState.player.hp - recoil, 0) } };
-        message += `（反動${recoil}ダメージ）`;
+  // ===== 攻撃系スキル =====
+  if (isAttackSkill) {
+    // ボーナスダメージを計算
+    let bonusDmg = 0;
+    const dmgMatch = effect.match(/ダメージ[+＋](\d+)/);
+    if (dmgMatch) bonusDmg = parseInt(dmgMatch[1], 10);
+
+    // 武器修正2倍（全力打撃等）
+    const doubleWeaponMod = effect.includes('武器修正2倍');
+    const effectiveWeaponMod = doubleWeaponMod
+      ? newState.player.weaponMod * 2
+      : newState.player.weaponMod;
+
+    // 防御無視
+    const ignoreDefense = effect.includes('防御無視') || effect.includes('防御力を無視');
+
+    // ダメージ倍率
+    const doubleDamage = effect.includes('2倍') || effect.includes('ダメージ2倍');
+
+    // 複数回攻撃（連斬、連撃、制圧射撃等）
+    const multiMatch = effect.match(/(\d+)回攻撃/);
+    const isMultiHit = multiMatch || effect.includes('達成値を採用');
+    const hitCount = multiMatch ? parseInt(multiMatch[1], 10) : (effect.includes('達成値を採用') ? 2 : 1);
+
+    // 全体攻撃（広域術式、一騎当千等）
+    const isAoe = effect.includes('全体') || effect.includes('護衛全体') || effect.includes('2体に同時攻撃');
+
+    // 核直接ダメージ（真名暴露等）
+    if (effect.includes('核に直接')) {
+      const directDmg = dmgMatch ? parseInt(dmgMatch[1], 10) : 5;
+      if (newState.core.exposed) {
+        newState = applyDamageToTarget(newState, 'core', true, directDmg);
+        message = `${skill.id}！ 核に直接${directDmg}ダメージ`;
+        damage = directDmg;
+      } else {
+        message = `${skill.id} — 核が露出していないため効果なし`;
+        success = false;
       }
-    } else if (check.success) {
-      damage = calculateDamage(check.maxDie, newState.player.weaponMod + bonusDmg, target.defense || 0);
-      if (effect.includes('防御無視') || effect.includes('防御力を無視')) {
-        damage = check.maxDie + newState.player.weaponMod + bonusDmg;
+    }
+    // 全体攻撃
+    else if (isAoe) {
+      const penaltyMatch = effect.match(/各?ダメージ[-−](\d+)/);
+      const aoePenalty = penaltyMatch ? parseInt(penaltyMatch[1], 10) : 0;
+      let totalDmg = 0;
+      const targets = newState.enemies.filter(e => e.hp > 0);
+      if (targets.length === 0) {
+        message = `${skill.id} — 対象がいない`;
+        success = false;
+      } else {
+        const msgs = [];
+        for (const t of targets) {
+          const check = resolveCheck(rank, effectiveWeaponMod, (t.defense || 0) + 4);
+          if (check.success) {
+            let dmg = ignoreDefense
+              ? check.maxDie + effectiveWeaponMod + bonusDmg - aoePenalty
+              : calculateDamage(check.maxDie, effectiveWeaponMod + bonusDmg - aoePenalty, t.defense || 0);
+            if (doubleDamage) dmg *= 2;
+            if (check.isSpecial) dmg = Math.floor(dmg * 1.5);
+            dmg = Math.max(dmg, 0);
+            newState = applyDamageToTarget(newState, t.id, false, dmg);
+            totalDmg += dmg;
+            msgs.push(`${t.name}に${dmg}`);
+          } else {
+            msgs.push(`${t.name}は回避`);
+          }
+        }
+        damage = totalDmg;
+        message = `${skill.id}！ ${msgs.join('、')}`;
       }
-      if (effect.includes('2倍')) damage = damage * 2;
-      if (check.isSpecial) damage = Math.floor(damage * 1.5);
-      message = `${skill.id}！ ${target.name}に${damage}ダメージ`;
-      if (check.isSpecial) message = `スペシャル！ ` + message;
-    } else {
-      message = `${skill.id}は${target.name}に避けられた`;
-      success = false;
+    }
+    // 複数回攻撃（連斬: 2回判定→高い方採用、連撃: 2回攻撃で各-1）
+    else if (isMultiHit && hitCount >= 2) {
+      let target;
+      let isCore = false;
+      if (targetId === 'core' && newState.core.exposed) { target = newState.core; isCore = true; }
+      else { target = newState.enemies.find(e => e.id === targetId && e.hp > 0); }
+      if (!target) return { state, result: { success: false, message: '対象が見つからない' } };
+
+      if (effect.includes('達成値を採用') || effect.includes('高い方')) {
+        // 2回振って高い方を採用（連斬）
+        const check1 = resolveCheck(rank, effectiveWeaponMod, (target.defense || 0) + 4);
+        const check2 = resolveCheck(rank, effectiveWeaponMod, (target.defense || 0) + 4);
+        const best = (check1.total >= check2.total) ? check1 : check2;
+        if (best.isFumble) {
+          message = `ファンブル！ ${skill.id}は失敗した`;
+          success = false;
+        } else if (best.success) {
+          damage = ignoreDefense
+            ? best.maxDie + effectiveWeaponMod + bonusDmg
+            : calculateDamage(best.maxDie, effectiveWeaponMod + bonusDmg, target.defense || 0);
+          if (doubleDamage) damage *= 2;
+          if (best.isSpecial) damage = Math.floor(damage * 1.5);
+          newState = applyDamageToTarget(newState, targetId, isCore, damage);
+          message = `${skill.id}！ 2回判定の最良値で${target.name}に${damage}ダメージ`;
+          if (best.isSpecial) message = `スペシャル！ ` + message;
+        } else {
+          message = `${skill.id}は${target.name}に避けられた`;
+          success = false;
+        }
+      } else {
+        // 各攻撃が独立（連撃、二丁拳銃等）
+        const penaltyMatch = effect.match(/各?ダメージ[-−](\d+)/);
+        const hitPenalty = penaltyMatch ? parseInt(penaltyMatch[1], 10) : 0;
+        const useWeaponMod = !effect.includes('武器修正なし');
+        let totalDmg = 0;
+        const msgs = [];
+        for (let i = 0; i < hitCount; i++) {
+          const mod = useWeaponMod ? effectiveWeaponMod : 0;
+          const check = resolveCheck(rank, mod, (target.defense || 0) + 4);
+          if (check.success) {
+            let dmg = calculateDamage(check.maxDie, mod + bonusDmg - hitPenalty, target.defense || 0);
+            dmg = Math.max(dmg, 0);
+            if (check.isSpecial) dmg = Math.floor(dmg * 1.5);
+            totalDmg += dmg;
+            msgs.push(`${dmg}`);
+          } else {
+            msgs.push('回避');
+          }
+        }
+        if (totalDmg > 0) newState = applyDamageToTarget(newState, targetId, isCore, totalDmg);
+        damage = totalDmg;
+        message = `${skill.id}！ ${hitCount}回攻撃 [${msgs.join(' / ')}] → ${target.name}に計${totalDmg}ダメージ`;
+      }
+    }
+    // 単体攻撃（基本）
+    else {
+      let target;
+      let isCore = false;
+      if (targetId === 'core' && newState.core.exposed) { target = newState.core; isCore = true; }
+      else { target = newState.enemies.find(e => e.id === targetId && e.hp > 0); }
+      if (!target) return { state, result: { success: false, message: '対象が見つからない' } };
+
+      const check = resolveCheck(rank, effectiveWeaponMod, (target.defense || 0) + 4);
+      if (check.isFumble) {
+        message = `ファンブル！ ${skill.id}は失敗した`;
+        success = false;
+      } else if (check.success) {
+        damage = ignoreDefense
+          ? check.maxDie + effectiveWeaponMod + bonusDmg
+          : calculateDamage(check.maxDie, effectiveWeaponMod + bonusDmg, target.defense || 0);
+        if (doubleDamage) damage *= 2;
+        if (check.isSpecial) damage = Math.floor(damage * 1.5);
+        newState = applyDamageToTarget(newState, targetId, isCore, damage);
+        message = `${skill.id}！ ${target.name}に${damage}ダメージ`;
+        if (check.isSpecial) message = `スペシャル！ ` + message;
+      } else {
+        message = `${skill.id}は${target.name}に避けられた`;
+        success = false;
+      }
     }
 
-    if (damage > 0) {
-      newState = applyDamageToTarget(newState, targetId, isCore, damage);
-    }
-    // 反動ダメージ（成功時）
-    if (success && effect.includes('反動') && !check.isFumble) {
+    // 反動ダメージ
+    if (effect.includes('反動')) {
       const recoilMatch = effect.match(/反動(\d+)/);
-      const recoil = recoilMatch ? parseInt(recoilMatch[1], 10) : 0;
-      if (recoil > 0) {
-        newState = { ...newState, player: { ...newState.player, hp: Math.max(newState.player.hp - recoil, 0) } };
-        message += `（反動${recoil}）`;
+      const recoil = recoilMatch ? parseInt(recoilMatch[1], 10) : 2;
+      newState = { ...newState, player: { ...newState.player, hp: Math.max(newState.player.hp - recoil, 0) } };
+      message += `（反動${recoil}）`;
+    }
+
+    // 追加効果: 対象の防御力低下
+    if (success && (effect.includes('防御力-') || effect.includes('防御力を次ラウンド'))) {
+      const debuffMatch = effect.match(/防御力.*?[-−](\d+)/);
+      const debuff = debuffMatch ? parseInt(debuffMatch[1], 10) : 1;
+      const tgt = newState.enemies.find(e => e.id === targetId);
+      if (tgt) {
+        tgt.defense = Math.max((tgt.defense || 0) - debuff, 0);
+        message += `（防御力-${debuff}）`;
       }
     }
 
-    if (isCore && newState.core.hp <= 0) {
+    // 追加効果: 行動遅延
+    if (success && effect.includes('遅延')) {
+      message += '（行動遅延付与）';
+    }
+
+    if ((targetId === 'core' || false) && newState.core.hp <= 0) {
       newState = { ...newState, phase: PHASE.VICTORY };
       newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
     }
   }
-  // 回復系スキル
+  // ===== 回復系スキル =====
   else if (effect.includes('HP') && effect.includes('回復')) {
     const healMatch = effect.match(/HP.*?(\d+)回復/);
     const healAmt = healMatch ? parseInt(healMatch[1], 10) : 2;
@@ -682,32 +827,44 @@ export function playerSkill(state, skillId, targetId) {
     message = `${skill.id}でHP${newHp - newState.player.hp}回復`;
     newState = { ...newState, player: { ...newState.player, hp: newHp } };
   }
-  // バフ系スキル（次の判定+N）
-  else if (effect.includes('判定+') || effect.includes('行使+') || effect.includes('攻撃判定+')) {
+  // ===== バフ系スキル（判定+N、行使+N） =====
+  else if (effect.includes('判定+') || effect.includes('行使+')) {
     const buffMatch = effect.match(/[+＋](\d+)/);
     const buffVal = buffMatch ? parseInt(buffMatch[1], 10) : 1;
     newState = { ...newState, player: { ...newState.player, _skillBuff: (newState.player._skillBuff || 0) + buffVal } };
     message = `${skill.id} — 次の判定+${buffVal}`;
   }
-  // 防御系スキル（ダメージ-N）
-  else if (effect.includes('ダメージ-') || effect.includes('受けるダメージ')) {
-    const defMatch = effect.match(/ダメージ[-−](\d+)/);
+  // ===== 防御系スキル（受けるダメージ-N） =====
+  else if (effect.includes('受けるダメージ') || (effect.includes('ダメージ') && effect.includes('軽減'))) {
+    const defMatch = effect.match(/[-−](\d+)/);
     const defVal = defMatch ? parseInt(defMatch[1], 10) : 2;
     newState = { ...newState, player: { ...newState.player, _skillDefense: (newState.player._skillDefense || 0) + defVal } };
     message = `${skill.id} — 次の被ダメージ-${defVal}`;
   }
-  // 回避系スキル
+  // ===== 回避系スキル =====
   else if (effect.includes('回避+') || effect.includes('リアクション判定+')) {
     const evMatch = effect.match(/[+＋](\d+)/);
     const evVal = evMatch ? parseInt(evMatch[1], 10) : 2;
     newState = { ...newState, player: { ...newState.player, _skillBuff: (newState.player._skillBuff || 0) + evVal } };
     message = `${skill.id} — リアクション+${evVal}`;
   }
-  // 共鳴メーター操作
-  else if (effect.includes('共鳴メーター')) {
-    const resMatch = effect.match(/共鳴メーター[-−](\d+)/);
+  // ===== デバフ系（対象の防御力低下） =====
+  else if (effect.includes('防御力') && effect.includes('-')) {
+    const debuffMatch = effect.match(/[-−](\d+)/);
+    const debuff = debuffMatch ? parseInt(debuffMatch[1], 10) : 2;
+    const tgt = newState.enemies.find(e => e.id === targetId && e.hp > 0);
+    if (tgt) {
+      tgt.defense = Math.max((tgt.defense || 0) - debuff, 0);
+      message = `${skill.id} — ${tgt.name}の防御力-${debuff}`;
+    } else {
+      message = `${skill.id} — 対象が見つからない`;
+      success = false;
+    }
+  }
+  // ===== 共鳴メーター操作 =====
+  else if (effect.includes('共鳴メーター') || effect.includes('浄化')) {
+    const resMatch = effect.match(/[-−](\d+)/);
     const resVal = resMatch ? parseInt(resMatch[1], 10) : 2;
-    // 浄化以外で最も高い共鳴を下げる
     const maxEmo = Object.entries(newState.resonance)
       .filter(([k]) => k !== 'purge')
       .sort((a, b) => b[1] - a[1])[0];
@@ -718,31 +875,23 @@ export function playerSkill(state, skillId, targetId) {
       message = `${skill.id} — 共鳴メーターに変化なし`;
     }
   }
-  // 信念消費系
-  else if (effect.includes('信念') && effect.includes('消費')) {
-    if (newState.player.beliefPoints <= 0) {
-      return { state, result: { success: false, message: '信念ポイントが足りない' } };
-    }
-    newState = { ...newState, player: { ...newState.player, beliefPoints: newState.player.beliefPoints - 1 } };
-    // 効果本体を処理（核ダメージ等）
-    if (effect.includes('ダメージ')) {
-      const dmgMatch = effect.match(/ダメージ[+＋](\d+)/);
-      const bonusDmg = dmgMatch ? parseInt(dmgMatch[1], 10) : 4;
-      if (targetId === 'core' && newState.core.exposed) {
-        newState = applyDamageToTarget(newState, 'core', true, bonusDmg);
-        message = `${skill.id}！ 信念消費 — 核に${bonusDmg}ダメージ`;
-      } else {
-        message = `${skill.id} — 信念を消費`;
-      }
-    } else {
-      message = `${skill.id} — 信念を消費して発動`;
-    }
-  }
-  // 護衛特性開示
-  else if (effect.includes('特性') && (effect.includes('開示') || effect.includes('把握'))) {
+  // ===== 護衛特性開示 =====
+  else if (effect.includes('特性') && (effect.includes('開示') || effect.includes('把握') || effect.includes('自動開示'))) {
     message = `${skill.id} — 護衛の特性を開示した`;
   }
-  // その他の汎用効果
+  // ===== 核の防御力ゼロ化（情報遮断等） =====
+  else if (effect.includes('核') && effect.includes('防御力=0')) {
+    newState = { ...newState, core: { ...newState.core, defense: 0 } };
+    message = `${skill.id} — 核の防御力を0にした`;
+  }
+  // ===== 味方全員バフ（情報共有、組織命令等） =====
+  else if (effect.includes('味方全員') && effect.includes('判定+')) {
+    const buffMatch = effect.match(/[+＋](\d+)/);
+    const buffVal = buffMatch ? parseInt(buffMatch[1], 10) : 1;
+    newState = { ...newState, player: { ...newState.player, _skillBuff: (newState.player._skillBuff || 0) + buffVal } };
+    message = `${skill.id} — 次ラウンドの判定+${buffVal}`;
+  }
+  // ===== その他の汎用効果 =====
   else {
     message = `${skill.id}を使用した — ${effect}`;
   }
