@@ -5,7 +5,7 @@
 
 import { useRef } from 'react';
 import { useCharacterState } from './hooks/useCharacterState';
-import { AWAKENING_PATTERNS, AFFILIATIONS, BELIEFS } from './data/masterData';
+import { AWAKENING_PATTERNS, AFFILIATIONS, SUB_AFFILIATIONS, BELIEFS } from './data/masterData';
 import AbilityPanel from './components/AbilityPanel';
 import EmotionMeter from './components/EmotionMeter';
 import ErosionGauge from './components/ErosionGauge';
@@ -86,12 +86,28 @@ export default function CharacterSheetPage() {
                         <select
                             className="profile-field__select"
                             value={state.affiliation}
-                            onChange={e => setField('affiliation', e.target.value)}
+                            onChange={e => {
+                                setField('affiliation', e.target.value);
+                                setField('sub_affiliation', '');
+                            }}
                         >
                             <option value="">選択してください</option>
                             {AFFILIATIONS.map(a => <option key={a} value={a}>{a}</option>)}
                         </select>
                     </div>
+                    {state.affiliation && SUB_AFFILIATIONS[state.affiliation] && (
+                        <div className="profile-field">
+                            <label className="profile-field__label">配属</label>
+                            <select
+                                className="profile-field__select"
+                                value={state.sub_affiliation}
+                                onChange={e => setField('sub_affiliation', e.target.value)}
+                            >
+                                <option value="">選択してください</option>
+                                {SUB_AFFILIATIONS[state.affiliation].map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                    )}
                     <div className="profile-field">
                         <label className="profile-field__label">信念</label>
                         <select

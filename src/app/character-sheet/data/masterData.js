@@ -37,11 +37,14 @@ export const AWAKENING_PATTERNS = [
     '怪異接触型', '先天性怪異型', '自発的覚醒型', 'その他',
 ];
 
-export const AFFILIATIONS = [
-    '怪異対策局（KCB）', '民間調査会社 PHANTOM',
-    '霊薬研究機関 NEXUS', '無所属・フリーランス',
-    '地下組織「怪異教団」', '政府特殊部隊', 'その他',
-];
+export const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
+
+// 配属（所属ごとの部署・タイプ）
+export const SUB_AFFILIATIONS = {
+    '祓部': ['古怪班', '新怪班', '封印班', '機動班'],
+    '傭兵': ['突撃型', '偵察型', '技術型', '護衛型'],
+    '無所属': ['野良討伐者', '裏社会の住人', '独学の研究者', '放浪の祓い屋'],
+};
 
 export const BELIEFS = [
     '怪異との共存', '人類の守護', '力の追求',
@@ -117,6 +120,7 @@ export const INITIAL_STATE = {
     characterImage: '',
     awakening: '',
     affiliation: '',
+    sub_affiliation: '',
     belief: '',
     background: '',
     abilities: Object.fromEntries(ABILITIES.map(a => [a.id, 'D'])),

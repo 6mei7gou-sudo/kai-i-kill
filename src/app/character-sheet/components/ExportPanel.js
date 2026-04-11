@@ -11,7 +11,7 @@ function stateToRpCharacter(state) {
         id: state.name || 'draft',
         character_name: state.name,
         affiliation: state.affiliation,
-        sub_affiliation: '',
+        sub_affiliation: state.sub_affiliation || '',
         awakening: state.awakening,
         background: state.background,
         brief_history: state.notes,
