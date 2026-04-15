@@ -1,7 +1,14 @@
-# 怪異キル TRPG — 引き継ぎ用コンテキスト
+# KAI-I//KILL プロジェクト — 引き継ぎ用コンテキスト
 
 このファイルを読めばプロジェクトの全体像と状態がわかる。
 新しいClaudeセッションにはまずこのファイルを読ませること。
+
+本プロジェクトは以下の複数プロダクトを同一の世界観と判定メカニクスで横断する統合開発プロジェクトである：
+
+- **Webサイト**（プレイヤー向け世界観・Webゲーム・投稿コミュニティ・SNS）
+- **オフラインTRPG**（従来の卓上セッション）
+- **VRイベント**（将来、ロールプレイ＋ゲームワールド）
+- **Bot連携**（将来、Discord Bot等）
 
 ---
 
@@ -21,24 +28,38 @@
 ## ファイル構成
 
 ```
-kai-i-kill/docs/
-├── gm/                      ← GM専用資料（秘匿情報含む）
+kai-i-kill/
+├── docs/                    ← 設計・仕様・世界観の文書（下記詳細）
+├── src/                     ← Next.js App Router（Webサイト本体）
+│   ├── app/                  ページ・API Route
+│   ├── components/           共通UI
+│   ├── data/                 Webゲーム用データ（ミッション・シナリオ・スキル等）
+│   └── lib/                  gameEngine.js（判定エンジン実装）
+├── archive/sheet-app-legacy/ ← 独立HTML版キャラシ（Next.js版へ統合済み・退避）
+├── supabase/                ← DB マイグレーション
+├── scripts/                 ← ビルド・データ変換スクリプト
+├── __tests__/               ← Jest テスト
+└── tasks/                   ← プロジェクト進捗・学習記録
+
+docs/
+├── gm/                      ← GM専用資料（秘匿情報含む・Web非公開）
 │   ├── world_bible, glossary, geography
 │   └── factions/            ← 勢力別詳細
-├── player/                  ← プレイヤー向け資料（秘匿除去済み）
-│   ├── world_bible, glossary, timeline, character_creation_guide
+├── player/                  ← プレイヤー向け資料（秘匿除去済み・Web公開）
+│   ├── world_bible, glossary, timeline, character_concept_guide
 │   └── factions/
-├── rules/                   ← TRPGルール
+├── rules/                   ← 判定メカニクス仕様（Web非公開・内部資料）
 │   ├── rules_unified.md     ← ★主文書★ v4.0
 │   ├── combat_hp.md         ← 戦闘補遺 v4.0
 │   ├── cybernetics.md       ← サイバネ補遺 v1.0
 │   ├── weapon_custom_data.md
 │   ├── expansion.md         ← 禁域解放 v1.0
 │   ├── system_data.json     ← 構造化データ v4.0
-│   ├── chapters/            ← Web表示用チャプター分割（15章）
+│   ├── chapters/            ← 章別分割（15章）
 │   └── archive/             ← 旧版（参照用）
-├── templates/               ← テンプレート集
+├── templates/               ← テンプレート集・公式PC記入フォーマット
 ├── design/                  ← デザインシステム・ガイド
+├── specs/                   ← 技術仕様書（gameEngine等）
 ├── pdf/gm-beta/             ← PDF出力物
 ├── _build/                  ← ビルドスクリプト
 ├── site/                    ← サイト設計
