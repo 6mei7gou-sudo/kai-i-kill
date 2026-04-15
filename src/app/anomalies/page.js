@@ -143,11 +143,6 @@ export default function IntroAnomaliesPage() {
                     </p>
                 </div>
 
-                <div style={{ marginTop: 'var(--space-md)' }}>
-                    <Link href="/rules/magic/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
-                        → 魔法システムの詳細ルール
-                    </Link>
-                </div>
             </div>
 
             {/* ===== 装備 ===== */}
@@ -205,11 +200,6 @@ export default function IntroAnomaliesPage() {
                     </p>
                 </div>
 
-                <div style={{ marginTop: 'var(--space-md)' }}>
-                    <Link href="/rules/equipment/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
-                        → 装備システムの詳細ルール
-                    </Link>
-                </div>
             </div>
 
             {/* ===== 深掘りリンク ===== */}

@@ -911,12 +911,6 @@ export default function QuickstartPage() {
                 </div>
             </div>
 
-            <div style={{ marginBottom: 'var(--space-xl)' }}>
-                <Link href="/rules/combat/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
-                    → 戦闘ルールの詳細を見る
-                </Link>
-            </div>
-
             {/* ===== リンク ===== */}
             <section className="section">
                 <div className="section__number">MORE — DEEP DIVE</div>
@@ -964,16 +958,6 @@ export default function QuickstartPage() {
                         <h3 className="card__title">世界観バイブル</h3>
                         <p className="card__desc">
                             世界の成り立ち・魔法インフラ・怪異のメカニズムの全文。
-                        </p>
-                    </div>
-                </Link>
-                <Link href="/rules/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="card">
-                        <div className="card__icon">▶</div>
-                        <div className="card__title-en">RULEBOOK</div>
-                        <h3 className="card__title">ルール目次</h3>
-                        <p className="card__desc">
-                            統合ルールブック v4.0 の全14章。判定・戦闘・スキル・魔法・装備を網羅。
                         </p>
                     </div>
                 </Link>

@@ -25,21 +25,6 @@ export const SEARCH_INDEX = [
   { title: '企業詳細', desc: '蒼鉄機工・雷禽重工・鴉羽技研の解説', path: '/organizations/companies/', keywords: ['企業', '蒼鉄', '雷禽', '鴉羽', '銀鎚', 'メーカー'] },
   { title: '無所属詳細', desc: '組織に属さない討伐者たちの生き方', path: '/organizations/unaffiliated/', keywords: ['無所属', '野良', '裏社会', '在野', '退魔師', 'フリーランス'] },
 
-  // TRPGルール
-  { title: 'ルール目次', desc: '統合ルールブック v4.0 の全14章', path: '/rules/', keywords: ['ルール', 'ルールブック', 'TRPG', '目次'] },
-  { title: '基本判定システム', desc: 'ランク制ダイスプール・段階修正', path: '/rules/dice/', keywords: ['ダイス', '判定', 'ランク', 'd6', '達成値', '段階'] },
-  { title: '《共鳴記録》', desc: '6種の感情メーター・覚醒ギフト', path: '/rules/resonance/', keywords: ['共鳴', '感情', '恐怖', '怒り', '哀愁', '焦燥', '渇望', '浄化', 'メーター'] },
-  { title: '戦闘《核護衛戦》', desc: '核と護衛の構造・ラウンド進行・ダメージ', path: '/rules/combat/', keywords: ['戦闘', '核', '護衛', 'ダメージ', 'HP', 'ラウンド', '行動'] },
-  { title: 'スキルシステム', desc: '6軸スキル・所属/配属/覚醒/背景/武器技能', path: '/rules/skills/', keywords: ['スキル', '所属', '配属', '覚醒', '背景', '武器技能'] },
-  { title: '調査・解明・討伐', desc: '三段階プロセス・四つの解明鍵', path: '/rules/investigation/', keywords: ['調査', '解明', '討伐', '解明鍵', '予兆カード'] },
-  { title: '魔法システム', desc: '8つの魔法言語・怪異誘発判定', path: '/rules/magic/', keywords: ['魔法', 'P', 'Igniscript', 'Lupis', 'Ivyo', 'NGT', 'Monyx', '誘発'] },
-  { title: 'キャラクター作成', desc: '10ステップの作成手順・初期値', path: '/rules/creation/', keywords: ['キャラクター', '作成', '手順', '初期値'] },
-  { title: '所属システム', desc: '祓部・傭兵・無所属の詳細ルール', path: '/rules/affiliation/', keywords: ['所属', '祓部', '傭兵', '無所属'] },
-  { title: '装備システム', desc: '武器種×企業マトリクス・CP・スロット', path: '/rules/equipment/', keywords: ['装備', '武器', 'CP', 'スロット', 'カスタム', 'メーカー'] },
-  { title: 'ギフト', desc: '初期ギフト・覚醒ギフト・共鳴段階解放', path: '/rules/gifts/', keywords: ['ギフト', '覚醒', '能力', '特殊'] },
-  { title: 'レベルシステム', desc: 'Lv1-10の成長・能力値昇格', path: '/rules/level/', keywords: ['レベル', '成長', '昇格', 'Lv', '経験'] },
-  { title: '怪異データ集', desc: '等級別怪異テンプレート・護衛データ', path: '/rules/anomaly-data/', keywords: ['怪異', 'データ', 'テンプレート', '護衛', '等級'] },
-
   // 遊ぶ
   { title: 'ゲームハブ', desc: 'ミッション・ADV・派遣クエスト', path: '/games/', keywords: ['ゲーム', 'ミッション', 'アドベンチャー', '派遣', 'クエスト'] },
   { title: '怪異討伐ミッション', desc: 'ターン制の怪異討伐バトル', path: '/games/mission/', keywords: ['ミッション', '討伐', 'バトル', '戦闘', 'ソロ', '協力'] },

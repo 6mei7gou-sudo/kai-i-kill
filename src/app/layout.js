@@ -11,13 +11,14 @@ export const metadata = {
   keywords: ['電脳怪異譚', 'KAI-I//KILL', 'TRPG', 'Webゲーム', '怪異', 'サイバーパンク', '和風ホラー'],
 };
 
-// サイドバーのナビゲーション構造（6グループ・20項目）
+// サイドバーのナビゲーション構造（5グループ・18項目）
 const navGroups = [
   {
     label: 'はじめに',
     items: [
       { href: '/', icon: '◉', text: 'トップ' },
       { href: '/quickstart/', icon: '▶', text: 'クイックスタート' },
+      { href: '/quickstart/character-guide/', icon: '☖', text: 'キャラ製作ガイドライン' },
       { href: '/anomalies/', icon: '△', text: '怪異・能力・装備' },
     ],
   },
@@ -36,13 +37,6 @@ const navGroups = [
       { href: '/organizations/mercenaries/', icon: '✕', text: '傭兵' },
       { href: '/organizations/companies/', icon: '目', text: '企業' },
       { href: '/organizations/unaffiliated/', icon: '◈', text: '無所属' },
-    ],
-  },
-  {
-    label: 'TRPGルール',
-    items: [
-      { href: '/rules/', icon: '▶', text: 'ルール目次' },
-      { href: '/quickstart/character-guide/', icon: '☖', text: 'キャラ製作ガイドライン' },
     ],
   },
   {
@@ -158,7 +152,6 @@ export default function RootLayout({ children }) {
               <footer className="site-footer">
                 <div className="site-footer__links">
                   <Link href="/quickstart/">クイックスタート</Link>
-                  <Link href="/rules/">ルール</Link>
                   <Link href="/world/">世界観</Link>
                   <Link href="/community/">コミュニティ</Link>
                   <Link href="/contact/">お問い合わせ</Link>

@@ -153,14 +153,6 @@ export default function OrganizationsPage() {
                         <p className="card__desc">三勢力が生まれた歴史的背景を読む。</p>
                     </div>
                 </Link>
-                <Link href="/rules/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="card">
-                        <div className="card__icon">▶</div>
-                        <div className="card__title-en">RULEBOOK</div>
-                        <h3 className="card__title">ルール目次</h3>
-                        <p className="card__desc">所属システム・スキルの詳細ルール。</p>
-                    </div>
-                </Link>
             </div>
         </div>
     );
