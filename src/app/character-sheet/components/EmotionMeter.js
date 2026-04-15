@@ -14,10 +14,14 @@ export default function EmotionMeter({ emotions, onSetEmotion }) {
             <div className="emotion-grid">
                 {EMOTIONS.map(emo => {
                     const value = emotions[emo.id] || 0;
+                    const isCritical = value >= 10;
                     return (
-                        <div key={emo.id} className="emotion-card">
+                        <div key={emo.id} className={`emotion-card${isCritical ? ' emotion-card--critical' : ''}`}>
                             <div className="emotion-card__label" style={{ color: emo.color }}>
                                 {emo.name}
+                                {isCritical && (
+                                    <span className="emotion-card__critical-badge" aria-label="臨界">⚠ 臨界！</span>
+                                )}
                             </div>
                             <div className="emotion-card__bar-track">
                                 <div

@@ -822,3 +822,117 @@
     break-inside: avoid;
   }
 }
+
+/* ===== sheet-app 移植機能：感情臨界表示 ===== */
+.emotion-card--critical {
+  box-shadow: 0 0 0 1px rgba(233, 30, 99, 0.6) inset, 0 0 10px rgba(233, 30, 99, 0.25);
+  background-color: rgba(233, 30, 99, 0.06);
+}
+
+.emotion-card__critical-badge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0 0.4em;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #fff;
+  background: #e91e63;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  animation: emotion-critical-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes emotion-critical-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ===== sheet-app 移植機能：ダイス判定履歴 ===== */
+.dice-roller__history {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+}
+
+.dice-roller__history-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #9a9a9a);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.dice-roller__history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+}
+
+.dice-roller__history-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 4px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+.dice-roller__history-item:last-child {
+  border-bottom: none;
+}
+
+.dice-roller__history-time {
+  color: var(--text-muted, #9a9a9a);
+  min-width: 64px;
+  font-size: 10px;
+}
+
+.dice-roller__history-icon {
+  min-width: 16px;
+}
+
+.dice-roller__history-body {
+  color: var(--text-primary, #e8e6e3);
+  flex: 1;
+}
+
+/* ===== sheet-app 移植機能：テキストエクスポート ===== */
+.export-panel__text-preview {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+}
+
+.export-panel__text-label {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--text-muted, #9a9a9a);
+  margin-bottom: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.export-panel__textarea {
+  width: 100%;
+  padding: 10px;
+  font-family: var(--font-mono, 'Consolas', monospace);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-primary, #e8e6e3);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+}
+}

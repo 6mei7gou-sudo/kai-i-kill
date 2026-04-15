@@ -142,7 +142,7 @@ export default function CharacterSheetPage() {
             <ErosionGauge erosion={state.erosion} onSetErosion={setErosion} />
 
             {/* ダイスローラー */}
-            <DiceRoller abilities={state.abilities} onAddRoll={addRoll} />
+            <DiceRoller abilities={state.abilities} rollHistory={state.rollHistory} onAddRoll={addRoll} />
 
             {/* メモ */}
             <div className="sheet-section">
@@ -161,7 +161,7 @@ export default function CharacterSheetPage() {
             </div>
 
             {/* エクスポート（PDF/PNG/印刷） */}
-            <ExportPanel state={state} sheetRef={sheetRef} />
+            <ExportPanel state={state} remainingCP={remainingCP} sheetRef={sheetRef} />
 
             {/* 保存/読込 */}
             <SaveLoadPanel state={state} onLoad={loadState} onReset={resetState} />

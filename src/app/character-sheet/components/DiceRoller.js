@@ -11,7 +11,7 @@ function rollDicePool(diceCount) {
     return { results, achievement };
 }
 
-export default function DiceRoller({ abilities, onAddRoll }) {
+export default function DiceRoller({ abilities, rollHistory = [], onAddRoll }) {
     const [selectedAbility, setSelectedAbility] = useState(ABILITIES[0].id);
     const [lastRoll, setLastRoll] = useState(null);
 
@@ -72,6 +72,23 @@ export default function DiceRoller({ abilities, onAddRoll }) {
                         <div className="dice-roller__result-detail">
                             {lastRoll.ability}（{lastRoll.rank}）→ [{lastRoll.results.join(', ')}] → 達成値: {lastRoll.achievement}
                         </div>
+                    </div>
+                )}
+
+                {rollHistory.length > 0 && (
+                    <div className="dice-roller__history">
+                        <div className="dice-roller__history-label">判定履歴（直近{Math.min(rollHistory.length, 20)}件）</div>
+                        <ul className="dice-roller__history-list">
+                            {rollHistory.slice(0, 20).map((roll, i) => (
+                                <li key={i} className={`dice-roller__history-item ${roll.cssClass}`}>
+                                    <span className="dice-roller__history-time">{roll.timestamp}</span>
+                                    <span className="dice-roller__history-icon">{roll.icon}</span>
+                                    <span className="dice-roller__history-body">
+                                        {roll.ability}（{roll.rank}）[{roll.results.join(',')}] → {roll.achievement}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 )}
             </div>
