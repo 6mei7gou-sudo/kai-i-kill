@@ -162,17 +162,15 @@ export default function GearDetail({ id }) {
                 </div>
             )}
 
-            {/* 共鳴・侵食 */}
-            {(entry.resonance_tendency || entry.erosion_risk !== 'なし') && (
+            {/* 共鳴 */}
+            {entry.resonance_tendency && (
                 <div style={S.section}>
                     <div style={S.sectionTitle}>RESONANCE</div>
-                    <h2 style={S.sectionHeading}>共鳴・侵食</h2>
+                    <h2 style={S.sectionHeading}>共鳴</h2>
                     <div style={S.row}>
                         <Field label="共鳴傾向" value={entry.resonance_tendency} />
-                        <Field label="侵食リスク" value={entry.erosion_risk} />
                     </div>
                     <Field label="共鳴のトリガー" value={entry.resonance_trigger} />
-                    <Field label="侵食の兆候" value={entry.erosion_signs} />
                     <Field label="起きうる変調" value={entry.possible_anomalies} />
                 </div>
             )}

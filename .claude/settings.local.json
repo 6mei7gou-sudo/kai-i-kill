@@ -15,7 +15,15 @@
       "Bash(mkdir:*)",
       "Bash(find /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill -type f \\\\\\(-name *.png -o -name *.jpg -o -name *.svg \\\\\\))",
       "Bash(find /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill -type f -name README* -o -name ROADMAP* -o -name TODO*)",
-      "Bash(grep -l \"location\\\\|district\\\\|area\\\\|region\\\\|map\\\\|geography\\\\|Tokyo\\\\|東京\\\\|新宿\\\\|渋谷\\\\|池袋\" /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill/docs/public/*.md)"
+      "Bash(grep -l \"location\\\\|district\\\\|area\\\\|region\\\\|map\\\\|geography\\\\|Tokyo\\\\|東京\\\\|新宿\\\\|渋谷\\\\|池袋\" /c/Users/meshi/.gemini/antigravity/scratch/kai-i-kill/docs/public/*.md)",
+      "Bash(mv docs/gm/detail_haraebe.md docs/gm/factions/haraebe.md)",
+      "Bash(mv docs/gm/detail_mercenaries.md docs/gm/factions/mercenaries.md)",
+      "Bash(mv docs/gm/detail_companies.md docs/gm/factions/companies.md)",
+      "Bash(mv docs/gm/detail_unaffiliated.md docs/gm/factions/unaffiliated.md)",
+      "Bash(curl -s -o /dev/null -w \"world/powers: %{http_code}\\\\n\" http://localhost:3099/world/powers/)",
+      "Bash(curl -s -o /dev/null -w \"world/factions: %{http_code}\\\\n\" http://localhost:3099/world/factions/)",
+      "Bash(curl -s -o /dev/null -w \"world/guide: %{http_code}\\\\n\" http://localhost:3099/world/guide/)",
+      "Bash(git push:*)"
     ]
   }
 }

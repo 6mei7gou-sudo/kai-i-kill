@@ -1,12 +1,15 @@
 // キャラクターシート投稿フォーム — v4.0 6軸スキルシステム対応
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
 import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
+import CharacterCard from '@/components/CharacterCard';
+import RpIdCard from '@/components/RpIdCard';
+import { exportAsImage } from '@/lib/exportImage';
 import { COMBAT_STYLE_STATS, COMBAT_STYLE_NAMES, BASE_WEAPONS, FORM_OPTIONS, EQUIPMENT_FORM_STATS, EQUIPMENT_FORM_NAMES, ORIGIN_TIER, ORIGIN_NAMES, STYLE_TO_OLD, OLD_TO_STYLE, FORM_TO_OLD, OLD_TO_FORM, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
@@ -1407,6 +1410,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     </div>
                 </div>
 
+                {/* ====== SEC 16: 出力（カード／テキスト） ====== */}
+                <ExportSection form={form} />
+
                 {/* ====== 結果 + 送信 ====== */}
                 {result && (
                     <div className="callout" style={{ marginBottom: 'var(--space-xl)', borderColor: result.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>
@@ -1421,6 +1427,181 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     {submitting ? 'SUBMITTING...' : isEdit ? '▶ シートを更新' : '▶ キャラクターシートを投稿'}
                 </button>
             </form>
+        </div>
+    );
+}
+
+// ===== ExportSection =====
+// 投稿前でも使える出力UI：名刺サイズキャラカード PNG / RP用IDカード PNG / プレーンテキスト
+function ExportSection({ form }) {
+    const charCardRef = useRef(null);
+    const rpCardRef = useRef(null);
+    const [exporting, setExporting] = useState(null);
+    const [textCopied, setTextCopied] = useState(false);
+
+    // フォームの値を CharacterCard / RpIdCard が期待する形に変換
+    const character = useMemo(() => ({
+        id: form.character_name || 'draft',
+        character_name: form.character_name,
+        affiliation: form.affiliation,
+        sub_affiliation: form.sub_affiliation || '',
+        awakening: form.awakening,
+        background: form.background,
+        brief_history: form.brief_history || '',
+        image_url: form.image_url || form.thumbnail_url || '',
+        thumbnail_url: form.thumbnail_url || form.image_url || '',
+        age: form.age || '',
+        gender: form.gender || '',
+        active_title: form.title || '',
+        title: form.title || '',
+        approved_status: 'pending',
+        author_name: form.author_name || '',
+        fanart_policy: form.fanart_policy || null,
+        created_at: new Date().toISOString(),
+    }), [form]);
+
+    // プレーンテキスト形式（Discord等への貼り付け用）
+    const buildText = useCallback(() => {
+        const c = character;
+        const lines = [];
+        lines.push('═══════════════════════════════════');
+        lines.push('  KAI-I//KILL キャラクターシート');
+        lines.push('═══════════════════════════════════');
+        lines.push('');
+        lines.push('【基本情報】');
+        lines.push(`名前：${c.character_name || '（名前なし）'}`);
+        if (c.title)            lines.push(`二つ名：${c.title}`);
+        if (c.age || c.gender)  lines.push(`年齢／性別：${c.age || '—'} / ${c.gender || '—'}`);
+        if (c.affiliation)      lines.push(`所属：${c.affiliation}${c.sub_affiliation ? `（${c.sub_affiliation}）` : ''}`);
+        if (c.awakening)        lines.push(`覚醒：${c.awakening}`);
+        if (c.background)       lines.push(`背景：${c.background}`);
+        if (form.weapon_type)   lines.push(`戦闘流派：${form.weapon_type}`);
+        if (form.level)         lines.push(`レベル：${form.level}`);
+        lines.push('');
+        lines.push('【能力値】');
+        const ABS = [
+            { key: 'rank_tai', name: '体' },  { key: 'rank_haya', name: '疾' },
+            { key: 'rank_shiki', name: '識' }, { key: 'rank_han', name: '判' },
+            { key: 'rank_shiya', name: '察' }, { key: 'rank_jutsu', name: '術' },
+            { key: 'rank_kon', name: '魂' },
+        ];
+        ABS.forEach(a => {
+            const rank = form[a.key] || 'D';
+            const plus = (form.stage_plus || []).includes(a.key) ? '+' : '';
+            lines.push(`  ${a.name}：${rank}${plus}`);
+        });
+        if (form.skills && form.skills.length > 0) {
+            lines.push('');
+            lines.push('【スキル】');
+            form.skills.forEach(s => lines.push(`  • ${s}`));
+        }
+        if (form.gift) {
+            lines.push('');
+            lines.push(`【ギフト】${form.gift}`);
+        }
+        if (form.brief_history) {
+            lines.push('');
+            lines.push('【経歴】');
+            lines.push(form.brief_history);
+        }
+        lines.push('');
+        lines.push('═══════════════════════════════════');
+        return lines.join('\n');
+    }, [character, form]);
+
+    const fileBaseName = (form.character_name || 'character').replace(/[^\w\u3040-\u30ff\u4e00-\u9fff-]/g, '_');
+
+    const handleExportCharCard = useCallback(async () => {
+        if (!charCardRef.current) return;
+        setExporting('char');
+        try {
+            await exportAsImage(charCardRef.current, `${fileBaseName}_card`);
+        } catch (err) {
+            console.error('キャラカード出力エラー:', err);
+            alert('キャラカード出力に失敗しました');
+        }
+        setExporting(null);
+    }, [fileBaseName]);
+
+    const handleExportRpCard = useCallback(async () => {
+        if (!rpCardRef.current) return;
+        setExporting('rp');
+        try {
+            await exportAsImage(rpCardRef.current, `${fileBaseName}_rpid`);
+        } catch (err) {
+            console.error('RP用IDカード出力エラー:', err);
+            alert('RP用IDカード出力に失敗しました');
+        }
+        setExporting(null);
+    }, [fileBaseName]);
+
+    const handleCopyText = useCallback(async () => {
+        const text = buildText();
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            }
+            setTextCopied(true);
+            setTimeout(() => setTextCopied(false), 2000);
+        } catch (err) {
+            console.error('クリップボードコピーエラー:', err);
+            alert('コピーに失敗しました');
+        }
+    }, [buildText]);
+
+    const btnStyle = {
+        padding: '10px 18px',
+        background: 'rgba(255, 255, 255, 0.04)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        color: 'var(--text-primary)',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--font-size-sm)',
+        cursor: 'pointer',
+    };
+
+    return (
+        <div style={S.section}>
+            <div style={S.sectionTitle}>SECTION 16 — EXPORT</div>
+            <h2 style={S.sectionHeading}>出力</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--space-md)' }}>
+                投稿前でも使える。名刺サイズのキャラカード／RP用IDカード／プレーンテキストとしてダウンロード・コピーできる。
+            </p>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
+                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportCharCard}>
+                    {exporting === 'char' ? '⏳ 生成中...' : '🃏 名刺カード PNG'}
+                </button>
+                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportRpCard}>
+                    {exporting === 'rp' ? '⏳ 生成中...' : '🪪 RP用IDカード PNG'}
+                </button>
+                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleCopyText}>
+                    {textCopied ? '✓ コピー済み' : '💬 テキストコピー'}
+                </button>
+            </div>
+
+            {/* キャラカード プレビュー（画面表示用） */}
+            <div style={{ marginBottom: 'var(--space-md)', overflowX: 'auto' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '6px' }}>キャラカード プレビュー</div>
+                <div ref={charCardRef}>
+                    <CharacterCard character={character} />
+                </div>
+            </div>
+
+            {/* RP用IDカード（画面外配置でキャプチャ用） */}
+            <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden="true">
+                <div ref={rpCardRef}>
+                    <RpIdCard character={character} />
+                </div>
+            </div>
         </div>
     );
 }

@@ -20,7 +20,7 @@ const INITIAL = {
     base_modifier: '', additional_traits: '',
     options: [{ name: '', type: '汎用', cp: 0, resonance: '', risk: '低', note: '' }],
     total_cp: 0, slot_exceeded: false, risk_level: '低', possible_anomalies: '',
-    resonance_tendency: '', resonance_trigger: '', erosion_risk: 'なし', erosion_signs: '',
+    resonance_tendency: '', resonance_trigger: '',
     base_product_url: '', asset_urls: [''], modification_notes: '', license_notes: '',
     credit: '', redistributable: '不可',
     related_characters: '', related_anomalies: '', related_factions: '', related_terms: '',
@@ -37,7 +37,6 @@ const OPTIONS = {
     qualities: ['標準', '高品質', '試作品', '特注'],
     aptitudes: ['低', '低〜中', '中', '高'],
     risks: ['低', '中', '高', '非常に高'],
-    erosions: ['なし', '低', '中', '高', '危険'],
     resonances: ['怒り', '渇望', '浄化', '恐怖', '焦燥', '哀愁'],
     optionTypes: ['汎用', '分類専用', 'メーカー専用'],
 };
@@ -501,16 +500,14 @@ export default function WeaponForm({ editId = null, initialData = null, characte
                     <FormTextArea label="起きうる変調（任意）" value={form.possible_anomalies} onChange={v => set('possible_anomalies', v)} placeholder="例：発熱、異音、幻聴、弾道が歪む、夢に出る" />
                 </div>
 
-                {/* セクション6：共鳴・侵食 */}
+                {/* セクション6：共鳴 */}
                 <div style={S.section}>
                     <div style={S.sectionTitle}>SECTION 6 — RESONANCE</div>
-                    <h2 style={S.sectionHeading}>共鳴・侵食</h2>
+                    <h2 style={S.sectionHeading}>共鳴</h2>
                     <div style={S.row}>
                         <FormSelect label="共鳴傾向" value={form.resonance_tendency} onChange={v => set('resonance_tendency', v)} options={['', ...OPTIONS.resonances]} />
-                        <FormSelect label="侵食リスク" value={form.erosion_risk} onChange={v => set('erosion_risk', v)} options={OPTIONS.erosions} />
                     </div>
                     <FormInput label="共鳴のトリガー" value={form.resonance_trigger} onChange={v => set('resonance_trigger', v)} placeholder="例：最大出力時、核を視認した時" />
-                    <FormInput label="侵食の兆候（任意）" value={form.erosion_signs} onChange={v => set('erosion_signs', v)} placeholder="例：手が冷える、記憶が欠ける、怪異の言葉がわかる" />
                 </div>
 
                 {/* セクション7：VRC改変情報 */}

@@ -240,15 +240,18 @@
 }
 
 /* ===== BRIEF HISTORY ===== */
+/* ファンアートポリシーの下（カード最下段、フッター直上）に配置。
+   長文でオーバーフローしても下にはフッターしか無いのでレイアウトが壊れない */
 .rp-id__history {
     position: absolute;
-    top: 230px;
+    top: 500px;
     left: 280px;
     right: 20px;
-    height: 140px;
-    padding: 12px 14px;
+    bottom: 30px;
+    padding: 10px 14px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.04);
+    overflow: hidden;
 }
 
 .rp-id__history-label {
@@ -259,24 +262,28 @@
 }
 
 .rp-id__history-text {
-    font-size: 13px;
+    font-size: 12px;
     color: #9a9a9a;
-    line-height: 1.8;
+    line-height: 1.7;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
 }
 
 /* ===== FANART POLICY ===== */
+/* もともと最下段にあったが、経歴ブロックと位置を入れ替えて中段へ移動 */
 .rp-id__fanart {
     position: absolute;
-    top: 500px;
-    left: 20px;
+    top: 230px;
+    left: 280px;
     right: 20px;
-    padding: 8px 12px;
+    height: 260px;
+    padding: 10px 14px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.04);
+    overflow: hidden;
 }
 
 .rp-id__fanart-label {

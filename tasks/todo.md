@@ -61,3 +61,6 @@
 ## ログ
 
 - 2026-04-15：計画確定、フェーズ4から着手予定
+- 2026-04-19：「侵食（erosion）削除」プロジェクト完走。キャラシUI／武器投稿フォーム／武器詳細／プレイヤー文書／シナリオJSON／CLAUDE.md／CONTEXT.md／Supabase 削除SQL下書き
+- 2026-04-19：新キャラカード（名刺サイズ 910×550px）／年齢・性別・二つ名フィールド／RP用IDカード経歴オーバーフロー修正
+- 2026-04-19：`/character-sheet/` ルート廃止。出力機能（キャラカード／RP用IDカード／プレーンテキスト）を `/create/character/` の SECTION 16 に統合。共有 CharacterCard コンポーネントを `src/components/` に新設。`archive/sheet-app-legacy/` は退避保管継続

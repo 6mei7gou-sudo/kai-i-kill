@@ -96,7 +96,7 @@ docs/
 - **属性**：体・疾・識・判・察・術・魂 の7つ
 - **セッション構造**：調査フェーズ → 解明完了宣言 → 討伐フェーズ（核護衛戦）
 - **感情システム**：《共鳴記録》— 恐怖/怒り/哀愁/焦燥/渇望/浄化の6メーター
-- **侵食率**：拡張ルール（《禁域解放》EX-5.5）で導入。基本ルールでは使用しない
+- **侵食率**：Webサイト・キャラシUI・プレイヤー向け公開資料からは**全削除方針**（2026-04-19）。ロア上の動詞「〜を侵食する」のみ残存。拡張ルール `docs/rules/expansion.md` 本体は内部資料として残す
 - **主文書**：`docs/rules/rules_unified.md`（v4.0）が最新版
 
 ## Webサイト（Next.js）
@@ -107,13 +107,13 @@ docs/
 - **Webゲーム**（`/games/`）：ミッション・ADV・派遣クエスト（判定エンジン搭載）
 - **投稿コミュニティ**（`/community/`, `/create/`）：キャラシ・怪異調査書・武器の投稿・閲覧
 - **SNS**（`/sns/`）：MirrorLine（タイムライン・RP・チャット）
-- **キャラクターシート**（`/character-sheet/`）：インタラクティブ入力・管理
+- **キャラクター作成・出力**（`/create/character/`）：投稿フォーム＋名刺サイズキャラカード／RP用IDカード／プレーンテキスト出力（旧 `/character-sheet/` は廃止し統合）
 - **ゲームガイド**（`/game-guide/`、Phase 1で新設予定）：判定の基本概念
 
 ### ディレクトリ
 
 - `src/`：Next.js App Router
-- `archive/sheet-app-legacy/`：独立HTML版キャラシ（Next.js版へ統合済み・退避）
+- `archive/sheet-app-legacy/`：独立HTML版キャラシ（参考用に退避保管）
 - `supabase/`：DB マイグレーション
 - `src/data/`：Webゲーム用データ（ミッション・シナリオ・スキル等）
 
@@ -148,5 +148,5 @@ docs/
 
 - [ ] Jest + React Testing Library セットアップ、APIテスト
 - [x] sheet-app を `/character-sheet` ルートとして Next.js に統合（2026-04完了）
-- [ ] キャラクターシート出力（PDF/PNG/JSON/印刷用レイアウト）
+- [x] `/character-sheet/` 廃止、`/create/character/` に出力機能を統合（2026-04-19完了：名刺サイズキャラカード／RP用IDカード／プレーンテキスト）
 - [ ] Supabase CLIマイグレーション正式化、RLSポリシー強化
