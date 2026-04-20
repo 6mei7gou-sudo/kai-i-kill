@@ -9,6 +9,7 @@ import ImageUploader from '@/components/ImageUploader';
 import '@/components/ImageUploader.css';
 import CharacterCard from '@/components/CharacterCard';
 import RpIdCard from '@/components/RpIdCard';
+import FullCharacterSheet from '@/components/FullCharacterSheet';
 import { exportAsImage } from '@/lib/exportImage';
 import { COMBAT_STYLE_STATS, COMBAT_STYLE_NAMES, BASE_WEAPONS, FORM_OPTIONS, EQUIPMENT_FORM_STATS, EQUIPMENT_FORM_NAMES, ORIGIN_TIER, ORIGIN_NAMES, STYLE_TO_OLD, OLD_TO_STYLE, FORM_TO_OLD, OLD_TO_FORM, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
@@ -1436,6 +1437,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 function ExportSection({ form }) {
     const charCardRef = useRef(null);
     const rpCardRef = useRef(null);
+    const fullSheetRef = useRef(null);
     const [exporting, setExporting] = useState(null);
     const [textCopied, setTextCopied] = useState(false);
 
@@ -1535,6 +1537,18 @@ function ExportSection({ form }) {
         setExporting(null);
     }, [fileBaseName]);
 
+    const handleExportFullSheet = useCallback(async () => {
+        if (!fullSheetRef.current) return;
+        setExporting('full');
+        try {
+            await exportAsImage(fullSheetRef.current, `${fileBaseName}_sheet`);
+        } catch (err) {
+            console.error('ステータスシート出力エラー:', err);
+            alert('ステータスシート出力に失敗しました');
+        }
+        setExporting(null);
+    }, [fileBaseName]);
+
     const handleCopyText = useCallback(async () => {
         const text = buildText();
         try {
@@ -1583,6 +1597,9 @@ function ExportSection({ form }) {
                 <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportRpCard}>
                     {exporting === 'rp' ? '⏳ 生成中...' : '🪪 RP用IDカード PNG'}
                 </button>
+                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportFullSheet}>
+                    {exporting === 'full' ? '⏳ 生成中...' : '📊 ステータスシート PNG'}
+                </button>
                 <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleCopyText}>
                     {textCopied ? '✓ コピー済み' : '💬 テキストコピー'}
                 </button>
@@ -1596,10 +1613,13 @@ function ExportSection({ form }) {
                 </div>
             </div>
 
-            {/* RP用IDカード（画面外配置でキャプチャ用） */}
+            {/* RP用IDカード／ステータスシート（画面外配置でキャプチャ用） */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden="true">
                 <div ref={rpCardRef}>
                     <RpIdCard character={character} />
+                </div>
+                <div ref={fullSheetRef}>
+                    <FullCharacterSheet form={form} />
                 </div>
             </div>
         </div>

@@ -1,0 +1,381 @@
+/* ステータス付きキャラクターシート（B4縦・1480×2106px） */
+/* html2canvas キャプチャ用、全値 px 固定 */
+
+.fcs {
+    position: relative;
+    width: 1480px;
+    height: 2106px;
+    box-sizing: border-box;
+    padding: 64px 72px 72px 96px;
+    background: linear-gradient(180deg, #0a0c10 0%, #111520 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    color: #e8e6e3;
+    overflow: hidden;
+}
+
+.fcs__accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 12px;
+}
+
+/* ===== TOP ===== */
+.fcs__top {
+    margin-bottom: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 16px;
+}
+
+.fcs__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.fcs__brand {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    color: #e8e6e3;
+    opacity: 0.9;
+}
+
+.fcs__brand-sub {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 14px;
+    letter-spacing: 0.25em;
+}
+
+/* ===== PROFILE ===== */
+.fcs__profile {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: flex-start;
+}
+
+.fcs__portrait {
+    width: 320px;
+    height: 400px;
+    flex-shrink: 0;
+    border: 1px solid;
+    background: #0a0c10;
+    overflow: hidden;
+}
+
+.fcs__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+
+.fcs__portrait-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 140px;
+    font-weight: 700;
+    opacity: 0.25;
+}
+
+.fcs__profile-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.fcs__name {
+    font-size: 52px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+}
+
+.fcs__title-text {
+    font-size: 22px;
+    font-weight: 400;
+    margin-top: -6px;
+}
+
+.fcs__affil-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.fcs__badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.fcs__sub {
+    font-size: 18px;
+    color: #c8c6c3;
+}
+
+.fcs__profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 24px;
+    margin-top: 6px;
+}
+
+.fcs__field {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.fcs__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: #6a6a7a;
+    letter-spacing: 0.1em;
+    min-width: 54px;
+}
+
+.fcs__value {
+    font-size: 16px;
+    color: #e8e6e3;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== SECTION ===== */
+.fcs__section {
+    margin-bottom: 28px;
+}
+
+.fcs__section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.fcs__section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+}
+
+.fcs__section-en {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+}
+
+.fcs__section-line {
+    flex: 1;
+    height: 1px;
+}
+
+.fcs__section-body {
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.fcs__empty {
+    font-size: 14px;
+    color: #6a6a7a;
+    font-style: italic;
+}
+
+/* ===== ABILITIES ===== */
+.fcs__abilities {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.fcs__ability {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.fcs__ability-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+}
+
+.fcs__ability-reading {
+    font-size: 10px;
+    color: #6a6a7a;
+    margin-top: 2px;
+}
+
+.fcs__ability-rank {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: #d4af37;
+    margin-top: 8px;
+    line-height: 1;
+}
+
+.fcs__ability-dice {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+    color: #9a9a9a;
+    margin-top: 4px;
+}
+
+/* ===== SKILLS ===== */
+.fcs__skills {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 18px;
+}
+
+.fcs__skill {
+    font-size: 15px;
+    color: #e8e6e3;
+    padding-left: 14px;
+    position: relative;
+}
+
+.fcs__skill::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #d4af37;
+}
+
+/* ===== EQUIPMENT ===== */
+.fcs__equip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px 20px;
+    margin-bottom: 10px;
+}
+
+.fcs__equip-detail {
+    font-size: 14px;
+    color: #c8c6c3;
+    line-height: 1.6;
+    margin-top: 8px;
+}
+
+.fcs__equip-opts {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #e8e6e3;
+}
+
+/* ===== CYBERNETICS ===== */
+.fcs__cyber-grade {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #e8e6e3;
+}
+
+.fcs__cyber-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fcs__cyber-list li {
+    font-size: 14px;
+    color: #e8e6e3;
+    padding: 2px 0;
+}
+
+/* ===== GIFT / LANGUAGES ===== */
+.fcs__gift {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #e8e6e3;
+}
+
+.fcs__lang-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.fcs__lang {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    font-size: 14px;
+    color: #e8e6e3;
+}
+
+/* ===== FATE / HISTORY ===== */
+.fcs__fate {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #e8e6e3;
+}
+
+.fcs__history {
+    margin-top: 6px;
+}
+
+.fcs__history-text {
+    font-size: 13px;
+    color: #c8c6c3;
+    line-height: 1.7;
+    margin-top: 6px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+}
+
+/* ===== FOOTER ===== */
+.fcs__footer {
+    position: absolute;
+    left: 96px;
+    right: 72px;
+    bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+    color: #555566;
+    letter-spacing: 0.1em;
+}
