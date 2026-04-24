@@ -8,7 +8,7 @@ const createJestConfig = nextJest({
 /** @type {import('jest').Config} */
 const config = {
     testEnvironment: 'jsdom',
-    setupFilesAfterSetup: ['<rootDir>/jest.setup.js'],
+    setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/'],
     moduleNameMapper: {
         // src/ 配下の絶対インポート対応
