@@ -23,7 +23,8 @@
       "Bash(curl -s -o /dev/null -w \"world/powers: %{http_code}\\\\n\" http://localhost:3099/world/powers/)",
       "Bash(curl -s -o /dev/null -w \"world/factions: %{http_code}\\\\n\" http://localhost:3099/world/factions/)",
       "Bash(curl -s -o /dev/null -w \"world/guide: %{http_code}\\\\n\" http://localhost:3099/world/guide/)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm test *)"
     ]
   }
 }

@@ -47,6 +47,10 @@ export default function AdminPage() {
     const [newsSubmitting, setNewsSubmitting] = useState(false);
     const [newsPosts, setNewsPosts] = useState([]);
 
+    // 危険ゾーン：リセットイベント
+    const [resetting, setResetting] = useState(false);
+    const [resetResult, setResetResult] = useState(null);
+
     // データ取得
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -165,6 +169,37 @@ export default function AdminPage() {
             ));
         } catch (err) {
             alert('ステータス変更に失敗: ' + err.message);
+        }
+    };
+
+    // 危険ゾーン：非公式キャラのレベル＋CP履歴リセット、全員CP没収＋50CP再配布、未開の開拓者称号配布
+    const handleResetEvent = async () => {
+        const ok = confirm(
+            '【取り消し不可】次の操作を一括で実行します：\n\n' +
+            '・非公式キャラ全件のレベルを 1 に戻す\n' +
+            '・対象キャラのレベルアップCP履歴を削除\n' +
+            '・全ユーザーのCP残高を 50 に再配布（差分は履歴に記録）\n' +
+            '・全キャラに「未開の開拓者」称号を配布\n\n' +
+            '本当に続行しますか？'
+        );
+        if (!ok) return;
+        const typed = prompt('確認のため、以下を一字違わず入力してください：\nリセットする');
+        if (typed !== 'リセットする') {
+            if (typed !== null) alert('入力が一致しません。中止しました。');
+            return;
+        }
+        setResetting(true);
+        setResetResult(null);
+        try {
+            const res = await fetch('/api/admin/reset-non-official-progress', { method: 'POST' });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || 'リセットに失敗しました');
+            setResetResult(json);
+            fetchData();
+        } catch (err) {
+            alert('リセットに失敗: ' + err.message);
+        } finally {
+            setResetting(false);
         }
     };
 
@@ -498,6 +533,66 @@ export default function AdminPage() {
 
                             {activeTab !== 'news' && !loading && filtered.length === 0 && (
                                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0', fontStyle: 'italic' }}>該当する投稿がありません</p>
+                            )}
+
+                            {/* === 危険ゾーン（キャラクタータブ専用） === */}
+                            {activeTab === 'character_sheets' && (
+                                <div style={{
+                                    marginTop: 'var(--space-xl)', padding: 'var(--space-lg)',
+                                    background: 'rgba(255,77,77,0.05)',
+                                    border: '1px solid rgba(255,77,77,0.4)',
+                                }}>
+                                    <h3 style={{
+                                        color: '#ff4d4d', fontFamily: 'var(--font-mono)',
+                                        fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-sm)',
+                                        letterSpacing: '0.1em',
+                                    }}>
+                                        ⚠ DANGER ZONE — リセットイベント
+                                    </h3>
+                                    <ul style={{
+                                        color: 'var(--text-secondary)', fontSize: '12px',
+                                        marginBottom: 'var(--space-md)', paddingLeft: '20px', lineHeight: 1.7,
+                                    }}>
+                                        <li>非公式キャラ全件のレベルを <strong>1</strong> に戻す</li>
+                                        <li>対象キャラのレベルアップCP履歴を削除</li>
+                                        <li>全ユーザーのCP残高を <strong>一律 50CP</strong> に再配布（CP没収＋再配布）</li>
+                                        <li>全キャラに称号 <strong>「未開の開拓者」</strong> を配布</li>
+                                    </ul>
+                                    <p style={{
+                                        color: '#ff4d4d', fontSize: '11px', fontFamily: 'var(--font-mono)',
+                                        marginBottom: 'var(--space-md)',
+                                    }}>
+                                        ※ この操作は<strong>取り消せません</strong>。CPは返金されません。
+                                    </p>
+                                    <button
+                                        onClick={handleResetEvent}
+                                        disabled={resetting}
+                                        style={{
+                                            padding: '10px 24px', cursor: resetting ? 'wait' : 'pointer',
+                                            background: 'rgba(255,77,77,0.15)', border: '1px solid #ff4d4d',
+                                            color: '#ff4d4d', fontFamily: 'var(--font-mono)',
+                                            fontSize: 'var(--font-size-sm)', fontWeight: 700,
+                                            opacity: resetting ? 0.6 : 1,
+                                        }}
+                                    >
+                                        {resetting ? '実行中…' : '▶ リセットイベントを実行'}
+                                    </button>
+                                    {resetResult && (
+                                        <div style={{
+                                            marginTop: 'var(--space-md)', padding: 'var(--space-md)',
+                                            background: 'rgba(0,255,170,0.05)',
+                                            border: '1px solid rgba(0,255,170,0.3)',
+                                            fontFamily: 'var(--font-mono)', fontSize: '11px',
+                                            color: 'var(--text-primary)', lineHeight: 1.7,
+                                        }}>
+                                            ✓ 完了しました：<br />
+                                            ・レベルを 1 に戻したキャラ：<strong>{resetResult.resetCharCount}</strong> 件<br />
+                                            ・削除したCP履歴：<strong>{resetResult.deletedHistoryCount}</strong> 件<br />
+                                            ・CPを 50 に再配布したアカウント：<strong>{resetResult.cpAdjustedCount}</strong> 件<br />
+                                            ・称号「未開の開拓者」を新規配布したキャラ：<strong>{resetResult.titleAwardedCount}</strong> 件
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </>
                     )}
