@@ -111,6 +111,7 @@ export default function CharacterGuidePage() {
                                 ['9', 'サイバネティクス等級Ⅲで開始', '全身改造は代償が重い。物語の末に辿り着くもの'],
                                 ['10', '他PCの記憶を操作できる設定', '記憶操作はNPC権限。PCが持つとPvPの原因になる'],
                                 ['11', '企業所属のキャラクター', 'PCの所属は祓部・傭兵・無所属の3つのみ。蒼鉄機工・雷禽重工等の企業社員としてのPCは作成不可。企業の装備を使う傭兵や、企業と契約関係にある討伐者は可'],
+                                ['12', '異能を持ったキャラクター', '異能は使うほど使用者が怪異側に変質していく力。PCは「人間側」であり、開始時から異能を保有するのは方針外。NPCの設定要素として扱う'],
                             ].map(([n, ng, reason]) => (
                                 <tr key={n}>
                                     <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-danger)', fontWeight: 700, whiteSpace: 'nowrap' }}>{n}</td>
