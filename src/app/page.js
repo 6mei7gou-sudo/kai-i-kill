@@ -131,9 +131,20 @@ export default function HomePage() {
         TRPG Coming Soon………
       </div>
 
+      {/* ===== News & Release ===== */}
+      <section className="section">
+        <div className="section__number">02 — NEWS & RELEASE</div>
+        <h2 className="section__heading">
+          お知らせ
+          <span className="section__heading-en">LATEST UPDATES</span>
+        </h2>
+      </section>
+
+      <NewsFeed />
+
       {/* ===== 世界観ティーザー ===== */}
       <section className="section">
-        <div className="section__number">02 — WORLD</div>
+        <div className="section__number">03 — WORLD</div>
         <h2 className="section__heading">
           この世界について
           <span className="section__heading-en">WORLD CONCEPT</span>
@@ -180,17 +191,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* ===== News & Release ===== */}
-      <section className="section">
-        <div className="section__number">03 — NEWS & RELEASE</div>
-        <h2 className="section__heading">
-          お知らせ
-          <span className="section__heading-en">LATEST UPDATES</span>
-        </h2>
-      </section>
-
-      <NewsFeed />
 
       {/* ===== もっと知る ===== */}
       <section className="section">
