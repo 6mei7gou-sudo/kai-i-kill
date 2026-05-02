@@ -58,11 +58,11 @@ export default function HomePage() {
               ▶
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.15em', marginBottom: 'var(--space-xs)' }}>
-              FOR TRPG PLAYERS
+              FOR RP PLAYERS
             </div>
             <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-md)' }}>RPで遊びたい</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-md)', lineHeight: 2.0, flex: 1 }}>
-              キャラクターの作り方、ダイスの振り方、戦闘の流れを順番に解説します。はじめてTRPGに触れる人でも大丈夫。
+              キャラクターの作り方、ダイスの振り方、戦闘の流れを順番に解説します。始めてRPする人でも大丈夫。
             </p>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-md)' }}>
               → クイックスタート
@@ -113,6 +113,18 @@ export default function HomePage() {
             </div>
           </div>
         </Link>
+      </div>
+
+      <div style={{
+        textAlign: 'center',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 'var(--font-size-sm)',
+        color: 'var(--text-muted)',
+        letterSpacing: '0.2em',
+        marginBottom: 'var(--space-3xl)',
+        marginTop: 'calc(-1 * var(--space-2xl))',
+      }}>
+        TRPG Coming Soon………
       </div>
 
       {/* ===== 世界観ティーザー ===== */}
