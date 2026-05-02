@@ -9,9 +9,13 @@ export default function HomePage() {
       <section className="hero">
         <div className="hero__hex" />
         <div className="hero__label">TRPG × Web Game × VRChat × Community</div>
-        <div className="hero__title-sm">電 脳 怪 異 譚</div>
-        <h1 className="hero__title">KAI-I//KILL</h1>
-        <div className="hero__reading">カ イ イ キ ル</div>
+        <h1 className="hero__title" style={{ margin: 0, padding: 0 }}>
+          <img
+            src="/kaiikill-logo.png"
+            alt="電脳怪異譚 KAI-I//KILL"
+            className="hero__logo"
+          />
+        </h1>
 
         <p className="hero__catchcopy">
           <span className="hero__accent">噂</span>が、殺しにくる。

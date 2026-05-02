@@ -239,6 +239,18 @@ h6 {
   letter-spacing: 0.08em;
 }
 
+.site-sidebar__logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--space-xs);
+}
+
+.site-sidebar__logo-link {
+  display: block;
+  text-decoration: none;
+}
+
 .site-sidebar__subtitle {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
@@ -663,6 +675,14 @@ h6 {
   color: var(--text-muted);
   letter-spacing: 0.3em;
   margin-bottom: var(--space-sm);
+}
+
+.hero__logo {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 0 auto var(--space-md);
 }
 
 .hero__sub {

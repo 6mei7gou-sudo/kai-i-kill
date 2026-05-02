@@ -94,10 +94,15 @@ export default function RootLayout({ children }) {
             {/* 固定サイドバー */}
             <aside className="site-sidebar" id="sidebar">
               <div className="site-sidebar__header">
-                <div className="site-sidebar__title-sm">電脳怪異譚</div>
-                <div className="site-sidebar__title">KAI-I//KILL</div>
+                <Link href="/" className="site-sidebar__logo-link">
+                  <img
+                    src="/kaiikill-logo.png"
+                    alt="電脳怪異譚 KAI-I//KILL"
+                    className="site-sidebar__logo"
+                  />
+                </Link>
                 <div className="site-sidebar__subtitle">討伐者ハンドブック</div>
-                <div className="site-sidebar__version">BETA 0.1.0 — PLAYER DOC</div>
+                <div className="site-sidebar__version">1.0.0 — PLAYER DOC</div>
               </div>
 
               {/* 認証ボタン */}
