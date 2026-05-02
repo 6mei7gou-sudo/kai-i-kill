@@ -344,8 +344,26 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         setSubmitting(true); setResult(null);
         try {
             const payload = { ...form };
-            // 計算済みランクを反映
-            ABILITIES.forEach(a => { payload[a.key] = getEffectiveRank(a.key); });
+            // 計算済みランクを反映（ただしステータスポイント等で既に上昇している分は守る：max を採用）
+            const RANK_VALUE = { D: 0, C: 1, B: 2, A: 3, S: 4 };
+            const RANK_NAMES = ['D', 'C', 'B', 'A', 'S'];
+            ABILITIES.forEach(a => {
+                const baseRank = getEffectiveRank(a.key);
+                if (isEdit) {
+                    // 編集モード：DB保存値（initialData）と現在値の最大を採用してランク低下を防ぐ
+                    const initialRank = (initialData && initialData[a.key]) || 'D';
+                    const currentRank = form[a.key] || 'D';
+                    const maxVal = Math.max(
+                        RANK_VALUE[baseRank] ?? 0,
+                        RANK_VALUE[initialRank] ?? 0,
+                        RANK_VALUE[currentRank] ?? 0,
+                    );
+                    payload[a.key] = RANK_NAMES[maxVal];
+                } else {
+                    // 新規作成：計算値そのまま
+                    payload[a.key] = baseRank;
+                }
+            });
             payload.belief_points = calcBeliefPoints();
             // class列は空文字（後方互換）
             payload.class = null;
