@@ -76,7 +76,7 @@ export default function DownloadsPage() {
                                 gap: 'var(--space-lg)',
                             }}>
                                 {cat.items.map((item) => (
-                                    <DownloadCard key={item.file} item={item} />
+                                    <DownloadCard key={item.file} item={item} category={cat.category} />
                                 ))}
                             </div>
                         )}
@@ -87,8 +87,11 @@ export default function DownloadsPage() {
     );
 }
 
-function DownloadCard({ item }) {
+function DownloadCard({ item, category }) {
     const url = `/downloads/${item.file}`;
+    // 所属組織・企業エンブレムは白背景で表示（紋章は明色背景の方が視認しやすいため）
+    const isEmblemCategory = category === '所属組織' || category === '企業エンブレム';
+    const imageBg = isEmblemCategory ? '#ffffff' : 'rgba(0,0,0,0.3)';
     return (
         <div style={{
             background: 'var(--bg-card)', border: 'var(--border-subtle)',
@@ -96,7 +99,7 @@ function DownloadCard({ item }) {
         }}>
             <div style={{
                 width: '100%', aspectRatio: '1 / 1',
-                background: 'rgba(0,0,0,0.3)',
+                background: imageBg,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden',
             }}>
