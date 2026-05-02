@@ -65,6 +65,8 @@ export default function CharacterDetail({ id }) {
     const rpCardRef = useRef(null);
     const [serialLoading, setSerialLoading] = useState(false);
     const [linkedGear, setLinkedGear] = useState(null);
+    const [spendingAttr, setSpendingAttr] = useState(null);
+    const [statusMsg, setStatusMsg] = useState(null);
     const isOwner = user && e?.user_id && user.id === e.user_id;
 
     useEffect(() => {
@@ -94,6 +96,26 @@ export default function CharacterDetail({ id }) {
             body: JSON.stringify({ character_id: id, active_title: titleName }),
         });
         if (res.ok) setE(prev => ({ ...prev, active_title: titleName }));
+    };
+
+    const handleSpendStatus = async (attribute) => {
+        setSpendingAttr(attribute);
+        setStatusMsg(null);
+        try {
+            const res = await fetch('/api/games/spend-status-point', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ character_id: id, attribute }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+            setE(prev => ({ ...prev, ...json.data }));
+            setStatusMsg({ ok: true, text: `${attribute}：${json.from} → ${json.to} に上昇しました（残ポイント: ${json.remaining}）` });
+        } catch (err) {
+            setStatusMsg({ ok: false, text: err.message || '通信エラー' });
+        } finally {
+            setSpendingAttr(null);
+        }
     };
 
     const handleRedeem = async () => {
@@ -342,6 +364,28 @@ export default function CharacterDetail({ id }) {
                 );
             })()}
 
+            {/* ===== ステータスポイント（所有者のみ） ===== */}
+            {isOwner && (() => {
+                const earned = Math.floor((e.level || 1) / 5);
+                const used = e.status_points_used || 0;
+                const available = earned - used;
+                if (earned === 0) return null;
+                return (
+                    <div style={{ ...SS.section, marginBottom: 'var(--space-lg)' }}>
+                        <div style={SS.sTitle}>STATUS POINTS</div>
+                        <h2 style={SS.sHead}>ステータスポイント（残: {available} / 累計獲得: {earned}）</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginBottom: 0 }}>
+                            5レベルごとに1ポイント獲得。能力値カードの「↑」ボタンでランクを1段階上げられる（D→C→B→A→S）。一度上げると元には戻せない。
+                        </p>
+                        {statusMsg && (
+                            <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-mono)', color: statusMsg.ok ? 'var(--accent-gold)' : 'var(--accent-danger)' }}>
+                                {statusMsg.text}
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
             {/* ===== 能力値（ランク制） ===== */}
             <div style={SS.section}>
                 <div style={SS.sTitle}>ABILITIES</div>
@@ -356,16 +400,40 @@ export default function CharacterDetail({ id }) {
                         const hasPlus = !isHidden && stagePlus.includes(a.key);
                         const display = isHidden ? '？' : (hasPlus && rank !== 'S' ? `${rank}+` : rank);
                         const isMax = !isHidden && val === maxRankVal;
+                        const attrName = a.key.replace('rank_', '');
+                        const availablePts = Math.floor((e.level || 1) / 5) - (e.status_points_used || 0);
+                        const canUpgrade = isOwner && !isHidden && rank !== 'S' && availablePts > 0;
                         return (
                             <div key={a.key} style={{ padding: '12px 14px', background: 'rgba(0,0,0,0.2)', border: isHidden ? '1px solid rgba(255,255,255,0.03)' : isMax ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.2)' : 'var(--border-subtle)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '6px' }}>
                                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
                                         {a.name} <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>({a.reading})</span>
                                     </span>
-                                    <span style={{
-                                        fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700,
-                                        color: isHidden ? '#333' : rankColor(rank), minWidth: '36px', textAlign: 'center',
-                                    }}>{display}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{
+                                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700,
+                                            color: isHidden ? '#333' : rankColor(rank), minWidth: '36px', textAlign: 'center',
+                                        }}>{display}</span>
+                                        {canUpgrade && (
+                                            <button
+                                                onClick={() => {
+                                                    if (!confirm(`${a.name}（${rank}）を1段階上げます。一度上げると戻せません。続けますか？`)) return;
+                                                    handleSpendStatus(attrName);
+                                                }}
+                                                disabled={spendingAttr === attrName}
+                                                title="ステータスポイントを消費して1段階上げる"
+                                                style={{
+                                                    padding: '2px 8px',
+                                                    fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700,
+                                                    background: 'rgba(212,175,55,0.15)', border: '1px solid var(--accent-gold-border)',
+                                                    color: 'var(--accent-gold)', cursor: spendingAttr === attrName ? 'wait' : 'pointer',
+                                                    opacity: spendingAttr === attrName ? 0.5 : 1,
+                                                }}
+                                            >
+                                                {spendingAttr === attrName ? '...' : '↑'}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                                     <div style={{ height: '100%', width: `${pct}%`, background: isHidden ? '#222' : isMax ? 'var(--accent-gold)' : affColor, transition: 'width 0.5s' }} />
