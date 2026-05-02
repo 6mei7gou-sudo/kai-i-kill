@@ -118,11 +118,15 @@ export default function HomePage() {
       <div style={{
         textAlign: 'center',
         fontFamily: 'var(--font-mono)',
-        fontSize: 'var(--font-size-sm)',
-        color: 'var(--text-muted)',
-        letterSpacing: '0.2em',
+        fontSize: 'var(--font-size-xl)',
+        fontWeight: 700,
+        color: 'var(--accent-gold)',
+        letterSpacing: '0.25em',
         marginBottom: 'var(--space-3xl)',
         marginTop: 'calc(-1 * var(--space-2xl))',
+        padding: 'var(--space-md) 0',
+        borderTop: '1px solid var(--accent-gold-border)',
+        borderBottom: '1px solid var(--accent-gold-border)',
       }}>
         TRPG Coming Soon………
       </div>
