@@ -261,13 +261,18 @@ export default function CharacterDetail({ id }) {
             )}
 
             {/* ===== レベルアップ ===== */}
-            {isOwner && (e.level || 1) < (e.is_official ? 10 : 5) && (() => {
-                const PL_CP_TABLE = { 1: 100, 2: 150, 3: 250, 4: 400 };
+            {isOwner && (e.level || 1) < (e.is_official ? 20 : 5) && (() => {
+                const PL_CP_TABLE = {
+                    1: 100, 2: 150, 3: 250, 4: 400,
+                    5: 500, 6: 600, 7: 700, 8: 800, 9: 900,
+                    10: 1000, 11: 1100, 12: 1200, 13: 1300, 14: 1400,
+                    15: 1500, 16: 1600, 17: 1700, 18: 1800, 19: 1900,
+                };
                 const cpCost = PL_CP_TABLE[e.level || 1] || null;
                 return (
                 <div style={{ ...SS.section, marginBottom: 'var(--space-lg)' }}>
                     <div style={SS.sTitle}>LEVEL UP</div>
-                    <h2 style={SS.sHead}>レベルアップ（現在 Lv.{e.level || 1}{e.is_official ? ' / 上限10' : ' / 上限5'}）</h2>
+                    <h2 style={SS.sHead}>レベルアップ（現在 Lv.{e.level || 1}{e.is_official ? ' / 上限20' : ' / 上限5'}）</h2>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-md)', flexWrap: 'wrap' }}>
                         {e.is_official ? (
                             <button

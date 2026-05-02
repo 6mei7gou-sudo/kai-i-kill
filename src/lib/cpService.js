@@ -1,10 +1,10 @@
 // アカウントCP（カスタマイズポイント）共通サービス
 // サーバーサイドAPIルートから import して使う
 
-// CP報酬定数
-export const MISSION_CP = { E: 1, D: 2, C: 3, B: 5, A: 8, S: 12 };
-export const ADV_CP = { bad: 1, normal: 2, good: 3, true: 5 };
-export const DISPATCH_CP = { D: 1, C: 2, B: 3, A: 5, S: 8 };
+// CP報酬定数（2026-05-02：レベル20拡張に合わせて約1.5倍に増額・難易度緩和）
+export const MISSION_CP = { E: 2, D: 3, C: 5, B: 8, A: 12, S: 18 };
+export const ADV_CP = { bad: 2, normal: 3, good: 5, true: 8 };
+export const DISPATCH_CP = { D: 2, C: 3, B: 5, A: 8, S: 12 };
 const INITIAL_CP = 10;
 
 /**

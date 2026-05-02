@@ -275,14 +275,15 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     }, [isOfficial]);
 
     // --- スキルトグル ---
-    const SKILL_SLOTS_BY_LEVEL = [0,2,3,4,5,6,7,8,9,10,12];
+    // 3レベルに1個のペースで増加：Lv1で1個、Lv3で2個、Lv6で3個、Lv9で4個、Lv12で5個、Lv15で6個、Lv18で7個（B案）
+    const SKILL_SLOTS_BY_LEVEL = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7];
     const toggleSkill = useCallback((skillId) => {
         setForm(prev => {
             const current = [...(prev.skills || [])];
             if (current.includes(skillId)) {
                 return { ...prev, skills: current.filter(s => s !== skillId) };
             }
-            const maxSlots = SKILL_SLOTS_BY_LEVEL[prev.level] || 2;
+            const maxSlots = SKILL_SLOTS_BY_LEVEL[prev.level] || 1;
             if (!isOfficial && current.length >= maxSlots) return prev;
             return { ...prev, skills: [...current, skillId] };
         });
@@ -716,7 +717,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         <div style={S.sectionTitle}>LEVEL（公式キャラ専用）</div>
                         <h2 style={S.sectionHeading}>レベル設定</h2>
                         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                            {[1,2,3,4,5,6,7,8,9,10].map(lv => (
+                            {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(lv => (
                                 <button key={lv} type="button" onClick={() => set('level', lv)}
                                     style={{
                                         padding: '6px 14px', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 700, cursor: 'pointer',

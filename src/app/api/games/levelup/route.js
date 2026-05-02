@@ -11,13 +11,28 @@ const supabase = createClient(
 
 // レベルごとの必要CP（現在のレベル → 次のレベルに上がるためのコスト）
 const LEVELUP_CP_TABLE = {
-    1: 100,   // Lv1→2
-    2: 150,   // Lv2→3
-    3: 250,   // Lv3→4
-    4: 400,   // Lv4→5
+    1: 100,    // Lv1→2
+    2: 150,    // Lv2→3
+    3: 250,    // Lv3→4
+    4: 400,    // Lv4→5
+    5: 500,    // Lv5→6
+    6: 600,    // Lv6→7
+    7: 700,    // Lv7→8
+    8: 800,    // Lv8→9
+    9: 900,    // Lv9→10
+    10: 1000,  // Lv10→11
+    11: 1100,  // Lv11→12
+    12: 1200,  // Lv12→13
+    13: 1300,  // Lv13→14
+    14: 1400,  // Lv14→15
+    15: 1500,  // Lv15→16
+    16: 1600,  // Lv16→17
+    17: 1700,  // Lv17→18
+    18: 1800,  // Lv18→19
+    19: 1900,  // Lv19→20
 };
 const PL_MAX_LEVEL = 5;
-const OFFICIAL_MAX_LEVEL = 10;
+const OFFICIAL_MAX_LEVEL = 20;
 
 // POST: レベルアップ
 export async function POST(request) {
