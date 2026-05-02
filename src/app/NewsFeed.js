@@ -46,7 +46,7 @@ export default function NewsFeed() {
     const filtered = filter === 'all' ? posts : posts.filter(p => p.category === filter);
 
     return (
-        <div style={{ marginBottom: 'var(--space-3xl)' }}>
+        <div style={{ marginBottom: 'var(--space-3xl)', maxWidth: '720px', marginLeft: 'auto', marginRight: 'auto' }}>
             {/* フィルタタブ */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-lg)' }}>
                 {['all', 'news', 'release', 'event'].map(key => (
@@ -84,7 +84,12 @@ export default function NewsFeed() {
                     </p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <div style={{
+                    display: 'flex', flexDirection: 'column', gap: '2px',
+                    maxHeight: '480px', overflowY: 'auto',
+                    border: 'var(--border-subtle)',
+                    paddingRight: '4px',
+                }}>
                     {filtered.map(post => {
                         const cat = CATEGORY_STYLE[post.category] || CATEGORY_STYLE.news;
                         const date = new Date(post.created_at).toLocaleDateString('ja-JP', {
