@@ -20,6 +20,10 @@ const navGroups = [
       { href: '/quickstart/', icon: '▶', text: 'クイックスタート' },
       { href: '/quickstart/character-guide/', icon: '☖', text: 'キャラ製作ガイドライン' },
       { href: '/anomalies/', icon: '△', text: '怪異・能力・装備' },
+      { href: '/downloads/', icon: '▼', text: '画像ダウンロード' },
+      { href: '/guidelines/', icon: '◇', text: '二次創作・イベント参加ガイドライン' },
+      { href: '/terms/', icon: '▤', text: '利用規約' },
+      { href: '/privacy/', icon: '▤', text: 'プライバシーポリシー' },
     ],
   },
   {
