@@ -1,0 +1,55 @@
+[
+  {
+    "category": "サムネイル",
+    "categoryEn": "THUMBNAIL",
+    "description": "VRCモデルアップロード用のサムネイル",
+    "items": [
+      {
+        "name": "KAI-I//KILL　キャラクターサムネイル",
+        "file": "thumbnail-kaiikill.png"
+      }
+    ]
+  },
+  {
+    "category": "所属組織",
+    "categoryEn": "AFFILIATION",
+    "description": "祓部・傭兵・無所属など、各所属組織のエンブレム。",
+    "items": [
+      {
+        "name": "Anonymous",
+        "file": "anonymous-emblem.png"
+      },
+      {
+        "name": "祓部",
+        "file": "haraebe-emblem.png"
+      }
+    ]
+  },
+  {
+    "category": "企業エンブレム",
+    "categoryEn": "CORPORATE EMBLEM",
+    "description": "蒼鉄機工・雷禽重工・銀鎚精機・鴉羽技研・朱鷺崎財閥の企業エンブレム。",
+    "items": [
+      {
+        "name": "朱鷺崎財閥",
+        "file": "tokisaki-emblem.png"
+      },
+      {
+        "name": "鴉羽技研",
+        "file": "karasuba-emblem.png"
+      },
+      {
+        "name": "蒼鉄機工",
+        "file": "Soutetsu-emblem.png"
+      },
+      {
+        "name": "雷禽重工",
+        "file": "Raikin-emblem.png"
+      },
+      {
+        "name": "銀鎚精機",
+        "file": "Gintsuti-emblem.png"
+      }
+    ]
+  }
+]

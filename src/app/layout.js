@@ -154,6 +154,10 @@ export default function RootLayout({ children }) {
                   <Link href="/quickstart/">クイックスタート</Link>
                   <Link href="/world/">世界観</Link>
                   <Link href="/community/">コミュニティ</Link>
+                  <Link href="/downloads/">画像ダウンロード</Link>
+                  <Link href="/guidelines/">二次創作ガイドライン</Link>
+                  <Link href="/terms/">利用規約</Link>
+                  <Link href="/privacy/">プライバシーポリシー</Link>
                   <Link href="/contact/">お問い合わせ</Link>
                 </div>
                 <p>© 電脳怪異譚 KAI-I//KILL Project</p>
