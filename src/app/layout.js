@@ -2,6 +2,7 @@ import './globals.css';
 import Link from 'next/link';
 import MobileMenuButton from './MobileMenuButton';
 import SiteSearch from '@/components/SiteSearch';
+import MigrationRunner from '@/components/MigrationRunner';
 import { ClerkProvider, Show, SignInButton, UserButton } from '@clerk/nextjs';
 
 // メタデータ（SEO対応）
@@ -88,6 +89,7 @@ export default function RootLayout({ children }) {
     }}>
       <html lang="ja">
         <body>
+          <MigrationRunner />
           <MobileMenuButton />
 
           <div className="site-layout">
