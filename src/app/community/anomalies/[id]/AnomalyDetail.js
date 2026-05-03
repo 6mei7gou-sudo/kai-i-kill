@@ -223,21 +223,31 @@ export default function AnomalyDetail({ id }) {
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '6px' }}>
                         {[
+                            // メディア種別
+                            { key: 'novel', label: '小説' },
+                            { key: 'illustration', label: 'イラスト' },
+                            { key: 'figure', label: '立体物（フィギュア・3Dモデル）' },
+                            { key: 'video', label: '動画' },
+                            // 改変・派生
                             { key: 'visual_change', label: '見た目の自由改変' },
                             { key: 'personification', label: '擬人化' },
                             { key: 'sexual_personification', label: '性的擬人化' },
+                            { key: 'setting_change', label: '核・ルール設定の改変' },
+                            { key: 'derivative', label: '派生怪異の創作' },
+                            // 描写
                             { key: 'comedy', label: 'コメディ・ギャグ化' },
                             { key: 'vs_others', label: '他怪異との対決描写' },
                             { key: 'with_characters', label: 'PCキャラとの絡み' },
-                            { key: 'setting_change', label: '核・ルール設定の改変' },
-                            { key: 'derivative', label: '派生怪異の創作' },
                             { key: 'victim_depiction', label: '被害者の描写' },
+                            { key: 'defeat_depiction', label: '討伐される描写' },
+                            // R系・パロディ
                             { key: 'gore', label: 'グロ表現（流血・損壊）' },
                             { key: 'parody', label: 'パロディ' },
                             { key: 'r18', label: 'R18（性的描写）' },
                             { key: 'r18g', label: 'R18G（残酷描写）' },
+                            // 使用範囲
                             { key: 'scenario_use', label: '自作シナリオでの使用' },
-                            { key: 'streaming', label: '配信・実況での使用' },
+                            { key: 'streaming', label: '配信での紹介' },
                         ].map(item => {
                             const val = entry.fanart_policy[item.key] || 'ok';
                             const styleByVal = {
