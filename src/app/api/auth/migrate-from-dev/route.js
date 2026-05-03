@@ -120,16 +120,17 @@ export async function POST() {
                     .maybeSingle();
 
                 if (newAccount) {
-                    // 新ID側に既存アカウント → balance を合算
+                    // 新ID側に既存アカウント → 旧の balance で上書き（旧優先）
+                    // 新ID側で ensureAccount が作成した初期10CPは破棄し、Dev時代の残高を維持する
                     await supabase
                         .from(ACCOUNT_TABLE)
                         .update({
-                            balance: (newAccount.balance || 0) + (oldAccount.balance || 0),
+                            balance: oldAccount.balance,
                             updated_at: new Date().toISOString(),
                         })
                         .eq('user_id', userId);
                     await supabase.from(ACCOUNT_TABLE).delete().eq('user_id', devUserId);
-                    updateCounts[ACCOUNT_TABLE] = 'merged';
+                    updateCounts[ACCOUNT_TABLE] = 'overwritten';
                 } else {
                     // 新ID側にアカウントなし → 旧IDの行を新IDで作って旧IDを削除
                     await supabase
