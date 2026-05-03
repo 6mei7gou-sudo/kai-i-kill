@@ -58,6 +58,7 @@ const navGroups = [
       { href: '/create/character/', icon: '☖', text: 'キャラシート作成' },
       { href: '/create/weapon/', icon: '⚔', text: '武器・装備を投稿' },
       { href: '/create/anomaly/', icon: '▲', text: '怪異調査書を作成' },
+      { href: '/create/novel/', icon: '✎', text: '小説を投稿' },
       { href: '/mypage/', icon: '◆', text: 'マイページ' },
       { href: '/community/', icon: '◇', text: 'コミュニティDB' },
     ],

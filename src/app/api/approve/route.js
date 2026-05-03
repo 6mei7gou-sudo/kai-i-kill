@@ -24,7 +24,7 @@ export async function PATCH(request) {
         const body = await request.json();
         const { table, id, status: newStatus, is_official } = body;
 
-        if (!['anomaly_drafts', 'gear_posts', 'character_sheets'].includes(table)) {
+        if (!['anomaly_drafts', 'gear_posts', 'character_sheets', 'novels'].includes(table)) {
             return NextResponse.json({ error: '不正なテーブル名' }, { status: 400 });
         }
 

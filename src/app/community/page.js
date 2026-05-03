@@ -28,6 +28,13 @@ const CATEGORIES = [
         title: 'キャラクターシート',
         desc: 'プレイヤーが作成したキャラクターシートを閲覧する。',
     },
+    {
+        slug: 'novels',
+        icon: '✎',
+        titleEn: 'NOVELS',
+        title: '小説',
+        desc: 'プレイヤー投稿の創作小説。本編に登場するキャラクターと怪異が紐付けられている。',
+    },
 ];
 
 export default function CommunityPage() {
