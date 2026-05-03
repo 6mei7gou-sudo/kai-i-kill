@@ -282,29 +282,37 @@ export default function NovelForm({ editId = null, initialData = null }) {
                         style={{ ...S.input, marginBottom: 'var(--space-sm)' }}
                     />
                     {charSearch.trim() && (
-                        <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px' }}>
-                            {filteredChars.length === 0 ? (
-                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '12px' }}>該当するキャラがありません</p>
-                            ) : filteredChars.map(c => {
-                                const selected = (form.featured_characters || []).some(x => x.id === c.id);
-                                return (
-                                    <button key={c.id} type="button"
-                                        onClick={() => toggleCharacter(c)}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '8px',
-                                            padding: '6px 10px', cursor: 'pointer', textAlign: 'left',
-                                            background: selected ? 'rgba(0,255,170,0.1)' : 'rgba(0,0,0,0.2)',
-                                            border: selected ? '1px solid rgba(0,255,170,0.4)' : 'var(--border-subtle)',
-                                            color: 'var(--text-primary)', fontSize: '12px',
-                                        }}
-                                    >
-                                        {(c.icon_url || c.thumbnail_url) && <img src={c.icon_url || c.thumbnail_url} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
-                                        <span style={{ flex: 1 }}>{c.character_name || '名称未設定'}</span>
-                                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{c.affiliation}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        <>
+                            <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                                {filteredChars.length} 件ヒット — クリックで複数選択（再クリックで解除）
+                            </div>
+                            <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px' }}>
+                                {filteredChars.length === 0 ? (
+                                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '12px' }}>該当するキャラがありません</p>
+                                ) : filteredChars.map(c => {
+                                    const selected = (form.featured_characters || []).some(x => x.id === c.id);
+                                    return (
+                                        <button key={c.id} type="button"
+                                            onClick={() => toggleCharacter(c)}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '8px',
+                                                padding: '6px 10px', cursor: 'pointer', textAlign: 'left',
+                                                background: selected ? 'rgba(0,255,170,0.1)' : 'rgba(0,0,0,0.2)',
+                                                border: selected ? '1px solid rgba(0,255,170,0.4)' : 'var(--border-subtle)',
+                                                color: 'var(--text-primary)', fontSize: '12px',
+                                            }}
+                                        >
+                                            <span style={{ width: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 700, color: selected ? '#00ffaa' : 'var(--text-muted)' }}>
+                                                {selected ? '✓' : '＋'}
+                                            </span>
+                                            {(c.icon_url || c.thumbnail_url) && <img src={c.icon_url || c.thumbnail_url} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
+                                            <span style={{ flex: 1 }}>{c.character_name || '名称未設定'}</span>
+                                            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{c.affiliation}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </div>
 
@@ -341,29 +349,37 @@ export default function NovelForm({ editId = null, initialData = null }) {
                         style={{ ...S.input, marginBottom: 'var(--space-sm)' }}
                     />
                     {anomSearch.trim() && (
-                        <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px' }}>
-                            {filteredAnoms.length === 0 ? (
-                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '12px' }}>該当する怪異がありません</p>
-                            ) : filteredAnoms.map(a => {
-                                const selected = (form.featured_anomalies || []).some(x => x.id === a.id);
-                                return (
-                                    <button key={a.id} type="button"
-                                        onClick={() => toggleAnomaly(a)}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '8px',
-                                            padding: '6px 10px', cursor: 'pointer', textAlign: 'left',
-                                            background: selected ? 'rgba(255,77,77,0.1)' : 'rgba(0,0,0,0.2)',
-                                            border: selected ? '1px solid rgba(255,77,77,0.4)' : 'var(--border-subtle)',
-                                            color: 'var(--text-primary)', fontSize: '12px',
-                                        }}
-                                    >
-                                        {(a.icon_url || a.thumbnail_url) && <img src={a.icon_url || a.thumbnail_url} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
-                                        <span style={{ flex: 1 }}>{a.anomaly_name || '名称未設定'}</span>
-                                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{a.grade}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        <>
+                            <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                                {filteredAnoms.length} 件ヒット — クリックで複数選択（再クリックで解除）
+                            </div>
+                            <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '4px' }}>
+                                {filteredAnoms.length === 0 ? (
+                                    <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '12px' }}>該当する怪異がありません</p>
+                                ) : filteredAnoms.map(a => {
+                                    const selected = (form.featured_anomalies || []).some(x => x.id === a.id);
+                                    return (
+                                        <button key={a.id} type="button"
+                                            onClick={() => toggleAnomaly(a)}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '8px',
+                                                padding: '6px 10px', cursor: 'pointer', textAlign: 'left',
+                                                background: selected ? 'rgba(255,77,77,0.1)' : 'rgba(0,0,0,0.2)',
+                                                border: selected ? '1px solid rgba(255,77,77,0.4)' : 'var(--border-subtle)',
+                                                color: 'var(--text-primary)', fontSize: '12px',
+                                            }}
+                                        >
+                                            <span style={{ width: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 700, color: selected ? '#ff4d4d' : 'var(--text-muted)' }}>
+                                                {selected ? '✓' : '＋'}
+                                            </span>
+                                            {(a.icon_url || a.thumbnail_url) && <img src={a.icon_url || a.thumbnail_url} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
+                                            <span style={{ flex: 1 }}>{a.anomaly_name || '名称未設定'}</span>
+                                            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{a.grade}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </div>
 
