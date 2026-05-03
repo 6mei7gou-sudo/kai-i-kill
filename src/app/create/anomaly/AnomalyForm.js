@@ -47,6 +47,24 @@ const INITIAL = {
     related_characters: '',
     related_factions: '',
     related_terms: '',
+    fanart_policy: {
+        visual_change: 'ok',
+        personification: 'ok',
+        sexual_personification: 'ng',
+        comedy: 'ok',
+        vs_others: 'ok',
+        with_characters: 'ok',
+        setting_change: 'ask',
+        derivative: 'ask',
+        victim_depiction: 'ok',
+        gore: 'ng',
+        parody: 'ok',
+        r18: 'ng',
+        r18g: 'ng',
+        scenario_use: 'ask',
+        streaming: 'ok',
+        note: '',
+    },
 };
 
 // 選択肢
@@ -306,6 +324,64 @@ export default function AnomalyForm({ editId = null, initialData = null }) {
                         <FormInput label="関連キャラ" value={form.related_characters} onChange={v => set('related_characters', v)} placeholder="CHAR-???" />
                         <FormInput label="関連組織" value={form.related_factions} onChange={v => set('related_factions', v)} placeholder="FAC-???" />
                         <FormInput label="関連用語" value={form.related_terms} onChange={v => set('related_terms', v)} placeholder="用語リンク" />
+                    </div>
+                </div>
+
+                {/* セクション9：二次創作ガイドライン */}
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>SECTION 9 — FANART POLICY</div>
+                    <h2 style={S.sectionHeading}>二次創作ガイドライン</h2>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: 'var(--space-md)', fontFamily: 'var(--font-mono)' }}>
+                        この怪異の二次創作（イラスト・小説・派生設定・配信使用など）で許可する表現を設定します。閲覧者の目安となります。
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '6px' }}>
+                        {[
+                            { key: 'visual_change', label: '見た目の自由改変' },
+                            { key: 'personification', label: '擬人化' },
+                            { key: 'sexual_personification', label: '性的擬人化' },
+                            { key: 'comedy', label: 'コメディ・ギャグ化' },
+                            { key: 'vs_others', label: '他怪異との対決描写' },
+                            { key: 'with_characters', label: 'PCキャラとの絡み' },
+                            { key: 'setting_change', label: '核・ルール設定の改変' },
+                            { key: 'derivative', label: '派生怪異の創作' },
+                            { key: 'victim_depiction', label: '被害者の描写' },
+                            { key: 'gore', label: 'グロ表現（流血・損壊）' },
+                            { key: 'parody', label: 'パロディ' },
+                            { key: 'r18', label: 'R18（性的描写）' },
+                            { key: 'r18g', label: 'R18G（残酷描写）' },
+                            { key: 'scenario_use', label: '自作シナリオでの使用' },
+                            { key: 'streaming', label: '配信・実況での使用' },
+                        ].map(item => {
+                            const val = (form.fanart_policy || {})[item.key] || 'ok';
+                            return (
+                                <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
+                                    <span style={{ flex: 1, fontSize: '12px', color: 'var(--text-primary)' }}>{item.label}</span>
+                                    {['ok', 'ask', 'ng'].map(v => (
+                                        <button key={v} type="button"
+                                            onClick={() => set('fanart_policy', { ...(form.fanart_policy || {}), [item.key]: v })}
+                                            style={{
+                                                padding: '2px 8px', fontSize: '10px', fontFamily: 'var(--font-mono)', cursor: 'pointer',
+                                                fontWeight: val === v ? 700 : 400,
+                                                background: val === v
+                                                    ? v === 'ok' ? 'rgba(0,255,170,0.15)' : v === 'ask' ? 'rgba(255,170,0,0.15)' : 'rgba(255,77,77,0.15)'
+                                                    : 'transparent',
+                                                border: val === v
+                                                    ? v === 'ok' ? '1px solid rgba(0,255,170,0.4)' : v === 'ask' ? '1px solid rgba(255,170,0,0.4)' : '1px solid rgba(255,77,77,0.4)'
+                                                    : '1px solid rgba(255,255,255,0.06)',
+                                                color: val === v
+                                                    ? v === 'ok' ? '#00ffaa' : v === 'ask' ? '#ffaa00' : '#ff4d4d'
+                                                    : 'var(--text-muted)',
+                                            }}
+                                        >
+                                            {v === 'ok' ? 'OK' : v === 'ask' ? '要相談' : 'NG'}
+                                        </button>
+                                    ))}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div style={{ marginTop: 'var(--space-md)' }}>
+                        <FormTextArea label="備考（任意）" value={(form.fanart_policy || {}).note || ''} onChange={v => set('fanart_policy', { ...(form.fanart_policy || {}), note: v })} placeholder="その他の条件や補足事項があれば記入..." />
                     </div>
                 </div>
 

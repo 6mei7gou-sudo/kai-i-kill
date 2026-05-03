@@ -212,6 +212,59 @@ export default function AnomalyDetail({ id }) {
                     </div>
                 </div>
             )}
+
+            {/* 二次創作ガイドライン */}
+            {entry.fanart_policy && (
+                <div style={S.section}>
+                    <div style={S.sectionTitle}>FANART POLICY</div>
+                    <h2 style={S.sectionHeading}>二次創作ガイドライン</h2>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
+                        この怪異の二次創作（イラスト・小説・派生設定・配信使用など）における作者の意向です。
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '6px' }}>
+                        {[
+                            { key: 'visual_change', label: '見た目の自由改変' },
+                            { key: 'personification', label: '擬人化' },
+                            { key: 'sexual_personification', label: '性的擬人化' },
+                            { key: 'comedy', label: 'コメディ・ギャグ化' },
+                            { key: 'vs_others', label: '他怪異との対決描写' },
+                            { key: 'with_characters', label: 'PCキャラとの絡み' },
+                            { key: 'setting_change', label: '核・ルール設定の改変' },
+                            { key: 'derivative', label: '派生怪異の創作' },
+                            { key: 'victim_depiction', label: '被害者の描写' },
+                            { key: 'gore', label: 'グロ表現（流血・損壊）' },
+                            { key: 'parody', label: 'パロディ' },
+                            { key: 'r18', label: 'R18（性的描写）' },
+                            { key: 'r18g', label: 'R18G（残酷描写）' },
+                            { key: 'scenario_use', label: '自作シナリオでの使用' },
+                            { key: 'streaming', label: '配信・実況での使用' },
+                        ].map(item => {
+                            const val = entry.fanart_policy[item.key] || 'ok';
+                            const styleByVal = {
+                                ok: { bg: 'rgba(0,255,170,0.15)', border: 'rgba(0,255,170,0.4)', color: '#00ffaa', label: 'OK' },
+                                ask: { bg: 'rgba(255,170,0,0.15)', border: 'rgba(255,170,0,0.4)', color: '#ffaa00', label: '要相談' },
+                                ng: { bg: 'rgba(255,77,77,0.15)', border: 'rgba(255,77,77,0.4)', color: '#ff4d4d', label: 'NG' },
+                            }[val] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', color: 'var(--text-muted)', label: '—' };
+                            return (
+                                <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
+                                    <span style={{ flex: 1, fontSize: '12px', color: 'var(--text-primary)' }}>{item.label}</span>
+                                    <span style={{
+                                        padding: '2px 10px', fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700,
+                                        background: styleByVal.bg, border: `1px solid ${styleByVal.border}`, color: styleByVal.color,
+                                    }}>
+                                        {styleByVal.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {entry.fanart_policy.note && (
+                        <div style={{ marginTop: 'var(--space-md)' }}>
+                            <Field label="作者からの備考" value={entry.fanart_policy.note} />
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
