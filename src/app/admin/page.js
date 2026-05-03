@@ -14,6 +14,8 @@ const TABS = [
     { key: 'character_sheets', label: 'キャラクター', icon: '☖', nameField: 'character_name', editPath: '/create/character', detailPath: '/community/characters' },
     { key: 'gear_posts', label: '武器・装備', icon: '⚔', nameField: 'gear_name', editPath: '/create/weapon', detailPath: '/community/gear' },
     { key: 'anomaly_drafts', label: '怪異調査書', icon: '△', nameField: 'anomaly_name', editPath: '/create/anomaly', detailPath: '/community/anomalies' },
+    { key: 'novels', label: '小説', icon: '✎', nameField: 'title', editPath: '/create/novel', detailPath: '/community/novels' },
+    { key: 'reports', label: '通報', icon: '⚠', isReports: true },
 ];
 
 const STATUS_BADGE = {
@@ -51,6 +53,9 @@ export default function AdminPage() {
     const [resetting, setResetting] = useState(false);
     const [resetResult, setResetResult] = useState(null);
 
+    // 通報データ
+    const [reports, setReports] = useState([]);
+
     // データ取得
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -59,6 +64,11 @@ export default function AdminPage() {
                 const res = await fetch('/api/news?limit=50');
                 const json = await res.json();
                 setNewsPosts(json.data || []);
+                setItems([]);
+            } else if (activeTab === 'reports') {
+                const res = await fetch('/api/reports');
+                const json = await res.json();
+                setReports(json.data || []);
                 setItems([]);
             } else {
                 const url = userFilter
@@ -74,6 +84,22 @@ export default function AdminPage() {
             setLoading(false);
         }
     }, [activeTab, userFilter]);
+
+    // 通報のステータス変更
+    const handleReportStatus = async (reportId, newStatus) => {
+        try {
+            const res = await fetch('/api/reports', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: reportId, status: newStatus }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+            setReports(prev => prev.map(r => r.id === reportId ? { ...r, ...json.data } : r));
+        } catch (err) {
+            alert('ステータス変更に失敗: ' + err.message);
+        }
+    };
 
     useEffect(() => {
         if (isAdmin) fetchData();
@@ -420,7 +446,7 @@ export default function AdminPage() {
                             )}
 
                             {/* テーブル（既存の投稿管理） */}
-                            {activeTab !== 'news' && !loading && (
+                            {activeTab !== 'news' && activeTab !== 'reports' && !loading && (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                                         <thead>
@@ -531,9 +557,82 @@ export default function AdminPage() {
                                 </div>
                             )}
 
-                            {activeTab !== 'news' && !loading && filtered.length === 0 && (
+                            {activeTab !== 'news' && activeTab !== 'reports' && !loading && filtered.length === 0 && (
                                 <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0', fontStyle: 'italic' }}>該当する投稿がありません</p>
                             )}
+
+                            {/* === 通報タブ === */}
+                            {activeTab === 'reports' && !loading && (() => {
+                                const REASON_LABEL = {
+                                    inappropriate: '不適切な内容', copyright: '著作権侵害',
+                                    spam: 'スパム', harassment: '誹謗中傷',
+                                    gore_excess: 'グロ・性表現過多', other: 'その他',
+                                };
+                                const TARGET_PATH = {
+                                    novel: '/community/novels',
+                                    character_sheet: '/community/characters',
+                                    gear_post: '/community/gear',
+                                    anomaly_draft: '/community/anomalies',
+                                };
+                                const STATUS_STYLE = {
+                                    pending: { bg: 'rgba(255,170,0,0.15)', border: 'rgba(255,170,0,0.4)', color: '#ffaa00', label: '未対応' },
+                                    reviewed: { bg: 'rgba(0,255,170,0.15)', border: 'rgba(0,255,170,0.4)', color: '#00ffaa', label: '確認済' },
+                                    dismissed: { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.2)', color: 'var(--text-muted)', label: '却下' },
+                                    actioned: { bg: 'rgba(255,77,77,0.15)', border: 'rgba(255,77,77,0.4)', color: '#ff4d4d', label: '対処済' },
+                                };
+                                if (reports.length === 0) {
+                                    return <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0', fontStyle: 'italic' }}>通報はありません</p>;
+                                }
+                                return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {reports.map(r => {
+                                            const st = STATUS_STYLE[r.status] || STATUS_STYLE.pending;
+                                            const targetUrl = TARGET_PATH[r.target_type] ? `${TARGET_PATH[r.target_type]}/${r.target_id}/` : null;
+                                            return (
+                                                <div key={r.id} style={{
+                                                    padding: 'var(--space-md)', background: 'var(--bg-card)',
+                                                    border: 'var(--border-subtle)', borderLeft: `3px solid ${st.color}`,
+                                                }}>
+                                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                                        <span style={{ padding: '2px 10px', fontSize: '10px', fontWeight: 700, background: st.bg, border: `1px solid ${st.border}`, color: st.color, fontFamily: 'var(--font-mono)' }}>
+                                                            {st.label}
+                                                        </span>
+                                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                                            {new Date(r.created_at).toLocaleString('ja-JP')}
+                                                        </span>
+                                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-primary)' }}>
+                                                            [{r.target_type}] {REASON_LABEL[r.reason] || r.reason}
+                                                        </span>
+                                                        {targetUrl && (
+                                                            <Link href={targetUrl} style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-cyber)', textDecoration: 'none' }}>
+                                                                対象を見る →
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+                                                        通報者: {r.reporter_user_id} / 対象ID: {r.target_id}
+                                                    </div>
+                                                    {r.description && (
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: 1.6, marginBottom: '8px', whiteSpace: 'pre-wrap' }}>
+                                                            {r.description}
+                                                        </p>
+                                                    )}
+                                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                                        <button onClick={() => handleReportStatus(r.id, 'reviewed')}
+                                                            style={{ ...actionBtn, color: '#00ffaa', borderColor: 'rgba(0,255,170,0.3)' }}>✓ 確認済</button>
+                                                        <button onClick={() => handleReportStatus(r.id, 'actioned')}
+                                                            style={{ ...actionBtn, color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)' }}>⚠ 対処済</button>
+                                                        <button onClick={() => handleReportStatus(r.id, 'dismissed')}
+                                                            style={{ ...actionBtn, color: 'var(--text-muted)', borderColor: 'rgba(255,255,255,0.1)' }}>✕ 却下</button>
+                                                        <button onClick={() => handleReportStatus(r.id, 'pending')}
+                                                            style={{ ...actionBtn, color: '#ffaa00', borderColor: 'rgba(255,170,0,0.3)' }}>↩ 未対応に戻す</button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })()}
 
                             {/* === 危険ゾーン（キャラクタータブ専用） === */}
                             {activeTab === 'character_sheets' && (
