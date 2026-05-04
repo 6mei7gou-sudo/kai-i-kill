@@ -209,14 +209,18 @@ h6 {
   top: 0;
   left: 0;
   width: var(--sidebar-width);
-  height: 100vh;
+  height: 100vh; /* fallback for old browsers */
+  height: 100dvh; /* dynamic viewport — モバイルブラウザの下部UIを除外 */
   background: var(--bg-sidebar);
   border-right: var(--border-subtle);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   z-index: 100;
   display: flex;
   flex-direction: column;
   padding: var(--space-xl) 0;
+  /* iOS home indicator + ブラウザUI対策で下部に余裕を確保 */
+  padding-bottom: calc(var(--space-3xl) + env(safe-area-inset-bottom, 0px));
 }
 
 .site-sidebar__header {
