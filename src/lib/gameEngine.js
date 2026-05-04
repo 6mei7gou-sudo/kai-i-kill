@@ -374,7 +374,7 @@ export function playerAttack(state, targetId) {
   const log = { type: 'player_attack', target: target.name, check, damage, message };
   newState = { ...newState, phase: PHASE.ENEMY_TURN, log: [...newState.log, log] };
 
-  if (isCore && newState.core.hp <= 0) {
+  if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
     newState = { ...newState, phase: PHASE.VICTORY };
     newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
   }
@@ -447,7 +447,7 @@ export function playerMagic(state, targetId) {
   const log = { type: 'player_magic', target: target.name, check, damage, message };
   newState = { ...newState, phase: PHASE.ENEMY_TURN, log: [...newState.log, log] };
 
-  if (isCore && newState.core.hp <= 0) {
+  if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
     newState = { ...newState, phase: PHASE.VICTORY };
     newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
   }
@@ -832,7 +832,7 @@ export function playerSkill(state, skillId, targetId) {
       message += '（行動遅延付与）';
     }
 
-    if ((targetId === 'core' || false) && newState.core.hp <= 0) {
+    if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
       newState = { ...newState, phase: PHASE.VICTORY };
       newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
     }
@@ -930,6 +930,12 @@ export function playerSkill(state, skillId, targetId) {
     phase: PHASE.ENEMY_TURN,
     log: [...newState.log, { type: 'player_skill', skill: skill.id, message }],
   };
+
+  // フォールバック勝利判定：どのスキル分岐を通っても core HP が 0 以下になっていれば勝利
+  if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
+    newState = { ...newState, phase: PHASE.VICTORY };
+    newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 討伐成功！' }];
+  }
 
   return { state: newState, result: { success, damage, message } };
 }
@@ -1287,7 +1293,7 @@ export function coopPlayerAttack(state, targetId) {
   const log = { type: 'player_attack', player: player.name, target: target.name, check, damage, message };
   newState = { ...newState, log: [...newState.log, log] };
 
-  if (isCore && newState.core.hp <= 0) {
+  if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
     newState = { ...newState, phase: PHASE.VICTORY };
     newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 協力討伐成功！' }];
     return { state: newState, result: { success: check.success, damage, check, message } };
@@ -1368,7 +1374,7 @@ export function coopPlayerMagic(state, targetId) {
   const log = { type: 'player_magic', player: player.name, target: target.name, check, damage, message };
   newState = { ...newState, log: [...newState.log, log] };
 
-  if (isCore && newState.core.hp <= 0) {
+  if (newState.core.hp <= 0 && newState.phase !== PHASE.VICTORY) {
     newState = { ...newState, phase: PHASE.VICTORY };
     newState.log = [...newState.log, { type: 'result', message: '核を破壊した！ 協力討伐成功！' }];
     return { state: newState, result: { success: check.success, damage, check, message } };
