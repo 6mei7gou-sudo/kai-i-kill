@@ -229,8 +229,17 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         if (selectedAssignment && selectedAssignment.upgrade === abilityKey) {
             rank = 'B';
         }
+        // 編集モードでは現在のフォーム値（DBに保存されている値）も考慮し、より高い方を採用
+        // ステータスポイント等で上昇したランクを保持するため
+        if (initialData) {
+            const formRank = form[abilityKey] || 'D';
+            const order = ['D', 'C', 'B', 'A', 'S'];
+            const calcIdx = order.indexOf(rank);
+            const formIdx = order.indexOf(formRank);
+            if (formIdx > calcIdx) rank = formRank;
+        }
         return rank;
-    }, [form, isOfficial, innateChoice, selectedBg, selectedAssignment]);
+    }, [form, isOfficial, innateChoice, selectedBg, selectedAssignment, initialData]);
 
     // --- 段階表示 ---
     const getStageDisplay = useCallback((abilityKey) => {
