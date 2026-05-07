@@ -23,6 +23,18 @@ function parseMd(content) {
             continue;
         }
 
+        // 画像（![alt](url) を1行で書いたもの）
+        const imageMatch = line.trim().match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+        if (imageMatch) {
+            blocks.push({
+                type: 'image',
+                alt: imageMatch[1],
+                src: imageMatch[2],
+            });
+            i++;
+            continue;
+        }
+
         // 見出し（## / ### / ####）
         const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
         if (headingMatch) {
@@ -78,7 +90,7 @@ function parseMd(content) {
 
         // 段落（連続する通常行をまとめる）
         let para = '';
-        while (i < lines.length && lines[i].trim() !== '' && !lines[i].match(/^#{1,4}\s/) && !lines[i].trim().startsWith('|') && !/^---+$/.test(lines[i].trim()) && !/^\s*-\s+/.test(lines[i]) && !/^\s*\d+\.\s+/.test(lines[i])) {
+        while (i < lines.length && lines[i].trim() !== '' && !lines[i].match(/^#{1,4}\s/) && !lines[i].trim().startsWith('|') && !/^---+$/.test(lines[i].trim()) && !/^\s*-\s+/.test(lines[i]) && !/^\s*\d+\.\s+/.test(lines[i]) && !/^!\[([^\]]*)\]\(([^)]+)\)$/.test(lines[i].trim())) {
             para += (para ? ' ' : '') + lines[i].trim();
             i++;
         }
@@ -181,6 +193,34 @@ function renderBlock(block, idx, sectionMap) {
     switch (block.type) {
         case 'hr':
             return null; // MDの区切り線はセクション間のスペーシングで代替
+
+        case 'image':
+            return (
+                <figure key={idx} style={{
+                    margin: 'var(--space-xl) 0',
+                    background: 'var(--bg-card)',
+                    border: 'var(--border-subtle)',
+                    padding: 'var(--space-md)',
+                    textAlign: 'center',
+                }}>
+                    <img
+                        src={block.src}
+                        alt={block.alt || ''}
+                        style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
+                    />
+                    {block.alt && (
+                        <figcaption style={{
+                            marginTop: 'var(--space-sm)',
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 'var(--font-size-xs)',
+                            color: 'var(--text-muted)',
+                            letterSpacing: '0.05em',
+                        }}>
+                            {block.alt}
+                        </figcaption>
+                    )}
+                </figure>
+            );
 
         case 'heading': {
             const id = headingToId(block.text);

@@ -89,9 +89,9 @@ export default function DownloadsPage() {
 
 function DownloadCard({ item, category }) {
     const url = `/downloads/${item.file}`;
-    // 所属組織・企業エンブレムは白背景で表示（紋章は明色背景の方が視認しやすいため）
-    const isEmblemCategory = category === '所属組織' || category === '企業エンブレム';
-    const imageBg = isEmblemCategory ? '#ffffff' : 'rgba(0,0,0,0.3)';
+    // 所属組織・企業エンブレム・地図は白背景で表示（紋章や地図は明色背景の方が視認しやすいため）
+    const isLightBgCategory = category === '所属組織' || category === '企業エンブレム' || category === '地図';
+    const imageBg = isLightBgCategory ? '#ffffff' : 'rgba(0,0,0,0.3)';
     return (
         <div style={{
             background: 'var(--bg-card)', border: 'var(--border-subtle)',

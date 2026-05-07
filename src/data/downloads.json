@@ -11,6 +11,17 @@
     ]
   },
   {
+    "category": "地図",
+    "categoryEn": "MAP",
+    "description": "架空日本 五管区の地図。世界観の地理把握や卓上資料として利用可。",
+    "items": [
+      {
+        "name": "架空日本 五管区地図 v1.0",
+        "file": "map.1.0.png"
+      }
+    ]
+  },
+  {
     "category": "所属組織",
     "categoryEn": "AFFILIATION",
     "description": "祓部・傭兵・無所属など、各所属組織のエンブレム。",
