@@ -13,6 +13,8 @@ import { exportAsImage } from '@/lib/exportImage';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
 
+const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 const AFF_COLOR = { '祓部': '#4488ff', '傭兵': '#ffaa00', '無所属': '#ff6644' };
 const LANG_COLORS = { 'Igniscript': '#ff4444', 'Lupis Surf': '#4488ff', 'Ivyo': '#44cc44', 'NGT': '#ffcc00', 'Monyx': '#aaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
 
@@ -67,7 +69,11 @@ export default function CharacterDetail({ id }) {
     const [linkedGear, setLinkedGear] = useState(null);
     const [spendingAttr, setSpendingAttr] = useState(null);
     const [statusMsg, setStatusMsg] = useState(null);
+    const [resettingSkills, setResettingSkills] = useState(false);
+    const [skillResetMsg, setSkillResetMsg] = useState(null);
     const isOwner = user && e?.user_id && user.id === e.user_id;
+    const isAdmin = !!(user && ADMIN_IDS.includes(user.id));
+    const canEditSkills = isOwner || isAdmin;
 
     useEffect(() => {
         (async () => {
@@ -115,6 +121,27 @@ export default function CharacterDetail({ id }) {
             setStatusMsg({ ok: false, text: err.message || '通信エラー' });
         } finally {
             setSpendingAttr(null);
+        }
+    };
+
+    const handleResetSkills = async () => {
+        if (!confirm('このキャラクターの選択スキルをすべてリセットしますか？\n（背景スキルは自動取得のため影響しません。リセット後、編集画面で選び直せます）')) return;
+        setResettingSkills(true);
+        setSkillResetMsg(null);
+        try {
+            const res = await fetch('/api/posts', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table: 'character_sheets', id, data: { skills: [] } }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error || '通信エラー');
+            setE(prev => ({ ...prev, skills: [] }));
+            setSkillResetMsg({ ok: true, text: 'スキルをリセットしました。編集画面で選び直してください。' });
+        } catch (err) {
+            setSkillResetMsg({ ok: false, text: err.message || 'リセットに失敗しました' });
+        } finally {
+            setResettingSkills(false);
         }
     };
 
@@ -488,6 +515,40 @@ export default function CharacterDetail({ id }) {
                             );
                         })}
                     </div>
+
+                    {/* スキルリセットボタン（本人または管理者のみ） */}
+                    {canEditSkills && skills.length > 0 && (
+                        <div style={{ marginTop: 'var(--space-md)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                onClick={handleResetSkills}
+                                disabled={resettingSkills}
+                                style={{
+                                    padding: '6px 14px',
+                                    fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', fontWeight: 700,
+                                    background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.3)',
+                                    color: '#ff8888', cursor: resettingSkills ? 'wait' : 'pointer',
+                                    opacity: resettingSkills ? 0.5 : 1,
+                                }}
+                            >
+                                {resettingSkills ? '...' : '↻ スキルをリセット'}
+                            </button>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
+                                選択スキルのみ削除されます。背景スキル（自動取得）は影響しません。
+                            </span>
+                        </div>
+                    )}
+                    {skillResetMsg && (
+                        <div style={{
+                            marginTop: 'var(--space-sm)', padding: '8px 12px',
+                            fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)',
+                            background: skillResetMsg.ok ? 'rgba(0,255,170,0.08)' : 'rgba(255,77,77,0.08)',
+                            border: `1px solid ${skillResetMsg.ok ? 'rgba(0,255,170,0.3)' : 'rgba(255,77,77,0.3)'}`,
+                            color: skillResetMsg.ok ? '#00ffaa' : '#ff8888',
+                        }}>
+                            {skillResetMsg.text}
+                        </div>
+                    )}
                 </div>
             )}
 
