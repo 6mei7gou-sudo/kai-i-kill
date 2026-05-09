@@ -138,6 +138,10 @@ const INITIAL = {
 // 先天覚醒型の追加C昇格選択肢
 const INNATE_CHOICES = ['rank_jutsu', 'rank_kon'];
 
+// レベル別スキルスロット数（3レベルに1個のペース）
+// Lv1=1, Lv3=2, Lv6=3, Lv9=4, Lv12=5, Lv15=6, Lv18=7
+const SKILL_SLOTS_BY_LEVEL = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7];
+
 // ===== コンポーネント =====
 
 export default function CharacterForm({ editId = null, initialData = null }) {
@@ -284,11 +288,10 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     }, [isOfficial]);
 
     // --- スキルトグル ---
-    // 3レベルに1個のペースで増加：Lv1で1個、Lv3で2個、Lv6で3個、Lv9で4個、Lv12で5個、Lv15で6個、Lv18で7個（B案）
-    const SKILL_SLOTS_BY_LEVEL = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7];
     const toggleSkill = useCallback((skillId) => {
         setForm(prev => {
-            const current = [...(prev.skills || [])];
+            // prev.skills が配列でない場合（旧データ・壊れたDB値など）は空配列とみなす
+            const current = Array.isArray(prev.skills) ? [...prev.skills] : [];
             if (current.includes(skillId)) {
                 return { ...prev, skills: current.filter(s => s !== skillId) };
             }
@@ -296,7 +299,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             if (!isOfficial && current.length >= maxSlots) return prev;
             return { ...prev, skills: [...current, skillId] };
         });
-    }, []);
+    }, [isOfficial]);
 
     // --- 取得可能スキル一覧 ---
     const availableSkills = useMemo(() => getAvailableSkills({
