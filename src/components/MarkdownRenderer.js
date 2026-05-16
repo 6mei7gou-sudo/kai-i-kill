@@ -104,14 +104,33 @@ function parseMd(content) {
 
 /**
  * インラインMarkdown記法をReactノードに変換
- * 対応：**太字**
+ * 対応：**太字**、[label](url) リンク（外部リンクは新規タブ）
  */
 function renderInline(text) {
-    if (!text || !text.includes('**')) return text;
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    if (!text) return text;
+    const hasBold = text.includes('**');
+    const hasLink = /\[[^\]]+\]\([^)]+\)/.test(text);
+    if (!hasBold && !hasLink) return text;
+
+    const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
     return parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
             return <strong key={i} style={{ color: 'var(--text-heading)', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+        }
+        const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (linkMatch) {
+            const [, label, url] = linkMatch;
+            const isExternal = /^https?:\/\//.test(url);
+            const linkProps = isExternal
+                ? { href: url, target: '_blank', rel: 'noopener noreferrer' }
+                : { href: url };
+            return (
+                <a key={i} {...linkProps} style={{
+                    color: 'var(--accent-gold)',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '0.2em',
+                }}>{label}</a>
+            );
         }
         return part;
     });
