@@ -24,7 +24,11 @@
       "Bash(curl -s -o /dev/null -w \"world/factions: %{http_code}\\\\n\" http://localhost:3099/world/factions/)",
       "Bash(curl -s -o /dev/null -w \"world/guide: %{http_code}\\\\n\" http://localhost:3099/world/guide/)",
       "Bash(git push:*)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(cp docs/gm/world_bible_v1.1.md docs/gm/world_bible_v1.1.md.bak)",
+      "Bash(cp docs/gm/glossary_v1.0.md docs/gm/glossary_v1.0.md.bak)",
+      "Bash(cp docs/gm/factions/haraebe.md docs/gm/factions/haraebe.md.bak)",
+      "Bash(cp docs/gm/factions/mercenaries.md docs/gm/factions/mercenaries.md.bak)"
     ]
   }
 }

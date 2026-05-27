@@ -205,6 +205,80 @@ export default function CharacterGuidePage() {
                 </div>
             </div>
 
+            {/* ===== 実験体のキャラクター ===== */}
+            <section className="section">
+                <div className="section__number">05 — EXPERIMENT SUBJECT</div>
+                <h2 className="section__heading">
+                    実験体のキャラクター
+                    <span className="section__heading-en">EXPERIMENTAL ORIGIN</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <div className="content-body" style={{ marginBottom: 'var(--space-lg)', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.9 }}>
+                    <p>
+                        PCのバックボーンとして、<strong style={{ color: 'var(--text-primary)' }}>人体実験を受けた</strong>、それによって誕生した、あるいは能力に覚醒したなど、非倫理的な出自や来歴を選択しても構わない。
+                    </p>
+                    <p>
+                        この際、実験を行った個人や団体を、<strong style={{ color: 'var(--text-primary)' }}>小規模な範囲</strong>であれば自由に作成できる。
+                    </p>
+                    <p>
+                        ただし、それ以外の公式サイトに記載されている組織や企業は、公にはこれらを行っていないため、設定として使用することはできない。なお、キャラクター作成時に「背景：元実験体」「覚醒パターン：実験覚醒型」を選択した場合でも、必ずしもこの設定を適用する必要はない。
+                    </p>
+                </div>
+            </div>
+
+            {/* ===== 稀人（まれびと）・別世界出身 ===== */}
+            <section className="section">
+                <div className="section__number">06 — RAREVISITOR</div>
+                <h2 className="section__heading">
+                    稀人（まれびと）・別世界出身のキャラクター
+                    <span className="section__heading-en">FROM ANOTHER WORLD</span>
+                </h2>
+            </section>
+
+            <div style={{ marginBottom: 'var(--space-2xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    以下の要項を遵守することで、<strong style={{ color: 'var(--accent-gold)' }}>別世界出身のキャラクター</strong>を自由に制作することができる。
+                </p>
+
+                <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="callout__label">戸籍について</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.9 }}>
+                        <p>
+                            稀人は現世の戸籍を保有していない。そのため、公的機関への所属は認められず、公文書（討伐者ライセンスを含む）の作成も不可能である。
+                        </p>
+                        <p>
+                            存在が露呈した場合は<strong style={{ color: 'var(--text-primary)' }}>魔導省</strong>によって保護され、後に元の世界へ送り返されることになるが、本人の強い希望があり、危険な存在ではないと判断された場合、新たに戸籍を取得し一般には正体を隠して生活することが可能である。その際は魔導省監視下のもと様々な検査・報告の義務が課される。
+                        </p>
+                    </div>
+                </div>
+
+                <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="callout__label">形態について</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.9 }}>
+                        <p>
+                            稀人は<strong style={{ color: 'var(--text-primary)' }}>人類に分類される</strong>。中には特異な外見的特徴を有する個体も存在するが、四足歩行の獣の姿や不定形、巨大な怪物など<span style={{ color: 'var(--accent-danger)' }}>「人型から大きく逸脱した外見」</span>のキャラクター制作は認められない。
+                        </p>
+                        <p>
+                            特異な外見は現世の一般人にとって恐怖や好奇の対象となりやすく、不要な混乱を招く恐れがあるため、平常時は隠匿することを強く推奨する。なお、特異な部位が露出している場合でも、それが致命的に人間離れしていない限り、周囲からは「過激な肉体改造」や「奇抜なアクセサリー」として解釈される。
+                        </p>
+                    </div>
+                </div>
+
+                <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="callout__label">技術・能力について</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.9 }}>
+                        <p>
+                            現世より大きく進んだ文明を持つ世界出身のキャラクターは作成できない。また、パワーバランスを崩すような<span style={{ color: 'var(--accent-danger)' }}>「強力な特殊能力」</span>や<span style={{ color: 'var(--accent-danger)' }}>「オーバーテクノロジー」</span>を保有させることは避けること。
+                        </p>
+                        <p>
+                            特に<strong style={{ color: 'var(--accent-danger)' }}>「別の世界へ自由に移動できる」「不死」</strong>といった設定は制限される。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* ===== リンク ===== */}
             <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
                 <Link href="/quickstart/" style={{ textDecoration: 'none', color: 'inherit' }}>

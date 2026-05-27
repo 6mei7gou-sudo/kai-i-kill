@@ -48,6 +48,7 @@
 - [x] 世界観指針部分を `docs/player/character_concept_guide.md` として抽出
 - [x] TRPG要素は既存 `docs/rules/chapters/creation.md` に存在するため旧ファイル削除で対応
 - [ ] `src/app/quickstart/character-guide` ページのMDファイル読み込み化は将来課題（現状はJSXハードコードで動作、β案で残置）
+- [ ] `src/app/quickstart/character-guide/page.js` に「実験体」「稀人」セクションを追加（ドキュメント反映漏れ修正・2026-05-27）
 
 ### フェーズ3：キャラシUI重複解消 ✅
 - [x] `sheet-app/` と `src/app/character-sheet/` の機能差分調査
