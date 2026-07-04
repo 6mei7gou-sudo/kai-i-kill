@@ -6,7 +6,8 @@
  * 対応記法：##/###/#### 見出し、表（|区切り）、太字（**）、リスト（- / 1.）、区切り線（---）
  */
 function parseMd(content) {
-    const lines = content.split('\n');
+    // CRLF（Windows改行）でも行末に \r が残らないように分割する
+    const lines = content.split(/\r?\n/);
     const blocks = [];
     let i = 0;
 
@@ -96,6 +97,9 @@ function parseMd(content) {
         }
         if (para) {
             blocks.push({ type: 'paragraph', text: para });
+        } else {
+            // どの記法にも該当しない行で無限ループしないための安全弁
+            i++;
         }
     }
 
