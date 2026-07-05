@@ -43,11 +43,13 @@ kai-i-kill/
 
 docs/
 ├── gm/                      ← GM専用資料（秘匿情報含む・Web非公開）
-│   ├── world_bible, glossary, geography
+│   ├── world_bible, glossary, geography（※2026-07にHTML/PDFビルドから復元。各ファイル冒頭の注記参照）
 │   └── factions/            ← 勢力別詳細
 ├── player/                  ← プレイヤー向け資料（秘匿除去済み・Web公開）
 │   ├── world_bible, glossary, timeline, character_concept_guide
-│   └── factions/
+│   ├── factions/
+│   └── special/             ← 特設記事（elevator.md → /world/elevator）
+├── legal/                   ← 利用規約・プライバシー・ガイドライン（Web公開）
 ├── rules/                   ← 判定メカニクス仕様（Web非公開・内部資料）
 │   ├── rules_unified.md     ← ★主文書★ v4.0
 │   ├── combat_hp.md         ← 戦闘補遺 v4.0

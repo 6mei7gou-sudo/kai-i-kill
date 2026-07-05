@@ -16,6 +16,7 @@
 ```
 docs/
 ├── gm/                      ← GM専用（秘匿設定・内部対立・真相を含む）
+│   │                            ※2026-07にビルド成果物から復元。各ファイル冒頭の注記参照
 │   ├── world_bible_v1.1.md      世界観バイブル（完全版）
 │   ├── glossary_v1.0.md         用語集（GM版・秘匿情報あり）
 │   ├── geography_v1.0.md        地理設定
@@ -30,11 +31,13 @@ docs/
 │   ├── glossary_v1.0.md         用語集
 │   ├── timeline_v1.0.md         年表
 │   ├── character_concept_guide.md  キャラクター造形ガイド（世界観指針）
-│   └── factions/                勢力別詳細
-│       ├── haraebe.md               祓部
-│       ├── mercenaries.md           傭兵
-│       ├── companies.md             企業
-│       └── unaffiliated.md          無所属
+│   ├── factions/                勢力別詳細
+│   │   ├── haraebe.md               祓部
+│   │   ├── mercenaries.md           傭兵
+│   │   ├── companies.md             企業
+│   │   └── unaffiliated.md          無所属
+│   └── special/                 特設記事
+│       └── elevator.md              異世界エレベーター（/world/elevator で表示）
 │
 ├── rules/                   ← TRPGルール
 │   ├── rules_unified.md        ★主文書★ 統合ルールブック v4.0
@@ -55,6 +58,8 @@ docs/
 │   ├── system/                  デザインシステム・トークン
 │   └── guides/                  デザインガイド（勢力・ロゴ・ライセンス等）
 │
+├── legal/                   ← 利用規約・プライバシー・ガイドライン（Web公開）
+├── specs/                   ← 技術仕様書（ゲームエンジン等）
 ├── pdf/gm-beta/             ← PDF出力物
 ├── _build/                  ← ビルドスクリプト
 ├── site/                    ← サイト設計
@@ -65,7 +70,7 @@ docs/
 ## 編集の鉄則
 
 1. **GM版 → プレイヤー版の同期**：GM版を更新したら対応するプレイヤー版も確認・更新する
-2. **用語集への反映**：新設定を追加したら `gm/glossary_v1.0.md` と `public/player_glossary_v1.0.md` にも反映する
+2. **用語集への反映**：新設定を追加したら `docs/gm/glossary_v1.0.md` と `docs/player/glossary_v1.0.md` にも反映する
 3. **文体統一**：常体（だ・である調）で統一。敬体（です・ます調）は使わない
 4. **秘匿管理**：プレイヤー版にGM専用情報を混入しない。判断に迷う場合は確認を取る
 5. **マークダウン書式**：見出し（`#`〜`####`）、テーブル（`|...|`）、箇条書き（`-`）を統一的に使用する

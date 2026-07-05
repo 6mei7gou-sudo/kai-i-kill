@@ -1,4 +1,4 @@
-// 特設：異世界エレベーター — docs/special/elevator.md を表示
+// 特設：異世界エレベーター — docs/player/special/elevator.md を表示
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default function ElevatorPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'special', 'elevator.md');
+    const filePath = path.join(process.cwd(), 'docs', 'player', 'special', 'elevator.md');
     const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
 
     return (
