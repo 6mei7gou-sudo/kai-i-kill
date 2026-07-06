@@ -31,6 +31,7 @@ const navGroups = [
     label: '世界を知る',
     items: [
       { href: '/world/', icon: '◉', text: '世界観バイブル' },
+      { href: '/official-characters/', icon: '★', text: '公式キャラクター' },
       { href: '/timeline/', icon: '◈', text: '世界年表' },
       { href: '/glossary/', icon: '▤', text: '用語集' },
       { href: '/world/elevator/', icon: '⇅', text: '異世界エレベーター' },

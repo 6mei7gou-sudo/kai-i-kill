@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUser, Show, RedirectToSignIn } from '@clerk/nextjs';
 import Link from 'next/link';
+import OfficialCharactersPanel from './OfficialCharactersPanel';
 
 // 管理者ID
 const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
@@ -11,6 +12,7 @@ const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filt
 // タブ定義
 const TABS = [
     { key: 'news', label: 'News', icon: '◆', isNews: true },
+    { key: 'official_chars', label: '公式キャラ', icon: '★', isOfficialChars: true },
     { key: 'character_sheets', label: 'キャラクター', icon: '☖', nameField: 'character_name', editPath: '/create/character', detailPath: '/community/characters' },
     { key: 'gear_posts', label: '武器・装備', icon: '⚔', nameField: 'gear_name', editPath: '/create/weapon', detailPath: '/community/gear' },
     { key: 'anomaly_drafts', label: '怪異調査書', icon: '△', nameField: 'anomaly_name', editPath: '/create/anomaly', detailPath: '/community/anomalies' },
@@ -64,6 +66,9 @@ export default function AdminPage() {
                 const res = await fetch('/api/news?limit=50');
                 const json = await res.json();
                 setNewsPosts(json.data || []);
+                setItems([]);
+            } else if (activeTab === 'official_chars') {
+                // 公式キャラはパネル側（OfficialCharactersPanel）が自前で取得する
                 setItems([]);
             } else if (activeTab === 'reports') {
                 const res = await fetch('/api/reports');
@@ -445,8 +450,11 @@ export default function AdminPage() {
                                 </div>
                             )}
 
+                            {/* === 公式キャラ管理パネル === */}
+                            {activeTab === 'official_chars' && !loading && <OfficialCharactersPanel />}
+
                             {/* テーブル（既存の投稿管理） */}
-                            {activeTab !== 'news' && activeTab !== 'reports' && !loading && (
+                            {activeTab !== 'news' && activeTab !== 'reports' && activeTab !== 'official_chars' && !loading && (
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)' }}>
                                         <thead>
