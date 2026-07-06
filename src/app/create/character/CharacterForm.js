@@ -122,6 +122,7 @@ const INITIAL = {
     equipment_type: '武装型', equipment_name: '', custom_equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     belief_points: 5,
     level: 1, fate: '', backstory: '', brief_history: '', hidden_abilities: [],
+    appearance: '', personality: '', speech_style: '',
     related_anomalies: '', related_characters: '', related_factions: '',
     social_x: '', social_vrc: '', social_url: '',
     cyber_grade: 'none',
@@ -1357,6 +1358,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                             {form.brief_history.length} / 250
                         </div>
                     </div>
+                    <FormTextArea label="外見（任意） — RP用シートに表示されます" value={form.appearance} onChange={v => set('appearance', v)} placeholder="身長・体格・髪・瞳・服装・目を引く特徴など" />
+                    <FormTextArea label="性格（任意） — RP用シートに表示されます" value={form.personality} onChange={v => set('personality', v)} placeholder="基本的な気質、対人傾向、譲れない信条など" />
+                    <FormTextArea label="口調・一人称（任意） — RP用シートに表示されます" value={form.speech_style} onChange={v => set('speech_style', v)} placeholder="一人称・二人称、話し方の癖、口癖など" />
                     <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
                     <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." />
                 </div>

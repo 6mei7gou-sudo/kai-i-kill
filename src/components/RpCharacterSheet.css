@@ -1,0 +1,293 @@
+/* RP用キャラクターシート（幅1480px固定・高さ可変、最低B4縦2106px） */
+/* html2canvas キャプチャ用、全値 px 固定。長文が切れないよう高さは内容に追従 */
+
+.rps {
+    position: relative;
+    width: 1480px;
+    min-height: 2106px;
+    box-sizing: border-box;
+    padding: 64px 72px 48px 96px;
+    background: linear-gradient(180deg, #0a0c10 0%, #111520 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    color: #e8e6e3;
+    display: flex;
+    flex-direction: column;
+}
+
+.rps__accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 12px;
+}
+
+/* ===== TOP ===== */
+.rps__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 16px;
+}
+
+.rps__brand {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    color: #e8e6e3;
+    opacity: 0.9;
+}
+
+.rps__brand-sub {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 14px;
+    letter-spacing: 0.25em;
+}
+
+/* ===== PROFILE ===== */
+.rps__profile {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: flex-start;
+}
+
+.rps__portrait {
+    width: 360px;
+    height: 450px;
+    flex-shrink: 0;
+    border: 1px solid;
+    background: #0a0c10;
+    overflow: hidden;
+}
+
+.rps__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+
+.rps__portrait-ph {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 140px;
+    font-weight: 700;
+    opacity: 0.25;
+}
+
+.rps__profile-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.rps__kana {
+    font-size: 18px;
+    color: #9a9aaa;
+    letter-spacing: 0.1em;
+    margin-bottom: -8px;
+}
+
+.rps__name {
+    font-size: 56px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+}
+
+.rps__title-text {
+    font-size: 24px;
+    font-weight: 400;
+    margin-top: -6px;
+}
+
+.rps__affil-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.rps__badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.rps__sub {
+    font-size: 18px;
+    color: #c8c6c3;
+}
+
+.rps__profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 24px;
+    margin-top: 6px;
+}
+
+.rps__field {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.rps__label {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: #6a6a7a;
+    letter-spacing: 0.1em;
+    min-width: 72px;
+}
+
+.rps__value {
+    font-size: 16px;
+    color: #e8e6e3;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== SECTION ===== */
+.rps__section {
+    margin-bottom: 28px;
+}
+
+.rps__section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.rps__section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+}
+
+.rps__section-en {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+}
+
+.rps__section-line {
+    flex: 1;
+    height: 1px;
+}
+
+.rps__section-body {
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ===== 複数行フィールド ===== */
+.rps__long-field {
+    margin-bottom: 16px;
+}
+
+.rps__long-field:last-child {
+    margin-bottom: 0;
+}
+
+.rps__long-text {
+    font-size: 16px;
+    color: #e8e6e3;
+    line-height: 1.8;
+    margin-top: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ===== LANGUAGES ===== */
+.rps__lang-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.rps__lang {
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    font-size: 15px;
+    color: #e8e6e3;
+}
+
+/* ===== FANART POLICY ===== */
+.rps__fanart-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px 16px;
+}
+
+.rps__fanart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.rps__fanart-name {
+    font-size: 13px;
+    color: #c8c6c3;
+}
+
+.rps__fanart-val {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.rps__fanart-note {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #c8c6c3;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+/* ===== SOCIAL ===== */
+.rps__social {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rps__social .rps__value {
+    white-space: normal;
+    word-break: break-all;
+}
+
+/* ===== FOOTER ===== */
+.rps__footer {
+    margin-top: auto;
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+    color: #555566;
+    letter-spacing: 0.1em;
+}
