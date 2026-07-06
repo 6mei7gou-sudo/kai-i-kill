@@ -9,6 +9,9 @@ import IdBadge from '@/components/IdBadge';
 import { getBackgroundSkill, getSkillTypeColor, getAxisColor, getAvailableSkills } from '@/data/skillData';
 import HunterLicense from '@/components/HunterLicense';
 import RpIdCard from '@/components/RpIdCard';
+import CharacterCard from '@/components/CharacterCard';
+import FullCharacterSheet from '@/components/FullCharacterSheet';
+import RpCharacterSheet from '@/components/RpCharacterSheet';
 import { exportAsImage } from '@/lib/exportImage';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
@@ -65,6 +68,9 @@ export default function CharacterDetail({ id }) {
     const [levelingUp, setLevelingUp] = useState(false);
     const licenseRef = useRef(null);
     const rpCardRef = useRef(null);
+    const charCardRef = useRef(null);
+    const fullSheetRef = useRef(null);
+    const rpSheetRef = useRef(null);
     const [serialLoading, setSerialLoading] = useState(false);
     const [linkedGear, setLinkedGear] = useState(null);
     const [spendingAttr, setSpendingAttr] = useState(null);
@@ -672,6 +678,17 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
+            {/* ===== RPプロフィール ===== */}
+            {(e.appearance || e.personality || e.speech_style) && (
+                <div style={SS.section}>
+                    <div style={SS.sTitle}>RP PROFILE</div>
+                    <h2 style={SS.sHead}>外見・性格・口調</h2>
+                    {e.appearance && <><div style={SS.label}>外見</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.appearance}</div></>}
+                    {e.personality && <><div style={SS.label}>性格</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.personality}</div></>}
+                    {e.speech_style && <><div style={SS.label}>口調・一人称</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.speech_style}</div></>}
+                </div>
+            )}
+
             {/* ===== ストーリー ===== */}
             {(e.fate || e.backstory) && (
                 <div style={SS.section}>
@@ -761,15 +778,18 @@ export default function CharacterDetail({ id }) {
                 );
             })()}
 
-            {/* 討伐者資格証・RP用IDカード（画面外に配置してキャプチャ用） */}
+            {/* 各種カード・シート（画面外に配置してキャプチャ用） */}
             <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                 <HunterLicense ref={licenseRef} character={{ ...e, equipment_name: linkedGear?.gear_name || e.equipment_name, equipment_maker: linkedGear?.manufacturer || e.equipment_maker }} />
                 <RpIdCard ref={rpCardRef} character={e} />
+                <CharacterCard ref={charCardRef} character={e} />
+                <FullCharacterSheet ref={fullSheetRef} form={{ ...e, equipment_name: linkedGear?.gear_name || e.equipment_name, equipment_maker: linkedGear?.manufacturer || e.equipment_maker }} />
+                <RpCharacterSheet ref={rpSheetRef} character={e} />
             </div>
 
             {/* フッター */}
             <IdBadge id={id} label="CHARACTER ID" created_at={e.created_at} updated_at={e.updated_at} />
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginBottom: 'var(--space-2xl)' }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', marginBottom: 'var(--space-2xl)' }}>
                 <button
                     onClick={async () => {
                         if (!licenseRef.current || exporting) return;
@@ -798,6 +818,27 @@ export default function CharacterDetail({ id }) {
                 >
                     {exporting ? '生成中...' : 'RP用IDカード'}
                 </button>
+                {[
+                    { ref: charCardRef, label: '名刺カード', file: 'card', size: { width: 910, height: 550 } },
+                    { ref: fullSheetRef, label: 'ステータスシート', file: 'sheet', size: { width: 1480, height: 2106 } },
+                    { ref: rpSheetRef, label: 'RPシート', file: 'rpsheet', size: { width: 1480 } },
+                ].map(({ ref, label, file, size }) => (
+                    <button
+                        key={file}
+                        onClick={async () => {
+                            if (!ref.current || exporting) return;
+                            setExporting(true);
+                            const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                            const idShort = (e.id || '').substring(0, 8);
+                            await exportAsImage(ref.current, `kaiii_${file}_${idShort}_${dateStr}`, size);
+                            setExporting(false);
+                        }}
+                        disabled={exporting}
+                        style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', background: 'rgba(212,175,55,0.05)', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)', cursor: 'pointer' }}
+                    >
+                        {exporting ? '生成中...' : label}
+                    </button>
+                ))}
                 {isOwner && <Link href={`/create/character/${id}/`} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', padding: '4px 12px', border: '1px solid rgba(255,170,0,0.3)', textDecoration: 'none' }}>編集</Link>}
                 <Link href="/community/characters/" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', padding: '4px 12px', border: 'var(--border-subtle)', textDecoration: 'none' }}>← 一覧</Link>
             </div>
