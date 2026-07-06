@@ -5,6 +5,8 @@ import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 import CharacterSelector from './CharacterSelector';
 
+const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 const CATEGORY_LABELS = {
   general: '雑談',
   lore: '世界観',
@@ -38,6 +40,9 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState('');
+  const [savingTitle, setSavingTitle] = useState(false);
 
   const fetchThread = (password) => {
     setLoading(true);
@@ -90,6 +95,32 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
       }
     };
   }, [threadId]);
+
+  // スレッドタイトルの保存（スレッド主・管理者のみ）
+  const handleSaveTitle = async () => {
+    const newTitle = titleInput.trim();
+    if (!newTitle || savingTitle) return;
+
+    setSavingTitle(true);
+    try {
+      const res = await fetch(`/api/sns/threads/${threadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        alert('タイトルの変更に失敗: ' + (json.error || '不明なエラー'));
+        return;
+      }
+      setThread((prev) => ({ ...prev, title: json.data.title, updated_at: json.data.updated_at }));
+      setEditingTitle(false);
+    } catch (err) {
+      alert('タイトルの変更に失敗: ' + err.message);
+    } finally {
+      setSavingTitle(false);
+    }
+  };
 
   const handleReply = async () => {
     if (!replyContent.trim() || !character || submitting || !isSignedIn) return;
@@ -205,14 +236,59 @@ export default function ThreadDetail({ threadId, layer, backPath, backLabel }) {
       });
   };
 
+  const canEditTitle = isSignedIn && user && thread
+    && (thread.user_id === user.id || ADMIN_IDS.includes(user.id));
+
   return (
     <div>
       {/* Thread header */}
       <div className="thread-detail__header">
-        <div className="thread-detail__title">
-          {passwordMode === 'write' && <span title="書込制限">🔐 </span>}
-          {thread.title}
-        </div>
+        {editingTitle ? (
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center', marginBottom: 'var(--space-xs)' }}>
+            <input
+              className="chat-input__field"
+              style={{ flex: 1 }}
+              maxLength={200}
+              value={titleInput}
+              onChange={(e) => setTitleInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveTitle(); }}
+              autoFocus
+            />
+            <button
+              className="post-composer__submit"
+              disabled={!titleInput.trim() || savingTitle}
+              onClick={handleSaveTitle}
+            >
+              {savingTitle ? '保存中...' : '保存'}
+            </button>
+            <button
+              className="post-composer__submit"
+              style={{ opacity: 0.7 }}
+              disabled={savingTitle}
+              onClick={() => setEditingTitle(false)}
+            >
+              キャンセル
+            </button>
+          </div>
+        ) : (
+          <div className="thread-detail__title">
+            {passwordMode === 'write' && <span title="書込制限">🔐 </span>}
+            {thread.title}
+            {canEditTitle && (
+              <button
+                title="タイトルを編集"
+                onClick={() => { setTitleInput(thread.title); setEditingTitle(true); }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)',
+                  marginLeft: 'var(--space-sm)', padding: 0,
+                }}
+              >
+                ✎
+              </button>
+            )}
+          </div>
+        )}
         <div className="thread-list__meta">
           {thread.category && (
             <span className="thread-list__category">

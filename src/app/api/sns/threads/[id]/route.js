@@ -13,6 +13,8 @@ function hashPassword(password) {
     return createHash('sha256').update(password).digest('hex');
 }
 
+const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 // GET: スレッド詳細 + 返信一覧
 export async function GET(request, { params }) {
     try {
@@ -152,6 +154,56 @@ export async function POST(request, { params }) {
         }
 
         return NextResponse.json({ ok: true, data: reply });
+    } catch (err) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+}
+
+// PATCH: スレッドタイトルを編集（スレッド主または管理者のみ）
+export async function PATCH(request, { params }) {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
+        }
+
+        const { id } = await params;
+        const body = await request.json();
+        const title = (body.title || '').trim();
+
+        if (!title) {
+            return NextResponse.json({ error: 'タイトルは必須です' }, { status: 400 });
+        }
+        if (title.length > 200) {
+            return NextResponse.json({ error: 'タイトルは200文字以内です' }, { status: 400 });
+        }
+
+        // 所有権チェック（管理者は例外）
+        const { data: existing, error: fetchError } = await supabase
+            .from('sns_threads')
+            .select('user_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !existing) {
+            return NextResponse.json({ error: 'スレッドが見つかりません' }, { status: 404 });
+        }
+        if (existing.user_id !== userId && !ADMIN_IDS.includes(userId)) {
+            return NextResponse.json({ error: 'スレッド主のみ編集できます' }, { status: 403 });
+        }
+
+        const { data, error } = await supabase
+            .from('sns_threads')
+            .update({ title, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // password_hash はクライアントに返さない
+        const { password_hash, ...safeThread } = data;
+        return NextResponse.json({ ok: true, data: safeThread });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
