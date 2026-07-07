@@ -1,9 +1,8 @@
-// 世界観バイブル — チャプター別ページ
-import fs from 'fs';
-import path from 'path';
+// 世界観バイブル — チャプター別ページ（紐付けは src/lib/siteDocs.js）
 import Link from 'next/link';
 import MdRenderer from '@/components/MarkdownRenderer';
 import { CHAPTERS } from '../chapters';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 // MDファイルから指定セクション群を抽出
 function extractSections(content, sectionTitles) {
@@ -55,8 +54,7 @@ export default async function WorldSectionPage({ params }) {
         );
     }
 
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'world_bible_v1.0.md');
-    const fullContent = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const fullContent = readSiteDoc('world-bible');
     const sectionContent = extractSections(fullContent, ch.sections);
 
     const prev = chIdx > 0 ? CHAPTERS[chIdx - 1] : null;

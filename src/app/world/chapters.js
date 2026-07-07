@@ -1,5 +1,5 @@
 // 世界観バイブルのチャプター構成 — /world/ ハブと /world/[section]/ で共有
-// ※ docs/player/world_bible_v1.0.md の章番号と完全に一致させること
+// ※ docs/player/world_bible.md の章番号と完全に一致させること
 
 export const CHAPTERS = [
     {

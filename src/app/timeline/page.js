@@ -1,13 +1,8 @@
-// タイムラインページ — 年表を時系列で表示（整形後フォーマット対応）
-import fs from 'fs';
-import path from 'path';
+// タイムラインページ — 年表を時系列で表示（整形後フォーマット対応・紐付けは src/lib/siteDocs.js）
+import { readSiteDoc } from '@/lib/siteDocs';
 
 function loadTimeline() {
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'timeline_v1.0.md');
-    if (fs.existsSync(filePath)) {
-        return fs.readFileSync(filePath, 'utf-8');
-    }
-    return '';
+    return readSiteDoc('timeline');
 }
 
 // 章（セクション）を抽出する

@@ -1,7 +1,7 @@
 # 地理設定資料集 v1.0【GM版・秘匿情報含む】
 
 > **【復元版についての注記】**
-> 本ファイルはMarkdown原稿の紛失に伴い、`docs/_build/gen_geography_pdf.py`（地理設定資料集PDF ver 1.0、2026.03）の埋め込みコンテンツから復元したものである。内容はPDF版 `docs/_build/geography_reference.pdf` と同一。
+> 本ファイルはMarkdown原稿の紛失に伴い、`docs/_build/gen_geography_pdf.py`（地理設定資料集PDF ver 1.0、2026.03）の埋め込みコンテンツから復元したものである。PDF出力物（geography_reference.pdf）は重複のため復元完了後にリポジトリから削除した（git履歴には残存）。
 
 ---
 

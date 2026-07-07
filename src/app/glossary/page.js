@@ -1,7 +1,6 @@
-// 用語集ページ — MDファイルからパースしてGlossaryClientに渡す
-import fs from 'fs';
-import path from 'path';
+// 用語集ページ — MDファイルからパースしてGlossaryClientに渡す（紐付けは src/lib/siteDocs.js）
 import GlossaryClient from './GlossaryClient';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 /**
  * MDファイルから用語エントリを抽出する
@@ -70,12 +69,8 @@ function parseGlossaryMd(content) {
 }
 
 function loadGlossary() {
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'glossary_v1.0.md');
-    if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        return parseGlossaryMd(content);
-    }
-    return [];
+    const content = readSiteDoc('glossary');
+    return content ? parseGlossaryMd(content) : [];
 }
 
 export const metadata = {

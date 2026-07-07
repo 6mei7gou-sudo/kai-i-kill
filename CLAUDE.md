@@ -17,9 +17,9 @@
 docs/
 ├── gm/                      ← GM専用（秘匿設定・内部対立・真相を含む）
 │   │                            ※2026-07にビルド成果物から復元。各ファイル冒頭の注記参照
-│   ├── world_bible_v1.1.md      世界観バイブル（完全版）
-│   ├── glossary_v1.0.md         用語集（GM版・秘匿情報あり）
-│   ├── geography_v1.0.md        地理設定
+│   ├── world_bible.md           世界観バイブル（完全版 v1.1）
+│   ├── glossary.md              用語集（GM版・秘匿情報あり）
+│   ├── geography.md             地理設定
 │   └── factions/                勢力別詳細
 │       ├── haraebe.md               祓部
 │       ├── mercenaries.md           傭兵
@@ -27,9 +27,9 @@ docs/
 │       └── unaffiliated.md          無所属
 │
 ├── player/                  ← プレイヤー向け（秘匿除去済み）
-│   ├── world_bible_v1.0.md      世界観バイブル（公開版）
-│   ├── glossary_v1.0.md         用語集
-│   ├── timeline_v1.0.md         年表
+│   ├── world_bible.md           世界観バイブル（公開版 v1.0）
+│   ├── glossary.md              用語集
+│   ├── timeline.md              年表
 │   ├── character_concept_guide.md  キャラクター造形ガイド（世界観指針）
 │   ├── factions/                勢力別詳細
 │   │   ├── haraebe.md               祓部
@@ -60,17 +60,18 @@ docs/
 │
 ├── legal/                   ← 利用規約・プライバシー・ガイドライン（Web公開）
 ├── specs/                   ← 技術仕様書（ゲームエンジン等）
-├── pdf/gm-beta/             ← PDF出力物
 ├── _build/                  ← ビルドスクリプト
 ├── site/                    ← サイト設計
 ├── CONTEXT.md               ← 引き継ぎコンテキスト
 └── README.md                ← 索引
 ```
 
+※ファイル名にバージョン番号を含めない（改版時のリンク切れ防止）。版は各ファイル冒頭に記載する。
+
 ## 編集の鉄則
 
 1. **GM版 → プレイヤー版の同期**：GM版を更新したら対応するプレイヤー版も確認・更新する
-2. **用語集への反映**：新設定を追加したら `docs/gm/glossary_v1.0.md` と `docs/player/glossary_v1.0.md` にも反映する
+2. **用語集への反映**：新設定を追加したら `docs/gm/glossary.md` と `docs/player/glossary.md` にも反映する
 3. **文体統一**：常体（だ・である調）で統一。敬体（です・ます調）は使わない
 4. **秘匿管理**：プレイヤー版にGM専用情報を混入しない。判断に迷う場合は確認を取る
 5. **マークダウン書式**：見出し（`#`〜`####`）、テーブル（`|...|`）、箇条書き（`-`）を統一的に使用する
@@ -118,6 +119,7 @@ docs/
 ### ディレクトリ
 
 - `src/`：Next.js App Router
+- `src/lib/siteDocs.js`：docs⇔サイトページ紐付けの一元管理（対応表は `docs/README.md` 参照）。docs のファイルを移動・改名したら必ずここを更新する
 - `archive/sheet-app-legacy/`：独立HTML版キャラシ（参考用に退避保管）
 - `supabase/`：DB マイグレーション
 - `src/data/`：Webゲーム用データ（ミッション・シナリオ・スキル等）

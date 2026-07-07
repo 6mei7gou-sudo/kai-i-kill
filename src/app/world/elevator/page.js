@@ -1,8 +1,7 @@
-// 特設：異世界エレベーター — docs/player/special/elevator.md を表示
-import fs from 'fs';
-import path from 'path';
+// 特設：異世界エレベーター — docs/player/special/elevator.md を表示（紐付けは src/lib/siteDocs.js）
 import Link from 'next/link';
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: '異世界エレベーター — 世界を知る — KAI-I//KILL',
@@ -10,8 +9,7 @@ export const metadata = {
 };
 
 export default function ElevatorPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'special', 'elevator.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('special-elevator');
 
     return (
         <div className="container">

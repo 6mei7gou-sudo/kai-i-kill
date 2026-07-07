@@ -62,11 +62,13 @@ docs/
 ├── templates/               ← テンプレート集・公式PC記入フォーマット
 ├── design/                  ← デザインシステム・ガイド
 ├── specs/                   ← 技術仕様書（gameEngine等）
-├── pdf/gm-beta/             ← PDF出力物
 ├── _build/                  ← ビルドスクリプト
 ├── site/                    ← サイト設計
 ├── CONTEXT.md               ← このファイル
 └── README.md                ← 索引
+
+※docs⇔サイトページの紐付けは src/lib/siteDocs.js で一元管理（対応表は docs/README.md）
+※設定資料のファイル名にバージョン番号は含めない（版はファイル冒頭に記載）
 ```
 
 ---

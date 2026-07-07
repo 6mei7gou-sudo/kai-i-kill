@@ -22,7 +22,7 @@
   - Discord Bot等のBot系連携（将来）
 - `templates/` — 投稿用書式・公式PC記入フォーマット（運営ツール）
 - `design/` — デザインシステム・ビジュアル制作資料
-- `_build/`、`pdf/` — ビルド・PDF出力物（運営作業物）
+- `_build/` — PDF等のビルドスクリプト（運営作業物）
 - `site/` — サイト設計資料
 - `specs/` — 技術仕様書（ゲームエンジン等）
 
@@ -33,19 +33,21 @@ Webの投稿機能（キャラシ投稿、怪異調査書投稿、武器投稿�
 
 ## フォルダ構成
 
+バージョン番号はファイル名に含めず、各ファイル冒頭の表記で管理する（改版してもWeb側の参照が壊れないようにするため）。
+
 ```
 docs/
 ├── gm/                  GM専用（秘匿情報含む）
-│   ├── world_bible_v1.1.md      世界観バイブル v1.1【復元版】
-│   ├── glossary_v1.0.md         用語集 v1.0【復元版】
-│   ├── geography_v1.0.md        地理設定 v1.0【復元版】
+│   ├── world_bible.md   世界観バイブル v1.1【復元版】
+│   ├── glossary.md      用語集 v1.0【復元版】
+│   ├── geography.md     地理設定 v1.0【復元版】
 │   └── factions/        勢力別詳細（祓部・傭兵・企業・無所属）【復元版】
 │
 ├── player/              プレイヤー向け（秘匿除去済み）
-│   ├── world_bible      世界観バイブル v1.0
-│   ├── glossary         用語集 v1.0
-│   ├── timeline         年表 v1.0
-│   ├── character_concept_guide   キャラクター造形ガイド（世界観指針）
+│   ├── world_bible.md   世界観バイブル v1.0
+│   ├── glossary.md      用語集 v1.0
+│   ├── timeline.md      年表 v1.0
+│   ├── character_concept_guide.md   キャラクター造形ガイド（世界観指針）
 │   ├── factions/        勢力別詳細（祓部・傭兵・企業・無所属）
 │   └── special/         特設記事（elevator.md — /world/elevator で表示）
 │
@@ -70,9 +72,6 @@ docs/
 │
 ├── legal/               利用規約・プライバシー・ガイドライン（Web公開）
 │
-├── pdf/                 PDF出力物
-│   └── gm-beta/        GMベータ版PDF
-│
 ├── _build/              ビルドスクリプト（非コンテンツ）
 ├── site/                サイト設計
 ├── specs/               技術仕様書（ゲームエンジン等）
@@ -87,7 +86,30 @@ docs/
 - 世界観バイブル・勢力別詳細・用語集 ← `_build/gm_rulebook_full.html`（2026-03頃のGM用総合ルールブックビルド）
 - 地理設定 ← `_build/gen_geography_pdf.py`（PDF生成スクリプトの埋め込みコンテンツ）
 
+復元元のHTMLと旧PDF出力物（`pdf/gm-beta/`）は内容が重複するため復元完了後に削除した（git履歴には残存）。
+
 復元内容はv3.0期のスナップショットであり、その後の設定更新が反映されていない箇所がある。特に企業構成：復元版の `gm/factions/companies.md` には旧構想の「羅刹技研」が登場するが、現行正典（`player/factions/companies.md`）の企業は蒼鉄機工・雷禽重工・銀鎚精機・鴉羽技研・朱鷺崎財閥の5社である。各ファイル冒頭の注記を参照し、現行の正典（`player/` 最新版・`rules/rules_unified.md` v4.0）と突き合わせて更新すること。
+
+---
+
+## Web表示との対応表
+
+サイトページと `docs/` の紐付けは **`src/lib/siteDocs.js` で一元管理**している。文書を追加・移動・改名する場合は必ず siteDocs.js を更新すること。ページ側のコードにパスを直書きしてはならない。
+
+| ルート | 文書 | siteDocs キー |
+|:---|:---|:---|
+| `/world/`・`/world/[section]/`・`/world/full/` | `player/world_bible.md` | `world-bible` |
+| `/world/elevator/` | `player/special/elevator.md` | `special-elevator` |
+| `/glossary/` | `player/glossary.md` | `glossary` |
+| `/timeline/` | `player/timeline.md` | `timeline` |
+| `/organizations/haraebe/` ほか4勢力 | `player/factions/*.md` | `faction-<slug>` |
+| `/terms/` | `legal/terms.md` | `terms` |
+| `/privacy/` | `legal/privacy.md` | `privacy` |
+| `/guidelines/` | `legal/guidelines.md` | `guidelines` |
+
+補足：
+- `/world/` の章構成は `src/app/world/chapters.js` の `CHAPTERS` が `player/world_bible.md` の `## 章番号` と対応する。世界観バイブルの章を増減・改番したら chapters.js も更新すること
+- `docs/gm/`・`docs/rules/` は運営専用のため siteDocs.js に登録してはならない
 
 ---
 

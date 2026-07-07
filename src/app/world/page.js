@@ -1,8 +1,7 @@
-// 世界観ハブ — 5章構成のチャプター選択ページ
+// 世界観ハブ — 5章構成のチャプター選択ページ（紐付けは src/lib/siteDocs.js）
 import Link from 'next/link';
-import fs from 'fs';
-import path from 'path';
 import { CHAPTERS } from './chapters';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: '世界観 — 電脳怪異譚 KAI-I//KILL',
@@ -25,8 +24,7 @@ function getChapterPreview(content, sectionTitle) {
 }
 
 export default function WorldPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'world_bible_v1.0.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('world-bible');
 
     return (
         <div className="container">
