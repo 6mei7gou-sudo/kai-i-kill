@@ -42,3 +42,4 @@
 - **ビルド/テスト**：`npm run build`・`npm test`。環境変数 `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`・`CLERK_SECRET_KEY` が必要（ローカル検証はダミー値で可）。検証は /verify-site を使う
 - **コミットメッセージ**：`fix(scope): 日本語の要約` 形式（type: feat / fix / refactor / chore / docs）
 - **主要ディレクトリ**：`src/`（App Router）・`src/lib/siteDocs.js`（docs⇔ページ紐付け）・`src/data/`（ゲームデータ）・`supabase/`（マイグレーション）・`archive/sheet-app-legacy/`（旧キャラシ、参照のみ）
+- **他のAIエージェント**（OpenAI Codex等）の入口は `AGENTS.md`（本ファイルを正本とする要約）。恒久ルールを変えたら AGENTS.md の要約もずれていないか確認する
