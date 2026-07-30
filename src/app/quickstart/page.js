@@ -80,7 +80,7 @@ export default function QuickstartPage() {
                 <div className="callout">
                     <div className="callout__label">判定の読み方：</div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                        ダイスを振ったら1個を<span className="text-gold">「達成値ダイス」</span>、別の1個を<span className="text-gold">「共鳴ダイス」</span>として選ぶ。達成値4以上で成功。出目6はスペシャル（自動成功＋追加効果）、出目1はファンブル（自動失敗）。
+                        ダイスを振ったら1個を<span className="text-gold">「達成値ダイス」</span>、別の1個を<span className="text-gold">「共鳴ダイス」</span>として選ぶ。達成値4以上で成功。出目6はスペシャル（自動成功＋追加効果）、<span className="text-gold">振ったダイスすべてが1でファンブル</span>（修正に関係なく自動失敗＋恐怖+1）。Dランクは1個振りのため1/6で事故が発生し、ランクが上がるほど激減する。
                     </p>
                 </div>
             </div>
@@ -516,7 +516,7 @@ export default function QuickstartPage() {
                                 <tr>
                                     <td style={{ fontWeight: 700, color: '#44aa88' }}>配属</td>
                                     <td>対応する配属を選択</td>
-                                    <td>各3（計30）</td>
+                                    <td>各3（計36）</td>
                                     <td>役割特化・専門技術</td>
                                 </tr>
                                 <tr>
@@ -595,45 +595,59 @@ export default function QuickstartPage() {
 
             <div style={{ marginBottom: 'var(--space-2xl)' }}>
                 <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
-                    判定のたびに感情が蓄積する。共鳴が深まればギフトが解放されるが、10点に達すると代償が来る。<span className="text-gold">浄化だけは臨界が恩恵になる。</span>
+                    共鳴盤は<span className="text-gold">卓全体で共有する</span>感情の記録盤。判定のたびに感情が蓄積し、共鳴が深まればギフトが解放されるが、10点に達すると代償が来る。<span className="text-gold">浄化だけは臨界が恩恵になる。</span>
                 </p>
+
+                <div className="callout" style={{ marginBottom: 'var(--space-lg)' }}>
+                    <div className="callout__label">共鳴ダイスの決め方：</div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
+                        2個以上のダイスを振った判定では、達成値ダイスに選ばなかったダイスから1個を選び、その<span className="text-gold">出目に対応する感情メーター</span>に1点置く。Dランクは1個振りのため共鳴ダイスを生まない（力なき者は怪異と共鳴すらできない）。
+                    </p>
+                </div>
 
                 <div className="content-body" style={{ marginBottom: 'var(--space-lg)' }}>
                     <table>
                         <thead>
                             <tr>
+                                <th>出目</th>
                                 <th>感情</th>
-                                <th>上昇する場面</th>
+                                <th>ダイス以外で上昇する場面（イベント加算 +2）</th>
                                 <th>臨界（10点）の代償</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>1</td>
                                 <td style={{ fontWeight: 700, color: '#8b2020' }}>恐怖</td>
-                                <td>逃走・防御に失敗した時、怪異のルールを破った時</td>
+                                <td>逃走・防御に失敗した時、怪異のルールを破った時、ファンブル時</td>
                                 <td>次の魂判定が自動ファンブル</td>
                             </tr>
                             <tr>
-                                <td style={{ fontWeight: 700, color: '#cc4400' }}>怒り</td>
-                                <td>攻撃スペシャル時、仲間が傷ついた時の行動</td>
-                                <td>1ラウンド強制：最も近い敵への最大火力攻撃のみ</td>
-                            </tr>
-                            <tr>
-                                <td style={{ fontWeight: 700, color: '#4488cc' }}>哀愁</td>
-                                <td>解明鍵を入手した時、NPCとの別れの場面</td>
-                                <td>次の調査判定すべて−1。信念1消費</td>
-                            </tr>
-                            <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>2</td>
                                 <td style={{ fontWeight: 700, color: '#cc8800' }}>焦燥</td>
                                 <td>制限ラウンド残り1で行動した時、手がかりを失った時</td>
                                 <td>次の行動宣言を先に公開（奇襲不可）</td>
                             </tr>
                             <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>3</td>
+                                <td style={{ fontWeight: 700, color: '#4488cc' }}>哀愁</td>
+                                <td>解明鍵を入手した時、NPCとの別れの場面</td>
+                                <td>次の調査判定すべて−1。信念1消費</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>4</td>
+                                <td style={{ fontWeight: 700, color: '#cc4400' }}>怒り</td>
+                                <td>攻撃スペシャル時、仲間が傷ついた直後の行動</td>
+                                <td>1ラウンド強制：最も近い敵への最大火力攻撃のみ</td>
+                            </tr>
+                            <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>5</td>
                                 <td style={{ fontWeight: 700, color: '#8844aa' }}>渇望</td>
                                 <td>特殊素材・禁忌の力を使用した時</td>
                                 <td>次の特殊行動のコストが倍増</td>
                             </tr>
                             <tr>
+                                <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, textAlign: 'center' }}>6</td>
                                 <td style={{ fontWeight: 700, color: '#44aa88' }}>浄化</td>
                                 <td>解明完了宣言成功時、信念を全消費した時</td>
                                 <td style={{ color: 'var(--accent-gold)' }}>代償なし。大浄化ギフト発動</td>
@@ -647,9 +661,9 @@ export default function QuickstartPage() {
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', letterSpacing: '0.1em', marginBottom: 'var(--space-xs)' }}>
                             AWAKENING GIFTS
                         </div>
-                        <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>覚醒ギフト</h3>
+                        <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>覚醒ギフト（全PC共用）</h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                            共鳴メーターが<span className="text-gold">1〜3点で初級</span>、<span className="text-gold">4〜6点で中級</span>、<span className="text-gold">7〜9点で上級</span>のギフトが解放される。感情を溜めるほど強い力が使えるが、臨界に近づく。
+                            共鳴メーターが<span className="text-gold">1〜3点で初級</span>、<span className="text-gold">4〜6点で中級</span>、<span className="text-gold">7〜9点で上級</span>のギフトが解放され、<span className="text-gold">どのPCでも使用できる</span>。使用コストは「そのメーターを+1する」こと — 力を使うほど感情は昂ぶり、臨界へ近づく。
                         </p>
                     </div>
                     <div style={{ background: 'var(--bg-card)', padding: 'var(--space-lg)', border: 'var(--border-subtle)' }}>
@@ -658,7 +672,7 @@ export default function QuickstartPage() {
                         </div>
                         <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-sm)' }}>臨界</h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8 }}>
-                            10点に達すると代償が発動し、メーターは0にリセットされる。<span className="text-gold">浄化だけは代償ではなく大浄化（味方全体への恩恵）が発動する。</span>
+                            10点に達すると代償が発動し、メーターは0にリセットされる。代償の対象は臨界の1点を置いた（または発生させた）PC。<span className="text-gold">浄化だけは代償ではなく大浄化（味方全体への恩恵）が発動する。</span>
                         </p>
                     </div>
                 </div>
