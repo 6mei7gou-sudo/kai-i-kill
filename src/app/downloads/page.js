@@ -3,7 +3,7 @@ import downloads from '@/data/downloads.json';
 
 export const metadata = {
     title: '画像ダウンロード — 電脳怪異譚 KAI-I//KILL',
-    description: 'ロゴ・企業エンブレム・サムネイル・勢力エンブレムなどの公式画像配布ページ。',
+    description: 'ロゴ・企業エンブレム・サムネイル・勢力エンブレム・五管区地図などの公式画像配布ページ。',
 };
 
 const totalCount = downloads.reduce((sum, c) => sum + c.items.length, 0);
@@ -15,13 +15,13 @@ export default function DownloadsPage() {
                 <div className="page-header__badge">DOWNLOADS</div>
                 <h1 className="page-header__title">画像ダウンロード</h1>
                 <div className="page-header__subtitle">
-                    公式素材：ロゴ・企業エンブレム・サムネイル・勢力エンブレム
+                    公式素材：ロゴ・企業エンブレム・サムネイル・勢力エンブレム・地図
                 </div>
             </div>
 
             <div className="callout" style={{ marginBottom: 'var(--space-xl)' }}>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, margin: 0 }}>
-                    画像はクリックでダウンロードできます。
+                    画像またはボタンをクリックするとダウンロードできます。
                     利用にあたっては <a href="/guidelines/" style={{ color: 'var(--accent-gold)' }}>二次創作・イベント参加ガイドライン</a> をご確認ください。
                 </p>
             </div>
@@ -89,26 +89,35 @@ export default function DownloadsPage() {
 
 function DownloadCard({ item, category }) {
     const url = `/downloads/${item.file}`;
-    // 所属組織・企業エンブレム・地図は白背景で表示（紋章や地図は明色背景の方が視認しやすいため）
-    const isLightBgCategory = category === '所属組織' || category === '企業エンブレム' || category === '地図';
+    // 表示用の軽量版（preview）があればサムネイルにはそれを使い、ダウンロードは原本（file）を渡す
+    const previewUrl = item.preview ? `/downloads/${item.preview}` : url;
+    // 所属組織・企業エンブレムは白背景で表示（紋章は明色背景の方が視認しやすいため）。地図はダーク基調なので暗背景
+    const isLightBgCategory = category === '所属組織' || category === '企業エンブレム';
     const imageBg = isLightBgCategory ? '#ffffff' : 'rgba(0,0,0,0.3)';
     return (
         <div style={{
             background: 'var(--bg-card)', border: 'var(--border-subtle)',
             display: 'flex', flexDirection: 'column',
         }}>
-            <div style={{
-                width: '100%', aspectRatio: '1 / 1',
-                background: imageBg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden',
-            }}>
+            <a
+                href={url}
+                download={item.file}
+                aria-label={`${item.name} をダウンロード`}
+                style={{
+                    width: '100%', aspectRatio: '1 / 1',
+                    background: imageBg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                }}
+            >
                 <img
-                    src={url}
+                    src={previewUrl}
                     alt={item.name}
+                    loading="lazy"
+                    decoding="async"
                     style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 />
-            </div>
+            </a>
             <div style={{ padding: 'var(--space-md)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                 <div style={{ fontWeight: 700, fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)' }}>
                     {item.name}

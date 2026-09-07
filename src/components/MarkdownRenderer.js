@@ -229,6 +229,8 @@ function renderBlock(block, idx, sectionMap) {
                     <img
                         src={block.src}
                         alt={block.alt || ''}
+                        loading="lazy"
+                        decoding="async"
                         style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
                     />
                     {block.alt && (

@@ -17,7 +17,8 @@
     "items": [
       {
         "name": "架空日本 五管区地図 v1.1",
-        "file": "map.1.1.png"
+        "file": "map.png",
+        "preview": "map.webp"
       }
     ]
   },
@@ -51,15 +52,15 @@
       },
       {
         "name": "蒼鉄機工",
-        "file": "Soutetsu-emblem.png"
+        "file": "soutetsu-emblem.png"
       },
       {
         "name": "雷禽重工",
-        "file": "Raikin-emblem.png"
+        "file": "raikin-emblem.png"
       },
       {
         "name": "銀鎚精機",
-        "file": "Gintsuti-emblem.png"
+        "file": "gintsuchi-emblem.png"
       }
     ]
   }
