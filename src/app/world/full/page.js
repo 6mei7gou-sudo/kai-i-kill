@@ -1,8 +1,7 @@
-// 世界観バイブル — 全文1ページ表示
-import fs from 'fs';
-import path from 'path';
+// 世界観バイブル — 全文1ページ表示（紐付けは src/lib/siteDocs.js）
 import Link from 'next/link';
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: '世界観（全文） — 電脳怪異譚 KAI-I//KILL',
@@ -10,8 +9,7 @@ export const metadata = {
 };
 
 export default function WorldFullPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'world_bible_v1.0.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('world-bible');
 
     return (
         <>

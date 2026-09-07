@@ -1,7 +1,6 @@
-// 二次創作・イベント参加ガイドライン — docs/legal/guidelines.md を表示
-import fs from 'fs';
-import path from 'path';
+// 二次創作・イベント参加ガイドライン — docs/legal/guidelines.md を表示（紐付けは src/lib/siteDocs.js）
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: '二次創作・イベント参加ガイドライン — 電脳怪異譚 KAI-I//KILL',
@@ -9,8 +8,7 @@ export const metadata = {
 };
 
 export default function GuidelinesPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'legal', 'guidelines.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('guidelines');
 
     return (
         <div className="container">

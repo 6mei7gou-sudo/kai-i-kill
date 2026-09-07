@@ -1,7 +1,6 @@
-// 利用規約 — docs/legal/terms.md を表示
-import fs from 'fs';
-import path from 'path';
+// 利用規約 — docs/legal/terms.md を表示（紐付けは src/lib/siteDocs.js）
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: '利用規約 — 電脳怪異譚 KAI-I//KILL',
@@ -9,8 +8,7 @@ export const metadata = {
 };
 
 export default function TermsPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'legal', 'terms.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('terms');
 
     return (
         <div className="container">

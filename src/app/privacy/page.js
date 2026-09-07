@@ -1,7 +1,6 @@
-// プライバシーポリシー — docs/legal/privacy.md を表示
-import fs from 'fs';
-import path from 'path';
+// プライバシーポリシー — docs/legal/privacy.md を表示（紐付けは src/lib/siteDocs.js）
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
 export const metadata = {
     title: 'プライバシーポリシー — 電脳怪異譚 KAI-I//KILL',
@@ -9,8 +8,7 @@ export const metadata = {
 };
 
 export default function PrivacyPage() {
-    const filePath = path.join(process.cwd(), 'docs', 'legal', 'privacy.md');
-    const content = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
+    const content = readSiteDoc('privacy');
 
     return (
         <div className="container">

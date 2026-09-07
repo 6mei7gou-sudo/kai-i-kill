@@ -120,9 +120,9 @@
 
 ## 関連資料
 
-- **世界観全般**：`docs/player/world_bible_v1.0.md`
+- **世界観全般**：`docs/player/world_bible.md`
 - **陣営の詳細**：`docs/player/factions/`（祓部・傭兵・企業・無所属）
-- **用語集**：`docs/player/glossary_v1.0.md`
-- **年表**：`docs/player/timeline_v1.0.md`
+- **用語集**：`docs/player/glossary.md`
+- **年表**：`docs/player/timeline.md`
 
 能力値・スキル・装備・成長などの具体仕様は、ゲーム側のキャラクター作成機能、または判定メカニクス仕様書（`docs/rules/`、運営向け）を参照すること。

@@ -7,8 +7,9 @@ import os
 import re
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-GM_DIR = os.path.join(os.path.dirname(BASE), '..', 'gm')
-GM_DIR = os.path.normpath(GM_DIR)
+DOCS_DIR = os.path.normpath(os.path.join(BASE, '..'))
+GM_DIR = os.path.join(DOCS_DIR, 'gm')
+RULES_DIR = os.path.join(DOCS_DIR, 'rules')
 
 def read_file(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -24,38 +25,39 @@ def strip_title(md_text):
     return '\n'.join(lines)
 
 # ファイル読み込み順序（論理構成）
+# ※パスはリポジトリの現行構成（docs/gm/・docs/rules/）を参照する
 sections = [
     # Part I: 世界観
     ("PART I　世界観", None),
-    ("世界観バイブル", os.path.join(GM_DIR, 'world_bible_v1.1.md')),
+    ("世界観バイブル", os.path.join(GM_DIR, 'world_bible.md')),
 
     # Part II: ゲームルール
     ("PART II　ゲームルール", None),
-    ("統合ルールブック v3.0", os.path.join(BASE, 'rules_unified.md')),
+    ("統合ルールブック v4.0", os.path.join(RULES_DIR, 'rules_unified.md')),
 
     # Part III: 戦闘詳細
     ("PART III　戦闘詳細ルール", None),
-    ("戦闘ルール補遺 v2.0", os.path.join(BASE, 'combat_hp_v2.md')),
+    ("戦闘ルール補遺 v4.0", os.path.join(RULES_DIR, 'combat_hp.md')),
 
     # Part IV: 装備・サイバネティクス
     ("PART IV　装備・サイバネティクス", None),
-    ("武器カスタムデータ", os.path.join(BASE, 'weapon_custom_data.md')),
-    ("サイバネティクス補遺", os.path.join(BASE, 'cybernetics_v1.md')),
+    ("武器カスタムデータ", os.path.join(RULES_DIR, 'weapon_custom_data.md')),
+    ("サイバネティクス補遺", os.path.join(RULES_DIR, 'cybernetics.md')),
 
     # Part V: 組織詳細
     ("PART V　組織詳細設定", None),
-    ("祓部 詳細設定", os.path.join(GM_DIR, 'detail_haraebe.md')),
-    ("傭兵 詳細設定", os.path.join(GM_DIR, 'detail_mercenaries.md')),
-    ("企業 詳細設定", os.path.join(GM_DIR, 'detail_companies.md')),
-    ("無所属 詳細設定", os.path.join(GM_DIR, 'detail_unaffiliated.md')),
+    ("祓部 詳細設定", os.path.join(GM_DIR, 'factions', 'haraebe.md')),
+    ("傭兵 詳細設定", os.path.join(GM_DIR, 'factions', 'mercenaries.md')),
+    ("企業 詳細設定", os.path.join(GM_DIR, 'factions', 'companies.md')),
+    ("無所属 詳細設定", os.path.join(GM_DIR, 'factions', 'unaffiliated.md')),
 
     # Part VI: 追加データブック
     ("PART VI　追加データブック《禁域解放》", None),
-    ("追加データブック《禁域解放》 v1.0", os.path.join(BASE, 'expansion_v1.md')),
+    ("追加データブック《禁域解放》 v1.0", os.path.join(RULES_DIR, 'expansion.md')),
 
     # Appendix: 用語集
     ("APPENDIX　用語集", None),
-    ("用語集（GM版）", os.path.join(GM_DIR, 'glossary_v1.0.md')),
+    ("用語集（GM版）", os.path.join(GM_DIR, 'glossary.md')),
 ]
 
 # Markdown統合
@@ -76,7 +78,7 @@ combined_md = """---
 | パート | 内容 |
 |:---|:---|
 | **PART I** | 世界観バイブル——設定の全体像 |
-| **PART II** | 統合ルールブック v3.0——判定・共鳴記録・戦闘・魔法・異能・キャラ作成・所属・装備・ギフト・成長 |
+| **PART II** | 統合ルールブック v4.0——判定・共鳴記録・戦闘・魔法・異能・キャラ作成・所属・装備・スキル・成長 |
 | **PART III** | 戦闘詳細ルール——HP・ダメージ・状態異常・連携・撤退・戦闘例 |
 | **PART IV** | 装備・サイバネティクス——カスタムオプション・ベース装備リスト・義体 |
 | **PART V** | 組織詳細設定——祓部・傭兵・企業・無所属の内部構造と秘匿情報 |

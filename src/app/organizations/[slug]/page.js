@@ -1,27 +1,22 @@
-// 組織詳細ページ — 各組織のMDファイルを直接レンダリング
-import fs from 'fs';
-import path from 'path';
+// 組織詳細ページ — 各組織のMDファイルを直接レンダリング（紐付けは src/lib/siteDocs.js）
 import MdRenderer from '@/components/MarkdownRenderer';
+import { readSiteDoc } from '@/lib/siteDocs';
 
-// スラッグとファイル名・メタデータの対応
+// スラッグと表示メタデータの対応（本文は siteDocs の faction-<slug> キーで読む）
 const ORG_META = {
     haraebe: {
-        file: 'haraebe.md',
         title: '祓部（はらえべ）詳細',
         badge: 'HARAEBE — PUBLIC AGENCY',
     },
     companies: {
-        file: 'companies.md',
         title: '企業詳細',
         badge: 'COMPANIES — CORPORATE ENTITIES',
     },
     mercenaries: {
-        file: 'mercenaries.md',
         title: '傭兵詳細',
         badge: 'MERCENARIES — INDEPENDENT FORCES',
     },
     unaffiliated: {
-        file: 'unaffiliated.md',
         title: '無所属詳細',
         badge: 'UNAFFILIATED — LONE OPERATORS',
     },
@@ -41,13 +36,8 @@ export async function generateMetadata({ params }) {
 }
 
 function loadOrgContent(slug) {
-    const meta = ORG_META[slug];
-    if (!meta) return '';
-    const filePath = path.join(process.cwd(), 'docs', 'player', 'factions', meta.file);
-    if (fs.existsSync(filePath)) {
-        return fs.readFileSync(filePath, 'utf-8');
-    }
-    return '';
+    if (!ORG_META[slug]) return '';
+    return readSiteDoc(`faction-${slug}`);
 }
 
 export default async function OrgDetailPage({ params }) {

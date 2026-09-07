@@ -4,7 +4,10 @@ node_modules/
 out/
 
 # GM専用資料（秘匿）
-docs/gm/
+# 2026-07: docs/gm/ の除外を解除。同内容が docs/_build/gm_rulebook_full.html と
+# docs/pdf/gm-beta/ として既にコミット済みで除外の実効性がなく、原稿の紛失リスクの方が
+# 大きいため（実際に原稿が失われ、2026-07にビルド成果物から復元した経緯がある）。
+# ※Webサイトへの非公開方針（docs/README.md の公開区分）は従来どおり変わらない
 
 # 環境変数
 .env
