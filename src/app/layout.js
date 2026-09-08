@@ -106,7 +106,7 @@ export default function RootLayout({ children }) {
                   />
                 </Link>
                 <div className="site-sidebar__subtitle">討伐者ハンドブック</div>
-                <div className="site-sidebar__version">1.0.0 — PLAYER DOC</div>
+                <div className="site-sidebar__version">1.1.0 — PLAYER DOC</div>
               </div>
 
               {/* 認証ボタン */}
