@@ -15,6 +15,7 @@ import RpCharacterSheet from '@/components/RpCharacterSheet';
 import { exportAsImage } from '@/lib/exportImage';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
+import { hasGameData } from '@/lib/characterBuild';
 
 const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
@@ -179,6 +180,8 @@ export default function CharacterDetail({ id }) {
     const stagePlus = e.stage_plus || [];
     const skills = e.skills || [];
     const bgSkill = getBackgroundSkill(e.background);
+    // ゲームデータ（ステータス・戦闘用データ）を持つシートか。RPシートのみなら戦闘系セクションは出さない
+    const gameData = hasGameData(e);
 
     // スキル名→データ逆引き
     const allSkills = getAvailableSkills({
@@ -201,7 +204,7 @@ export default function CharacterDetail({ id }) {
 
             {/* ===== ヒーロー ===== */}
             <div style={{
-                marginTop: 'var(--space-lg)', padding: 'var(--space-2xl)',
+                marginTop: 'var(--space-lg)', marginBottom: 'var(--space-lg)', padding: 'var(--space-2xl)',
                 background: `linear-gradient(135deg, ${affColor}08, rgba(0,0,0,0.6))`,
                 border: `1px solid ${affColor}33`, position: 'relative', overflow: 'hidden',
             }}>
@@ -238,7 +241,7 @@ export default function CharacterDetail({ id }) {
                         )}
                         <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: '0 0 4px', display: 'flex', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
                             {e.character_name}
-                            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--accent-gold)', verticalAlign: 'middle' }}>Lv.{e.level || 1}</span>
+                            {gameData && <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: 'var(--accent-gold)', verticalAlign: 'middle' }}>Lv.{e.level || 1}</span>}
                             {e.is_official && <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '2px 8px', background: 'rgba(192,208,224,0.12)', border: '1px solid rgba(192,208,224,0.3)', color: '#c0d0e0', verticalAlign: 'middle' }}>★ OFFICIAL</span>}
                             {e.title && <span style={{ fontSize: 'var(--font-size-md)', fontWeight: 400, color: 'var(--text-muted)' }}>「{e.title}」</span>}
                             {e.active_title && (
@@ -274,9 +277,44 @@ export default function CharacterDetail({ id }) {
                 </div>
             </div>
 
+            {/* ===== RPシートのみ（ゲームデータ未設定）の案内 ===== */}
+            {!gameData && (
+                <div style={{ ...SS.section, borderStyle: 'dashed', borderColor: 'rgba(212,175,55,0.25)' }}>
+                    <div style={SS.sTitle}>RP SHEET</div>
+                    <h2 style={SS.sHead}>RPシート（ゲームデータ未設定）</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: isOwner ? 'var(--space-md)' : 0 }}>
+                        このキャラクターはロールプレイ用のプロフィールだけで登録されている。判定に使うステータス（背景・配属・戦闘流派・スキル・装備）は、編集画面で「ゲームデータを付ける」をオンにすると追加できる。
+                    </p>
+                    {isOwner && (
+                        <Link href={`/create/character/${id}/`} style={{ display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold-border)', padding: '6px 16px', textDecoration: 'none' }}>ゲームデータを追加する</Link>
+                    )}
+                </div>
+            )}
+
+            {/* ===== RPプロフィール ===== */}
+            {(e.appearance || e.personality || e.speech_style) && (
+                <div style={SS.section}>
+                    <div style={SS.sTitle}>RP PROFILE</div>
+                    <h2 style={SS.sHead}>外見・性格・口調</h2>
+                    {e.appearance && <><div style={SS.label}>外見</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.appearance}</div></>}
+                    {e.personality && <><div style={SS.label}>性格</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.personality}</div></>}
+                    {e.speech_style && <><div style={SS.label}>口調・一人称</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.speech_style}</div></>}
+                </div>
+            )}
+
+            {/* ===== ストーリー ===== */}
+            {(e.fate || e.backstory) && (
+                <div style={SS.section}>
+                    <div style={SS.sTitle}>STORY</div>
+                    <h2 style={SS.sHead}>因縁・バックストーリー</h2>
+                    <Field label="因縁" value={e.fate} />
+                    {e.backstory && <><div style={SS.label}>バックストーリー</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.backstory}</div></>}
+                </div>
+            )}
+
             {/* ===== 実績・称号 ===== */}
             {(achievements.length > 0 || isOwner) && (
-                <div style={{ ...SS.section, marginTop: 'var(--space-lg)' }}>
+                <div style={SS.section}>
                     <div style={SS.sTitle}>ACHIEVEMENTS</div>
                     <h2 style={SS.sHead}>実績・称号</h2>
                     {achievements.length > 0 && (
@@ -316,7 +354,7 @@ export default function CharacterDetail({ id }) {
             )}
 
             {/* ===== レベルアップ ===== */}
-            {isOwner && (e.level || 1) < (e.is_official ? 20 : 5) && (() => {
+            {gameData && isOwner && (e.level || 1) < (e.is_official ? 20 : 5) && (() => {
                 const PL_CP_TABLE = {
                     1: 100, 2: 150, 3: 250, 4: 400,
                     5: 500, 6: 600, 7: 700, 8: 800, 9: 900,
@@ -398,7 +436,7 @@ export default function CharacterDetail({ id }) {
             })()}
 
             {/* ===== ステータスポイント（所有者のみ） ===== */}
-            {isOwner && (() => {
+            {gameData && isOwner && (() => {
                 const earned = Math.floor((e.level || 1) / 5);
                 const used = e.status_points_used || 0;
                 const available = earned - used;
@@ -420,6 +458,7 @@ export default function CharacterDetail({ id }) {
             })()}
 
             {/* ===== 能力値（ランク制） ===== */}
+            {gameData && (
             <div style={SS.section}>
                 <div style={SS.sTitle}>ABILITIES</div>
                 <h2 style={SS.sHead}>能力値ランク</h2>
@@ -484,9 +523,10 @@ export default function CharacterDetail({ id }) {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--accent-gold)' }}>{e.belief_points || 5}</span>
                 </div>
             </div>
+            )}
 
             {/* ===== スキル ===== */}
-            {(skills.length > 0 || bgSkill) && (
+            {gameData && (skills.length > 0 || bgSkill) && (
                 <div style={SS.section}>
                     <div style={SS.sTitle}>SKILLS</div>
                     <h2 style={SS.sHead}>取得スキル</h2>
@@ -678,27 +718,6 @@ export default function CharacterDetail({ id }) {
                 </div>
             )}
 
-            {/* ===== RPプロフィール ===== */}
-            {(e.appearance || e.personality || e.speech_style) && (
-                <div style={SS.section}>
-                    <div style={SS.sTitle}>RP PROFILE</div>
-                    <h2 style={SS.sHead}>外見・性格・口調</h2>
-                    {e.appearance && <><div style={SS.label}>外見</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.appearance}</div></>}
-                    {e.personality && <><div style={SS.label}>性格</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.personality}</div></>}
-                    {e.speech_style && <><div style={SS.label}>口調・一人称</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.speech_style}</div></>}
-                </div>
-            )}
-
-            {/* ===== ストーリー ===== */}
-            {(e.fate || e.backstory) && (
-                <div style={SS.section}>
-                    <div style={SS.sTitle}>STORY</div>
-                    <h2 style={SS.sHead}>因縁・バックストーリー</h2>
-                    <Field label="因縁" value={e.fate} />
-                    {e.backstory && <><div style={SS.label}>バックストーリー</div><div style={{ ...SS.value, whiteSpace: 'pre-wrap' }}>{e.backstory}</div></>}
-                </div>
-            )}
-
             {/* ===== 関連リンク ===== */}
             {(e.related_anomalies || e.related_characters || e.related_factions) && (
                 <div style={SS.section}>
@@ -819,9 +838,9 @@ export default function CharacterDetail({ id }) {
                     {exporting ? '生成中...' : 'RP用IDカード'}
                 </button>
                 {[
-                    { ref: charCardRef, label: '名刺カード', file: 'card', size: { width: 910, height: 550 } },
-                    { ref: fullSheetRef, label: 'ステータスシート', file: 'sheet', size: { width: 1480, height: 2106 } },
                     { ref: rpSheetRef, label: 'RPシート', file: 'rpsheet', size: { width: 1480 } },
+                    { ref: charCardRef, label: '名刺カード', file: 'card', size: { width: 910, height: 550 } },
+                    ...(gameData ? [{ ref: fullSheetRef, label: 'ステータスシート', file: 'sheet', size: { width: 1480, height: 2106 } }] : []),
                 ].map(({ ref, label, file, size }) => (
                     <button
                         key={file}

@@ -24,12 +24,14 @@
 
 - [ ] Phase 3本体：PBWセッションルーム、IC投稿、状態パネル、リソース変換
 - [ ] Supabase CLIマイグレーション正式化、RLSポリシー強化（Phase 1持ち越し）
-- [ ] `/game-guide/` 新設（判定の基本概念のみ。Phase 1予定が未着手。`/quickstart/` との統合も選択肢）
+- [ ] `/game-guide/` 新設（判定の基本概念のみ。Phase 1予定が未着手。2026-09-08の再設計で `/quickstart/` 02章「ゲームデータの読み方」が基本概念を担うようになったため、統合で済ませるか要判断）
+- [ ] スキル初期スロット数の齟齬：`docs/rules/rules_unified.md` 9-1 は「スキルを2つ選択」、Web実装（`SKILL_SLOTS_BY_LEVEL`）は Lv1=1・3レベルごとに+1。どちらを正とするか決めて片方を直す
 - [ ] GM復元版の突き合わせ更新：`docs/gm/factions/companies.md` の「羅刹技研」を現行5社体制（鴉羽技研・朱鷺崎財閥）に改稿。他の復元ファイルも冒頭注記に従い確認
 - [ ] `.claude/settings.local.json` の旧版に個人パスが残存（git履歴）。履歴からの完全除去（filter-repo＋force push）を行うかはオーナー判断待ち
 
 ## 完了ログ（新しい順）
 
+- 2026-09-08：キャラシ生成器・クイックスタート再設計（RPシート既定／ゲームデータはスイッチ追加／ステータス概要パネル／共有データ `characterBuildData.js`・`characterBuild.js`／テスト63件）
 - 2026-07-08：docs全面再編（gm/復元・安定名化・siteDocs.js一元化・重複成果物削除）。AI環境監査に基づく指示書・記憶ファイルのスリム化
 - 2026-05-27：quickstart/character-guide に実験体・稀人セクションを反映（コミット bdb8d2c）
 - 2026-04-19：侵食率削除完走／新キャラカード（名刺サイズ）／`/character-sheet/` 廃止・`/create/character/` に出力機能統合

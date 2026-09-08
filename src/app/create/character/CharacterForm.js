@@ -1,112 +1,22 @@
-// キャラクターシート投稿フォーム — v4.0 6軸スキルシステム対応
+// キャラクターシート作成・編集フォーム — v4.0
+// 既定は「RPシート（簡易キャラクターシート）」。ゲームデータ（ステータス・戦闘用データ）は
+// スイッチで追加する。ステータスの構造は変えず、見せ方だけを一本道にしている。
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { S, FormSelect, FormInput, FormTextArea } from '@/components/FormFields';
-import ImageUploader from '@/components/ImageUploader';
-import '@/components/ImageUploader.css';
-import CharacterCard from '@/components/CharacterCard';
-import RpIdCard from '@/components/RpIdCard';
-import FullCharacterSheet from '@/components/FullCharacterSheet';
-import { exportAsImage } from '@/lib/exportImage';
-import { COMBAT_STYLE_STATS, COMBAT_STYLE_NAMES, BASE_WEAPONS, FORM_OPTIONS, EQUIPMENT_FORM_STATS, EQUIPMENT_FORM_NAMES, ORIGIN_TIER, ORIGIN_NAMES, STYLE_TO_OLD, OLD_TO_STYLE, FORM_TO_OLD, OLD_TO_FORM, WEAPON_TYPE_STATS, WEAPON_SUBTYPES, EQUIPMENT_SUBTYPES, CUSTOM_OPTIONS, findOption, getWeaponSpec } from '@/data/weaponData';
-import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
-import WeaponStatsPanel from '@/components/WeaponStatsPanel';
-import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
-import { getAvailableSkills, getBackgroundSkill, getSkillTypeColor, getAxisColor } from '@/data/skillData';
-
-// ===== 定数定義 =====
-
-const RANKS = ['D', 'C', 'B', 'A', 'S'];
-const RANK_DICE = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6+特典' };
-
-const ABILITIES = [
-    { key: 'rank_tai', name: '体', reading: 'たい', desc: '格闘・突破・物理耐久' },
-    { key: 'rank_haya', name: '疾', reading: 'はや', desc: '先手・回避・追跡' },
-    { key: 'rank_shiki', name: '識', reading: 'しき', desc: '調査・知識・文献・解明' },
-    { key: 'rank_han', name: '判', reading: 'はん', desc: '解明宣言・看破・戦術判断' },
-    { key: 'rank_shiya', name: '察', reading: 'さつ', desc: '怪異感知・観察・証言聴取' },
-    { key: 'rank_jutsu', name: '術', reading: 'じゅつ', desc: '魔法行使・魔導具操作' },
-    { key: 'rank_kon', name: '魂', reading: 'こん', desc: '信念維持・精神防御' },
-];
-
-// 背景（6種）— 2能力値がC昇格 + 背景スキル自動取得
-const BACKGROUNDS = [
-    { id: '神社育ち', upgrades: ['rank_shiya', 'rank_kon'], desc: '禁足地のデータベースへのアクセス権。古い怪異の解明鍵①の難易度-1' },
-    { id: '鋼の肉体', upgrades: ['rank_tai', 'rank_haya'], desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
-    { id: '都市伝説研究者', upgrades: ['rank_shiki', 'rank_han'], desc: '調査スペシャル時に解明鍵追加入手の可能性' },
-    { id: '元実験体', upgrades: ['rank_kon'], desc: '魂C昇格。渇望の覚醒ギフトを1段階低コストで使用可能' },
-    { id: 'ハッカー上がり', upgrades: ['rank_shiki', 'rank_haya'], desc: 'NGT魔法判定+1。独立型装備のCP+3' },
-    { id: '魔道資格者', upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
-];
-
-// 配属（所属に連動）— 1能力値がB昇格 + 配属スキル解放
-const ASSIGNMENTS = {
-    '祓部': [
-        { id: '古怪班', upgrade: 'rank_shiki', desc: '古い怪異の調査・解明特化。伝承・禁足地の知識' },
-        { id: '新怪班', upgrade: 'rank_shiya', desc: '現代型怪異の追跡・分析。SNS・デジタルメディア' },
-        { id: '封印班', upgrade: 'rank_kon', desc: '禁足地の管理と特級怪異の封印。浄化の専門家' },
-        { id: '機動班', upgrade: 'rank_tai', desc: '前線投入の実働部隊。直轄即応隊・広域機動班' },
-    ],
-    '傭兵': [
-        { id: '突撃型', upgrade: 'rank_tai', desc: '火力と耐久の前衛。傭兵の花形' },
-        { id: '偵察型', upgrade: 'rank_shiya', desc: '情報収集と戦場分析。目と耳の専門家' },
-        { id: '技術型', upgrade: 'rank_jutsu', desc: '装備改造と魔法技術。後方支援' },
-        { id: '護衛型', upgrade: 'rank_han', desc: '要人護衛と脅威評価。交渉と戦術判断の専門家' },
-    ],
-    '無所属': [
-        { id: '野良討伐者', upgrade: 'rank_tai', desc: '組織に頼らず腕一本で戦う。生存特化' },
-        { id: '裏社会の住人', upgrade: 'rank_han', desc: '情報網と人脈で勝負。交渉と策略' },
-        { id: '在野研究者', upgrade: 'rank_shiki', desc: '独自に怪異を研究する学者肌' },
-        { id: '退魔師', upgrade: 'rank_kon', desc: '独学で祓いの術を身につけた一匹狼' },
-    ],
-};
-
-// 覚醒パターン
-const AWAKENINGS = [
-    { id: '先天覚醒型', desc: '生まれつき素養を持ち訓練で開花', effect: '術または魂がCでスタート（背景とは別枠）' },
-    { id: 'ショック覚醒型', desc: '怪異に関わる強烈な体験が引き金', effect: '恨み/喪失に対する判定+1。初期信念+1' },
-    { id: '実験覚醒型', desc: '人体実験で強制覚醒', effect: '察判定+1（怪異への過敏さ）' },
-    { id: '接触覚醒型', desc: '怪異の核や特殊素材への長期接触', effect: '察判定に常時+1（怪異の気配への鋭敏さ）' },
-];
-
-// 戦闘流派（新用語）— form.weapon_type にはDB互換で「斬撃型」等を格納
-const COMBAT_STYLES = COMBAT_STYLE_NAMES.map(name => ({
-    id: name,                          // 表示用: 斬撃, 打撃, ...
-    storeId: STYLE_TO_OLD[name],       // DB格納用: 斬撃型, 打撃型, ...
-    ...COMBAT_STYLE_STATS[name],
-}));
-
-const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
-
-const AFFILIATION_INFO = {
-    '祓部': { bonus: '識の調査+2（3回/セッション）＋援軍要請1回', constraint: '任務命令への服従が義務。装備・行動に法的制限' },
-    '傭兵': { bonus: '装備1ランクUP、二つ名+1（常時）', constraint: '収益がないと活動困難。バック企業の方針に縛られる' },
-    '無所属': { bonus: '察+1常時、裏ルート（1回/セッション）', constraint: '法的保護なし。全組織から警戒。補給ルート不安定' },
-};
-
-// ギフト
-const GIFTS = [
-    { id: '鍵の直感', desc: '調査フェイズで1日1回、解明鍵のヒントをGMに求められる' },
-    { id: '生還の意地', desc: 'HP0時、魂判定成功で1HP残して生存（1シナリオ1回）' },
-    { id: '装備の鬼', desc: '武装型・半装身型装備の武器修正+1' },
-    { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
-    { id: '怪異の残響', desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
-    { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
-];
-
-// 魔法言語
-const LANGUAGES = [
-    { id: 'Igniscript', color: '赤', desc: '燃やす・爆発・熱変容', hex: '#ff4444' },
-    { id: 'Lupis Surf', color: '青', desc: '流す・包む・圧力', hex: '#4488ff' },
-    { id: 'Ivyo', color: '緑', desc: '育てる・自然サイクル', hex: '#44cc44' },
-    { id: 'NGT', color: '黄', desc: '加速・電気的処理・情報解析', hex: '#ffcc00' },
-    { id: 'Monyx', color: '無色', desc: '最小術式・汎用転用', hex: '#aaaaaa' },
-    { id: 'P:', color: '紫', desc: '弱体化・妨害・封印（P派生）', hex: '#aa44ff' },
-    { id: "P'", color: '桃', desc: '回復・強化・修復（P派生）', hex: '#ff88cc' },
-];
+import Link from 'next/link';
+import { S } from '@/components/FormFields';
+import { findOption, getWeaponSpec } from '@/data/weaponData';
+import { GAME_DATA_STEPS, INNATE_AWAKENING, DEFAULT_INNATE_CHOICE, RANK_VALUE, BASE_BELIEF_POINTS } from '@/data/characterBuildData';
+import { computeRanks, getGameDataStatus, validateCharacterForm, buildCharacterPayload, hasGameData } from '@/lib/characterBuild';
+import RpSections from './RpSections';
+import GameDataSections, { calcUsedCp } from './GameDataSections';
+import StatusSummary from './StatusSummary';
+import ExportSection from './ExportSection';
+import { Notice } from './formStyles';
+import './CharacterForm.css';
 
 // 初期値
 const INITIAL = {
@@ -120,7 +30,8 @@ const INITIAL = {
     skills: [],
     proficient_languages: [], weak_languages: [],
     equipment_type: '武装型', equipment_name: '', custom_equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
-    belief_points: 5,
+    linked_gear_id: '',
+    belief_points: BASE_BELIEF_POINTS,
     level: 1, fate: '', backstory: '', brief_history: '', hidden_abilities: [],
     appearance: '', personality: '', speech_style: '',
     related_anomalies: '', related_characters: '', related_factions: '',
@@ -136,14 +47,35 @@ const INITIAL = {
     },
 };
 
-// 先天覚醒型の追加C昇格選択肢
-const INNATE_CHOICES = ['rank_jutsu', 'rank_kon'];
+// DBから読んだ行をフォーム状態に整える（null → 空文字／配列を保証）
+function normalizeRecord(data) {
+    const f = { ...INITIAL, ...data };
+    ['sub_affiliation', 'background', 'weapon_type', 'gift', 'equipment_type', 'equipment_name', 'custom_equipment_name', 'equipment_maker', 'equipment_detail',
+        'linked_gear_id', 'title', 'age', 'gender', 'character_name_kana', 'appearance', 'personality', 'speech_style', 'brief_history', 'fate', 'backstory',
+        'related_anomalies', 'related_characters', 'related_factions', 'social_x', 'social_vrc', 'social_url', 'thumbnail_url', 'icon_url', 'author_name'].forEach(k => {
+        if (f[k] == null) f[k] = '';
+    });
+    if (!f.equipment_type) f.equipment_type = '武装型';
+    ['skills', 'stage_plus', 'proficient_languages', 'weak_languages', 'equipment_options', 'hidden_abilities'].forEach(k => {
+        if (!Array.isArray(f[k])) f[k] = [];
+    });
+    if (!Array.isArray(f.image_urls) || f.image_urls.length < 3) f.image_urls = [...(Array.isArray(f.image_urls) ? f.image_urls : []), '', '', ''].slice(0, 3);
+    let cyber = Array.isArray(f.cybernetics) ? f.cybernetics : [];
+    while (cyber.length < 3) cyber = [...cyber, { name: '', part: '' }];
+    f.cybernetics = cyber;
+    f.fanart_policy = { ...INITIAL.fanart_policy, ...(f.fanart_policy || {}) };
+    if (!f.cyber_grade) f.cyber_grade = 'none';
+    if (!f.level) f.level = 1;
+    return f;
+}
 
-// レベル別スキルスロット数（3レベルに1個のペース）
-// Lv1=1, Lv3=2, Lv6=3, Lv9=4, Lv12=5, Lv15=6, Lv18=7
-const SKILL_SLOTS_BY_LEVEL = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7];
-
-// ===== コンポーネント =====
+// 既存レコードから先天覚醒型の選択（術/魂）を推定する
+function inferInnateChoice(data) {
+    if (!data || data.awakening !== INNATE_AWAKENING) return DEFAULT_INNATE_CHOICE;
+    const kon = RANK_VALUE[data.rank_kon] || 0;
+    const jutsu = RANK_VALUE[data.rank_jutsu] || 0;
+    return kon > jutsu ? 'rank_kon' : DEFAULT_INNATE_CHOICE;
+}
 
 export default function CharacterForm({ editId = null, initialData = null }) {
     const { user } = useUser();
@@ -154,54 +86,64 @@ export default function CharacterForm({ editId = null, initialData = null }) {
     const DRAFT_KEY = `kaiii_char_draft_${editId || 'new'}`;
 
     const [form, setForm] = useState(() => {
-        // 編集モードでなければlocalStorageから下書きを復元
         if (typeof window !== 'undefined' && !editId) {
             try {
                 const saved = localStorage.getItem(DRAFT_KEY);
-                if (saved) return { ...INITIAL, ...JSON.parse(saved) };
+                if (saved) return normalizeRecord(JSON.parse(saved));
             } catch {}
         }
         return INITIAL;
     });
+    const [gameEnabled, setGameEnabled] = useState(() => {
+        if (typeof window !== 'undefined' && !editId) {
+            try {
+                const saved = localStorage.getItem(DRAFT_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (typeof parsed._game_enabled === 'boolean') return parsed._game_enabled;
+                    return hasGameData(parsed);
+                }
+            } catch {}
+        }
+        return false;
+    });
+    const [innateChoice, setInnateChoice] = useState(DEFAULT_INNATE_CHOICE);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const [myGear, setMyGear] = useState([]);
-    const [innateChoice, setInnateChoice] = useState('rank_jutsu');
     const [draftMsg, setDraftMsg] = useState(null);
+    const [hasDraft, setHasDraft] = useState(false);
 
-    // 編集モード：initialDataで上書き
+    // 編集モード：initialDataで上書き。ゲームデータがあればスイッチON
     useEffect(() => {
         if (initialData) {
-            setForm(prev => ({
-                ...prev,
-                ...initialData,
-                skills: initialData.skills || [],
-                stage_plus: initialData.stage_plus || [],
-            }));
+            setForm(normalizeRecord(initialData));
+            setGameEnabled(hasGameData(initialData) || isOfficial);
+            setInnateChoice(inferInnateChoice(initialData));
         }
-    }, [initialData]);
+    }, [initialData, isOfficial]);
+
+    useEffect(() => {
+        if (isEdit) return;
+        try { setHasDraft(!!localStorage.getItem(DRAFT_KEY)); } catch {}
+    }, [isEdit, DRAFT_KEY]);
 
     // 自動保存（2秒デバウンス）
     useEffect(() => {
-        if (isEdit) return; // 編集モードでは下書き保存しない
+        if (isEdit) return;
         const timer = setTimeout(() => {
-            try {
-                localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-            } catch {}
+            try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...form, _game_enabled: gameEnabled })); } catch {}
         }, 2000);
         return () => clearTimeout(timer);
-    }, [form, isEdit, DRAFT_KEY]);
+    }, [form, gameEnabled, isEdit, DRAFT_KEY]);
 
-    // 下書きクリア（投稿成功時に呼ぶ）
-    const clearDraft = () => {
-        try { localStorage.removeItem(DRAFT_KEY); } catch {}
-    };
+    const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch {} };
 
     useEffect(() => {
         if (user && !form.author_name && !isEdit) {
             setForm(prev => ({ ...prev, author_name: `@${user.username || user.firstName || 'user'}` }));
         }
-    }, [user, isEdit]);
+    }, [user, isEdit]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (!user) return;
@@ -213,175 +155,29 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
     const set = useCallback((key, val) => setForm(prev => ({ ...prev, [key]: val })), []);
 
-    // --- 選択状態 ---
-    const selectedBg = BACKGROUNDS.find(b => b.id === form.background);
-    const selectedAssignment = (ASSIGNMENTS[form.affiliation] || []).find(a => a.id === form.sub_affiliation);
+    // --- 派生値 ---
+    const ranks = useMemo(() => computeRanks(form, {
+        innateChoice, isOfficial,
+        savedRanks: isEdit ? initialData : null,
+    }), [form, innateChoice, isOfficial, isEdit, initialData]);
+    const gameStatus = useMemo(() => getGameDataStatus(form), [form]);
+    const { usedCp } = useMemo(() => calcUsedCp(form, myGear), [form, myGear]);
+    const rpDone = !!form.character_name.trim();
 
-    // --- ランク計算（背景→C、配属→B、覚醒→C） ---
-    const getEffectiveRank = useCallback((abilityKey) => {
-        // 公式キャラはフォームの値をそのまま使用（自由設定）
-        if (isOfficial) return form[abilityKey] || 'D';
-        let rank = 'D';
-        // 背景によるC昇格
-        if (selectedBg && selectedBg.upgrades.includes(abilityKey)) {
-            rank = 'C';
-        }
-        // 先天覚醒型：術or魂がC（背景とは別枠）
-        if (form.awakening === '先天覚醒型' && abilityKey === innateChoice) {
-            if (RANKS.indexOf(rank) < RANKS.indexOf('C')) rank = 'C';
-        }
-        // 配属によるB昇格
-        if (selectedAssignment && selectedAssignment.upgrade === abilityKey) {
-            rank = 'B';
-        }
-        // 編集モードでは現在のフォーム値（DBに保存されている値）も考慮し、より高い方を採用
-        // ステータスポイント等で上昇したランクを保持するため
-        if (initialData) {
-            const formRank = form[abilityKey] || 'D';
-            const order = ['D', 'C', 'B', 'A', 'S'];
-            const calcIdx = order.indexOf(rank);
-            const formIdx = order.indexOf(formRank);
-            if (formIdx > calcIdx) rank = formRank;
-        }
-        return rank;
-    }, [form, isOfficial, innateChoice, selectedBg, selectedAssignment, initialData]);
-
-    // --- 段階表示 ---
-    const getStageDisplay = useCallback((abilityKey) => {
-        const rank = getEffectiveRank(abilityKey);
-        const hasPlus = (form.stage_plus || []).includes(abilityKey);
-        if (hasPlus && rank !== 'S') return `${rank}+`;
-        return rank;
-    }, [getEffectiveRank, form.stage_plus]);
-
-    // --- 信念ポイント ---
-    const calcBeliefPoints = useCallback(() => {
-        let pts = 5;
-        if (form.awakening === 'ショック覚醒型') pts += 1;
-        return pts;
-    }, [form.awakening]);
-
-    // --- 得意/苦手言語トグル ---
-    const toggleLanguage = useCallback((type, langId) => {
-        setForm(prev => {
-            const key = type === 'proficient' ? 'proficient_languages' : 'weak_languages';
-            const otherKey = type === 'proficient' ? 'weak_languages' : 'proficient_languages';
-            const current = [...(prev[key] || [])];
-            const other = prev[otherKey] || [];
-            if (current.includes(langId)) return { ...prev, [key]: current.filter(l => l !== langId) };
-            // 公式キャラは制限なし、通常は3つまで＋相互排他
-            if (!isOfficial && (current.length >= 3 || other.includes(langId))) return prev;
-            return { ...prev, [key]: [...current, langId] };
-        });
-    }, [isOfficial]);
-
-    // --- 段階トグル ---
-    const toggleStagePlus = useCallback((abilityKey) => {
-        setForm(prev => {
-            const current = [...(prev.stage_plus || [])];
-            if (current.includes(abilityKey)) {
-                return { ...prev, stage_plus: current.filter(k => k !== abilityKey) };
-            }
-            // 公式キャラは制限なし、通常は2つまで
-            if (!isOfficial && current.length >= 2) return prev;
-            return { ...prev, stage_plus: [...current, abilityKey] };
-        });
-    }, [isOfficial]);
-
-    // --- スキルトグル ---
-    const toggleSkill = useCallback((skillId) => {
-        setForm(prev => {
-            // prev.skills が配列でない場合（旧データ・壊れたDB値など）は空配列とみなす
-            const current = Array.isArray(prev.skills) ? [...prev.skills] : [];
-            if (current.includes(skillId)) {
-                return { ...prev, skills: current.filter(s => s !== skillId) };
-            }
-            const maxSlots = SKILL_SLOTS_BY_LEVEL[prev.level] || 1;
-            if (!isOfficial && current.length >= maxSlots) return prev;
-            return { ...prev, skills: [...current, skillId] };
-        });
-    }, [isOfficial]);
-
-    // --- 取得可能スキル一覧 ---
-    const availableSkills = useMemo(() => getAvailableSkills({
-        affiliation: form.affiliation,
-        assignment: form.sub_affiliation,
-        awakening: form.awakening,
-        weaponType: form.weapon_type,
-    }), [form.affiliation, form.sub_affiliation, form.awakening, form.weapon_type]);
-
-    const bgSkill = useMemo(() => getBackgroundSkill(form.background), [form.background]);
-
-    // --- 武器ステータス計算 ---
-    const weaponStats = useMemo(() => {
-        if (!form.weapon_type) return null;
-        return calcWeaponStats({
-            weaponType: form.weapon_type,
-            manufacturer: form.equipment_maker || '汎用品',
-            equipmentType: form.equipment_type,
-            subtype: form.equipment_name || '',
-            options: form.equipment_options,
-            gift: form.gift,
-        });
-    }, [form.weapon_type, form.equipment_maker, form.equipment_type, form.equipment_name, form.equipment_options, form.gift]);
-
-    const attackAbilityKey = useMemo(() => getAttackAbility(form.weapon_type), [form.weapon_type]);
-
-    const damageRange = useMemo(() => {
-        if (!weaponStats || !attackAbilityKey) return null;
-        const rank = getEffectiveRank(attackAbilityKey);
-        const hp = (form.stage_plus || []).includes(attackAbilityKey);
-        return calcExpectedDamage(rank, weaponStats.totalMod, hp);
-    }, [weaponStats, attackAbilityKey, getEffectiveRank, form.stage_plus]);
+    const jumpTo = useCallback((key) => {
+        const el = document.getElementById(`gd-${key}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, []);
 
     // --- 投稿処理 ---
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.character_name.trim()) { setResult({ ok: false, msg: 'キャラ名は必須です' }); return; }
-        if (!form.background) { setResult({ ok: false, msg: '背景を選択してください' }); return; }
-        if (!form.sub_affiliation) { setResult({ ok: false, msg: '配属を選択してください' }); return; }
-        if (!form.weapon_type) { setResult({ ok: false, msg: '戦闘流派を選択してください' }); return; }
-
-        // サイバネティクス：等級選択時はパーツ必須＋レベル制限
-        if (form.cyber_grade && form.cyber_grade !== 'none') {
-            const hasCyber = (form.cybernetics || []).some(c => c.name);
-            if (!hasCyber) { setResult({ ok: false, msg: `サイバネティクス等級${form.cyber_grade}を選択していますが、パーツが未選択です。最低1つ選択してください` }); return; }
-            if (form.cyber_grade === 'II' && form.level < 4) { setResult({ ok: false, msg: 'サイバネティクス等級Ⅱの施術にはレベル4以上が必要です' }); return; }
-            if (form.cyber_grade === 'III' && form.level < 9) { setResult({ ok: false, msg: 'サイバネティクス等級Ⅲの施術にはレベル9以上が必要です' }); return; }
-        }
-
-        const profLen = (form.proficient_languages || []).length;
-        const weakLen = (form.weak_languages || []).length;
-        if (profLen !== weakLen) { setResult({ ok: false, msg: `得意言語と苦手言語の数を揃えてください（得意${profLen} / 苦手${weakLen}）` }); return; }
+        const err = validateCharacterForm(form, { gameEnabled, isOfficial });
+        if (err) { setResult({ ok: false, msg: err }); return; }
 
         setSubmitting(true); setResult(null);
         try {
-            const payload = { ...form };
-            // 計算済みランクを反映（ただしステータスポイント等で既に上昇している分は守る：max を採用）
-            const RANK_VALUE = { D: 0, C: 1, B: 2, A: 3, S: 4 };
-            const RANK_NAMES = ['D', 'C', 'B', 'A', 'S'];
-            ABILITIES.forEach(a => {
-                const baseRank = getEffectiveRank(a.key);
-                if (isEdit) {
-                    // 編集モード：DB保存値（initialData）と現在値の最大を採用してランク低下を防ぐ
-                    const initialRank = (initialData && initialData[a.key]) || 'D';
-                    const currentRank = form[a.key] || 'D';
-                    const maxVal = Math.max(
-                        RANK_VALUE[baseRank] ?? 0,
-                        RANK_VALUE[initialRank] ?? 0,
-                        RANK_VALUE[currentRank] ?? 0,
-                    );
-                    payload[a.key] = RANK_NAMES[maxVal];
-                } else {
-                    // 新規作成：計算値そのまま
-                    payload[a.key] = baseRank;
-                }
-            });
-            payload.belief_points = calcBeliefPoints();
-            // class列は空文字（後方互換）
-            payload.class = null;
-            if (!payload.linked_gear_id) payload.linked_gear_id = null;
-            delete payload.id; delete payload.created_at; delete payload.updated_at; delete payload.user_id; delete payload.image_url;
+            const payload = buildCharacterPayload(form, { gameEnabled, isEdit, isOfficial, initialData, innateChoice });
 
             const method = isEdit ? 'PATCH' : 'POST';
             const body = isEdit
@@ -392,8 +188,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
             const json = await res.json();
             if (!res.ok) throw new Error(json.error);
 
-            // 新規作成時、武器種が選択されていたら自動で武器投稿
-            if (!isEdit && form.weapon_type && !form.linked_gear_id) {
+            // 新規作成時、戦闘流派が選択されていたら自動で武器投稿して紐づける
+            let gearPosted = false;
+            if (!isEdit && gameEnabled && form.weapon_type && !form.linked_gear_id) {
                 try {
                     const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
                     const optionsData = form.equipment_options.map(name => {
@@ -418,30 +215,21 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                         summary: form.equipment_detail || '',
                         visibility: form.visibility || '公開',
                     };
-                    const gearRes = await fetch('/api/posts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ table: 'gear_posts', data: gearPayload }),
-                    });
+                    const gearRes = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ table: 'gear_posts', data: gearPayload }) });
                     const gearJson = await gearRes.json();
-                    // 作成した武器をキャラクターに紐づけ
                     if (gearRes.ok && gearJson.data?.id && json.data?.id) {
                         await fetch('/api/posts', {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                table: 'character_sheets',
-                                id: json.data.id,
-                                data: { linked_gear_id: gearJson.data.id },
-                            }),
+                            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ table: 'character_sheets', id: json.data.id, data: { linked_gear_id: gearJson.data.id } }),
                         });
+                        gearPosted = true;
                     }
                 } catch (gearErr) {
                     console.warn('武器自動投稿に失敗:', gearErr);
                 }
             }
 
-            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : 'キャラクターシートを投稿しました！装備も自動投稿されました。' });
+            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : `キャラクターシートを投稿しました！${gearPosted ? '装備も自動投稿されました。' : ''}` });
             clearDraft();
             if (!isEdit) setForm(INITIAL);
             setTimeout(() => router.push(`/community/characters/${json.data?.id || editId}/`), 1500);
@@ -450,1004 +238,117 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         } finally { setSubmitting(false); }
     };
 
-    // --- スタイル ---
-    const cardStyle = (selected) => ({
-        padding: '14px', textAlign: 'left', cursor: 'pointer',
-        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-        background: selected ? 'rgba(212, 175, 55, 0.08)' : 'rgba(0,0,0,0.2)',
-        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-        transition: 'all 0.2s',
-    });
-    const cardTitle = (selected) => ({
-        fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)',
-        marginBottom: '4px', color: selected ? 'var(--accent-gold)' : 'var(--text-primary)',
-    });
-    const cardDesc = { fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 };
-    const rankBadgeStyle = (rank, isUpgraded = false, hasPlus = false) => ({
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        minWidth: '40px', height: '36px', padding: '0 6px',
-        fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700,
-        background: isUpgraded ? 'rgba(212, 175, 55, 0.15)' : 'rgba(255,255,255,0.04)',
-        border: isUpgraded ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.3)' : 'var(--border-subtle)',
-        color: rank === 'S' ? '#ff4444' : rank === 'A' ? '#ffcc00' : rank === 'B' ? 'var(--accent-gold)' : rank === 'C' ? '#88aacc' : 'var(--text-muted)',
-    });
-    const infoBox = { marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)' };
-    const gridCards = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' };
-    const sectionNote = { color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)', fontStyle: 'italic' };
+    const toggleGame = () => setGameEnabled(v => !v);
 
     return (
         <div className="container">
             <section className="section">
                 <span className="section__title">// {isEdit ? 'EDIT' : 'CREATE'} — CHARACTER SHEET v4</span>
                 <h1 className="section__heading">{isEdit ? 'キャラクターシートを編集' : 'キャラクターシートを作成'}</h1>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
-                    {isEdit ? 'シートの内容を修正できます。' : '討伐者のキャラクターシートを作成してコミュニティに共有しましょう。'}
+                <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)', lineHeight: 1.8 }}>
+                    まずは<strong style={{ color: 'var(--text-primary)' }}>RPシート</strong>（名前・立場・見た目・来歴）を作る。キャラ名だけあれば投稿できる。
+                    セッションで判定に使う<strong style={{ color: 'var(--text-primary)' }}>ゲームデータ</strong>は、必要になったらスイッチで追加すればいい。
+                    <Link href="/quickstart/" style={{ color: 'var(--accent-gold)', marginLeft: '6px' }}>作り方の解説はクイックスタート →</Link>
                 </p>
             </section>
 
             <form onSubmit={handleSubmit}>
                 {/* 下書き通知 */}
-                {!isEdit && typeof window !== 'undefined' && (() => {
-                    let hasDraft = false;
-                    try { hasDraft = !!localStorage.getItem(DRAFT_KEY); } catch {}
-                    return hasDraft ? (
-                        <div style={{ padding: '10px 14px', marginBottom: 'var(--space-md)', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)' }}>
-                                下書きを自動復元しました（入力内容は自動保存されます）
-                            </span>
-                            <button type="button" onClick={() => { clearDraft(); setForm(INITIAL); setDraftMsg('下書きをクリアしました'); }}
-                                style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '3px 10px', cursor: 'pointer' }}>
-                                下書きをクリア
-                            </button>
-                        </div>
-                    ) : null;
-                })()}
+                {!isEdit && hasDraft && (
+                    <div style={{ padding: '10px 14px', marginBottom: 'var(--space-md)', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)' }}>下書きを自動復元しました（入力内容は自動保存されます）</span>
+                        <button type="button" onClick={() => { clearDraft(); setForm(INITIAL); setGameEnabled(false); setHasDraft(false); setDraftMsg('下書きをクリアしました'); }}
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '3px 10px', cursor: 'pointer' }}>
+                            下書きをクリア
+                        </button>
+                    </div>
+                )}
                 {draftMsg && <div style={{ padding: '8px 14px', marginBottom: 'var(--space-md)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>{draftMsg}</div>}
 
-                {/* ====== SEC 0: メタ ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 0 — META</div>
-                    <h2 style={S.sectionHeading}>メタ情報</h2>
-                    <div style={S.row}>
-                        <FormInput label="投稿者名" value={form.author_name} onChange={v => set('author_name', v)} placeholder="@ユーザー名" />
-                        <FormSelect label="公開範囲" value={form.visibility} onChange={v => set('visibility', v)} options={['公開', '限定']} />
+                {/* モードバー */}
+                <div className="cf-mode-bar">
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.15em', color: 'var(--accent-gold)' }}>RP SHEET</div>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: rpDone ? '#44cc88' : 'var(--text-muted)' }}>{rpDone ? '✓ 投稿できる' : '○ キャラ名を入力'}</div>
+                        </div>
+                        <button type="button" className="cf-switch" onClick={toggleGame} aria-pressed={gameEnabled}>
+                            <span className={`cf-switch__track${gameEnabled ? ' cf-switch__track--on' : ''}`}><span className="cf-switch__knob" /></span>
+                            <span>
+                                <span style={{ display: 'block', fontSize: '10px', letterSpacing: '0.15em', color: gameEnabled ? 'var(--accent-gold)' : 'var(--text-muted)' }}>GAME DATA</span>
+                                <span style={{ color: gameEnabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                                    ゲームデータを{gameEnabled ? '付ける' : '付けない'}
+                                    {gameEnabled && <span style={{ marginLeft: '8px', fontSize: '11px', color: gameStatus.complete ? '#44cc88' : '#ffaa00' }}>{gameStatus.complete ? '✓ 完成' : `未選択：${gameStatus.missing.join('・')}`}</span>}
+                                </span>
+                            </span>
+                        </button>
                     </div>
-                    <div style={S.row}>
-                        <ImageUploader label="サムネイル" value={form.thumbnail_url} onChange={v => set('thumbnail_url', v)} folder="characters" hint="推奨 3:4（600×800px）— 資格証・詳細ページのメイン画像" />
-                        <ImageUploader label="アイコン" value={form.icon_url} onChange={v => set('icon_url', v)} folder="characters" compact hint="推奨 1:1（200×200px）— 一覧カード・SNS投稿の丸アイコン" />
-                    </div>
-                    <div style={S.row}>
-                        {form.image_urls.map((url, i) => (
-                            <ImageUploader key={i} label={`画像${i + 1}`} value={url} onChange={v => { const a = [...form.image_urls]; a[i] = v; set('image_urls', a); }} folder="characters" hint="推奨 16:9（例: 1200×675px）" />
-                        ))}
-                    </div>
+                    <nav className="cf-jump-nav" aria-label="セクションへ移動">
+                        <a href="#rp-identity">名前と立場</a>
+                        <a href="#rp-profile">プロフィール</a>
+                        <a href="#rp-story">来歴</a>
+                        <a href="#rp-fanart">二次創作</a>
+                        {gameEnabled && GAME_DATA_STEPS.map(s => <a key={s.key} href={`#gd-${s.key}`}>{s.no}.{s.title}</a>)}
+                        <a href="#export">出力</a>
+                    </nav>
                 </div>
 
-                {/* ====== SEC 1: 基本情報 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 1 — IDENTITY</div>
-                    <h2 style={S.sectionHeading}>基本情報</h2>
-                    <div style={S.row}>
-                        <FormInput label="キャラ名 *" value={form.character_name} onChange={v => set('character_name', v)} placeholder="例：黒崎 蓮" />
-                        <FormInput label="フリガナ" value={form.character_name_kana} onChange={v => set('character_name_kana', v)} placeholder="例：くろさき れん" />
-                        <FormInput label="二つ名（任意）" value={form.title} onChange={v => set('title', v)} placeholder="例：封印の名手" />
-                    </div>
-                    <div style={S.row}>
-                        <FormInput label="年齢" value={form.age} onChange={v => set('age', v)} placeholder="例：24" />
-                        <FormInput label="性別" value={form.gender} onChange={v => set('gender', v)} placeholder="自由記述" />
-                    </div>
-                </div>
+                {/* ====== RPシート ====== */}
+                <RpSections form={form} set={set} isEdit={isEdit} />
 
-                {/* ====== SEC 2: 背景 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 2 — BACKGROUND</div>
-                    <h2 style={S.sectionHeading}>背景 *</h2>
-                    <p style={sectionNote}>背景を選ぶと2つの能力値がCに昇格し、背景スキルが自動で付きます。</p>
-                    <div style={gridCards}>
-                        {BACKGROUNDS.map(bg => {
-                            const selected = form.background === bg.id;
-                            const upgradeNames = bg.upgrades.map(k => ABILITIES.find(a => a.key === k)?.name).join('・');
-                            const skill = getBackgroundSkill(bg.id);
-                            return (
-                                <button key={bg.id} type="button" onClick={() => set('background', selected ? '' : bg.id)} style={cardStyle(selected)}>
-                                    <div style={cardTitle(selected)}>{bg.id}</div>
-                                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>
-                                        {upgradeNames || '魂'} → C昇格
-                                    </div>
-                                    <div style={cardDesc}>{bg.desc}</div>
-                                    {skill && (
-                                        <div style={{ marginTop: '6px', fontSize: '10px', color: '#44cc88', fontFamily: 'var(--font-mono)' }}>
-                                            自動スキル: {skill.id}（{skill.effect}）
-                                        </div>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* ====== SEC 3: 所属＋配属 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 3 — FACTION &amp; ASSIGNMENT</div>
-                    <h2 style={S.sectionHeading}>所属・配属 *</h2>
-
-                    {/* 所属選択 */}
-                    <div style={{ marginBottom: 'var(--space-xl)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>所属</div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {AFFILIATIONS.map(aff => (
-                                <button key={aff} type="button"
-                                    onClick={() => { set('affiliation', aff); set('sub_affiliation', ''); }}
-                                    style={{
-                                        ...cardStyle(form.affiliation === aff),
-                                        flex: '1', minWidth: '140px', textAlign: 'center',
-                                    }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-md)', color: form.affiliation === aff ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                                        {aff}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                        <div style={infoBox}>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>▸ {AFFILIATION_INFO[form.affiliation].bonus}</div>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>▹ {AFFILIATION_INFO[form.affiliation].constraint}</div>
-                        </div>
-                    </div>
-
-                    {/* 配属選択 */}
-                    <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>
-                            {form.affiliation === '祓部' ? '配属班' : form.affiliation === '傭兵' ? '専門' : '流儀'} *
-                        </div>
-                        <div style={gridCards}>
-                            {(ASSIGNMENTS[form.affiliation] || []).map(asn => {
-                                const selected = form.sub_affiliation === asn.id;
-                                const upgradeName = ABILITIES.find(a => a.key === asn.upgrade)?.name;
-                                return (
-                                    <button key={asn.id} type="button" onClick={() => set('sub_affiliation', selected ? '' : asn.id)} style={cardStyle(selected)}>
-                                        <div style={cardTitle(selected)}>{asn.id}</div>
-                                        <div style={{ fontSize: 'var(--font-size-xs)', color: '#44aaff', marginBottom: '4px' }}>
-                                            {upgradeName} → B昇格
-                                        </div>
-                                        <div style={cardDesc}>{asn.desc}</div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ====== SEC 4: 覚醒パターン ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 4 — AWAKENING</div>
-                    <h2 style={S.sectionHeading}>覚醒パターン *</h2>
-                    <p style={sectionNote}>討伐者として覚醒した経緯。覚醒スキルが解放されます。</p>
-                    <div style={gridCards}>
-                        {AWAKENINGS.map(awk => {
-                            const selected = form.awakening === awk.id;
-                            return (
-                                <button key={awk.id} type="button" onClick={() => set('awakening', awk.id)} style={cardStyle(selected)}>
-                                    <div style={cardTitle(selected)}>{awk.id}</div>
-                                    <div style={{ fontSize: 'var(--font-size-xs)', color: '#aa44ff', marginBottom: '4px' }}>{awk.effect}</div>
-                                    <div style={cardDesc}>{awk.desc}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                    {/* 先天覚醒型：術or魂の選択 */}
-                    {form.awakening === '先天覚醒型' && (
-                        <div style={{ ...infoBox, display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)' }}>C昇格する能力値:</span>
-                            {INNATE_CHOICES.map(key => {
-                                const ab = ABILITIES.find(a => a.key === key);
-                                return (
-                                    <button key={key} type="button" onClick={() => setInnateChoice(key)}
-                                        style={{
-                                            padding: '6px 16px', fontFamily: 'var(--font-mono)', fontWeight: 700,
-                                            background: innateChoice === key ? 'rgba(170,68,255,0.15)' : 'rgba(0,0,0,0.3)',
-                                            border: innateChoice === key ? '1px solid rgba(170,68,255,0.4)' : 'var(--border-subtle)',
-                                            color: innateChoice === key ? '#aa44ff' : 'var(--text-muted)', cursor: 'pointer',
-                                        }}>
-                                        {ab?.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* ====== SEC 5: 主力装備（カスケード方式） ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 5 — ARMAMENT</div>
-                    <h2 style={S.sectionHeading}>主力装備 *</h2>
-                    <p style={sectionNote}>上から順に選んでいくと、武器のスペックが自動で決まります。</p>
-
-                    {/* STEP 1: 戦闘流派 */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
-                            STEP 1 — 戦闘流派（どう戦う？）
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
-                            {COMBAT_STYLES.map(cs => {
-                                const selected = form.weapon_type === cs.storeId;
-                                return (
-                                    <button key={cs.id} type="button"
-                                        onClick={() => {
-                                            if (selected) {
-                                                set('weapon_type', '');
-                                                set('equipment_name', '');
-                                            } else {
-                                                set('weapon_type', cs.storeId);
-                                                set('equipment_name', '');
-                                            }
-                                        }}
-                                        style={cardStyle(selected)}>
-                                        <div style={{ ...cardTitle(selected), color: selected ? '#ff6644' : 'var(--text-primary)' }}>{cs.id}</div>
-                                        <div style={{ fontSize: 'var(--font-size-xs)', color: '#ff6644', marginBottom: '2px' }}>{cs.desc}</div>
-                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{cs.weapons}</div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* STEP 2: ベース武器 */}
-                    {form.weapon_type && (() => {
-                        const styleName = OLD_TO_STYLE[form.weapon_type] || form.weapon_type;
-                        const weapons = BASE_WEAPONS[styleName] || [];
-                        if (weapons.length === 0) return null;
-                        return (
-                            <div style={{ marginBottom: 'var(--space-lg)' }}>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
-                                    STEP 2 — ベース武器（何を持つ？）
-                                </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {weapons.map(sub => {
-                                        const selected = form.equipment_name === sub.id;
-                                        return (
-                                            <button key={sub.id} type="button"
-                                                onClick={() => set('equipment_name', selected ? '' : sub.id)}
-                                                style={{
-                                                    padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
-                                                    border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                                    background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
-                                                    color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                                    fontFamily: 'var(--font-mono)', fontSize: '12px',
-                                                }}
-                                                title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
-                                            >
-                                                <span style={{ fontWeight: 700 }}>{sub.id}</span>
-                                                {sub.modAdj !== 0 && (
-                                                    <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
-                                                        {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
-                                                    </span>
-                                                )}
-                                                {sub.reach && (
-                                                    <span style={{ marginLeft: '4px', fontSize: '9px', color: '#88aacc', opacity: 0.8 }}>{sub.reach}</span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                {form.equipment_name && (() => {
-                                    const sel = weapons.find(s => s.id === form.equipment_name);
-                                    return sel ? (
-                                        <div style={{ marginTop: '6px', padding: '6px 10px', background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                            {sel.note}
-                                        </div>
-                                    ) : null;
-                                })()}
+                {/* ====== ゲームデータ ====== */}
+                {gameEnabled ? (
+                    <div className="cf-game-layout">
+                        <div>
+                            <div style={{ ...S.section, padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)', borderColor: 'var(--accent-gold-border)' }}>
+                                <div style={S.sectionTitle}>GAME DATA — 判定に使うデータ</div>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, margin: 0 }}>
+                                    全能力値はDから始まる。<span style={{ color: 'var(--accent-gold)' }}>背景</span>で2つがC、<span style={{ color: '#44aaff' }}>配属</span>で1つがB、<span style={{ color: '#aa44ff' }}>先天覚醒</span>なら術か魂がCになり、最後に<span style={{ color: '#64c8ff' }}>+段階</span>を2つ足す。
+                                    右の概要パネルに、いまの選択で決まったランクと「どこから昇格したか」が常に表示される。必須は STEP 1・2・7。
+                                </p>
                             </div>
-                        );
-                    })()}
-                </div>
-
-                {/* ====== 公式キャラ用レベル設定 ====== */}
-                {isOfficial && (
-                    <div style={S.section}>
-                        <div style={S.sectionTitle}>LEVEL（公式キャラ専用）</div>
-                        <h2 style={S.sectionHeading}>レベル設定</h2>
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                            {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(lv => (
-                                <button key={lv} type="button" onClick={() => set('level', lv)}
-                                    style={{
-                                        padding: '6px 14px', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-                                        background: form.level === lv ? 'rgba(192,208,224,0.2)' : 'transparent',
-                                        border: form.level === lv ? '1px solid rgba(192,208,224,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                                        color: form.level === lv ? '#c0d0e0' : 'var(--text-muted)',
-                                    }}>Lv.{lv}</button>
+                            {isOfficial && <Notice tone="gold">公式キャラクター：ランクは直接設定でき、スロット・段階・言語の上限は適用されない。</Notice>}
+                            <GameDataSections
+                                form={form} set={set} setForm={setForm}
+                                isOfficial={isOfficial}
+                                innateChoice={innateChoice} setInnateChoice={setInnateChoice}
+                                ranks={ranks} myGear={myGear}
+                            />
+                        </div>
+                        <div className="cf-game-side">
+                            <div className="cf-summary-full"><StatusSummary form={form} ranks={ranks} status={gameStatus} usedCp={usedCp} onJump={jumpTo} /></div>
+                            <div className="cf-summary-compact"><StatusSummary form={form} ranks={ranks} status={gameStatus} usedCp={usedCp} onJump={jumpTo} compact /></div>
+                        </div>
+                    </div>
+                ) : (
+                    <div id="game-teaser" style={{ ...S.section, borderStyle: 'dashed', borderColor: 'rgba(212,175,55,0.25)' }}>
+                        <div style={S.sectionTitle}>GAME DATA — 任意</div>
+                        <h2 style={{ ...S.sectionHeading, marginBottom: 'var(--space-sm)' }}>ゲームデータを付ける</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', lineHeight: 1.8, marginBottom: 'var(--space-md)' }}>
+                            セッションで判定に使うステータス。背景・配属・戦闘流派を選ぶだけで七つの能力値のランクが自動で決まり、スキル・ギフト・装備をそこに足していく。
+                            RPシートだけで投稿しておき、あとから編集で追加してもいい。
+                        </p>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
+                            {GAME_DATA_STEPS.map(s => (
+                                <span key={s.key} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '3px 8px', border: s.required ? '1px solid var(--accent-gold-border)' : '1px solid rgba(255,255,255,0.08)', color: s.required ? 'var(--accent-gold)' : 'var(--text-muted)' }}>
+                                    {s.no}. {s.title}{s.required ? ' *' : ''}
+                                </span>
                             ))}
                         </div>
+                        <button type="button" onClick={toggleGame}
+                            style={{ padding: '10px 24px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, background: 'rgba(212,175,55,0.1)', border: '1px solid var(--accent-gold-border)', color: 'var(--accent-gold)', cursor: 'pointer' }}>
+                            ＋ ゲームデータを付ける
+                        </button>
+                        {(gameStatus.started) && (
+                            <div style={{ marginTop: 'var(--space-md)' }}>
+                                <Notice tone="warn">入力済みのゲームデータは保持されるが、オフのまま投稿するとシートには含まれない。</Notice>
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {/* ====== SEC 6: 能力値＋段階調整 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 6 — ABILITIES</div>
-                    <h2 style={S.sectionHeading}>能力値ランク</h2>
-                    <p style={sectionNote}>
-                        全能力値はDスタート。背景・配属・覚醒で自動昇格。さらに2つの能力値に＋段階を付与できます。
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
-                        {ABILITIES.map(ability => {
-                            const effectiveRank = getEffectiveRank(ability.key);
-                            const isUpgraded = effectiveRank !== 'D';
-                            const hasPlus = (form.stage_plus || []).includes(ability.key);
-                            const stageDisplay = getStageDisplay(ability.key);
-                            const upgradeSource = [];
-                            if (selectedBg && selectedBg.upgrades.includes(ability.key)) upgradeSource.push(`背景:${selectedBg.id}`);
-                            if (form.awakening === '先天覚醒型' && ability.key === innateChoice) upgradeSource.push('覚醒:先天型');
-                            if (selectedAssignment && selectedAssignment.upgrade === ability.key) upgradeSource.push(`配属:${selectedAssignment.id}`);
-                            if (hasPlus) upgradeSource.push('+段階');
-                            return (
-                                <div key={ability.key} style={{ padding: '14px', background: 'rgba(0,0,0,0.2)', border: isUpgraded ? '1px solid var(--accent-gold-border)' : hasPlus ? '1px solid rgba(100,200,255,0.2)' : 'var(--border-subtle)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                        <div>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-md)', fontWeight: 700 }}>{ability.name}</span>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginLeft: '8px' }}>({ability.reading})</span>
-                                        </div>
-                                        <span style={rankBadgeStyle(effectiveRank, isUpgraded, hasPlus)}>{stageDisplay}</span>
-                                    </div>
-                                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '4px' }}>{ability.desc}</div>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>
-                                        ダイス: {RANK_DICE[effectiveRank]}{hasPlus ? '（達成値+1）' : ''}
-                                    </div>
-                                    {upgradeSource.length > 0 && (
-                                        <div style={{ fontSize: '10px', color: 'var(--accent-gold)', marginTop: '4px' }}>
-                                            ▲ {upgradeSource.join(' / ')}
-                                        </div>
-                                    )}
-                                    {/* 公式キャラ：ランク直接選択 */}
-                                    {isOfficial && (
-                                        <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
-                                            {RANKS.map(r => (
-                                                <button key={r} type="button" onClick={() => set(ability.key, r)}
-                                                    style={{
-                                                        padding: '3px 8px', fontFamily: 'var(--font-mono)', fontSize: '10px', cursor: 'pointer',
-                                                        background: form[ability.key] === r ? 'rgba(192,208,224,0.2)' : 'transparent',
-                                                        border: form[ability.key] === r ? '1px solid rgba(192,208,224,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                                                        color: form[ability.key] === r ? '#c0d0e0' : 'var(--text-muted)',
-                                                    }}>{r}</button>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {/* 段階トグル */}
-                                    <button type="button" onClick={() => toggleStagePlus(ability.key)}
-                                        style={{
-                                            marginTop: '8px', padding: '3px 10px',
-                                            fontFamily: 'var(--font-mono)', fontSize: '10px',
-                                            background: hasPlus ? 'rgba(100,200,255,0.12)' : 'transparent',
-                                            border: hasPlus ? '1px solid rgba(100,200,255,0.3)' : '1px dashed rgba(255,255,255,0.15)',
-                                            color: hasPlus ? '#64c8ff' : 'var(--text-muted)',
-                                            cursor: 'pointer',
-                                        }}>
-                                        {hasPlus ? '＋段階 ✓' : '＋段階'}
-                                    </button>
-                                    {/* 公式キャラ：能力値を非表示にするトグル */}
-                                    {isOfficial && (() => {
-                                        const hidden = (form.hidden_abilities || []).includes(ability.key);
-                                        return (
-                                            <button type="button" onClick={() => {
-                                                setForm(prev => {
-                                                    const cur = [...(prev.hidden_abilities || [])];
-                                                    return { ...prev, hidden_abilities: hidden ? cur.filter(k => k !== ability.key) : [...cur, ability.key] };
-                                                });
-                                            }}
-                                                style={{
-                                                    marginTop: '4px', marginLeft: '4px', padding: '3px 10px',
-                                                    fontFamily: 'var(--font-mono)', fontSize: '10px',
-                                                    background: hidden ? 'rgba(255,77,77,0.12)' : 'transparent',
-                                                    border: hidden ? '1px solid rgba(255,77,77,0.3)' : '1px dashed rgba(255,255,255,0.15)',
-                                                    color: hidden ? '#ff4d4d' : 'var(--text-muted)',
-                                                    cursor: 'pointer',
-                                                }}>
-                                                {hidden ? '非公開 ✓' : '非公開'}
-                                            </button>
-                                        );
-                                    })()}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.stage_plus || []).length <= 2 ? 'var(--text-muted)' : 'var(--accent-danger)', marginTop: 'var(--space-sm)' }}>
-                        +段階: {(form.stage_plus || []).length} / 2
-                    </div>
-
-                    {/* 信念ポイント */}
-                    <div style={{ ...infoBox, marginTop: 'var(--space-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px' }}>信念ポイント (BELIEF)</div>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>判定を振り直す、シーンに介入するなどの消費リソース</div>
-                        </div>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--accent-gold)' }}>{calcBeliefPoints()}</span>
-                    </div>
-                </div>
-
-                {/* ====== SEC 7: スキル選択 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 7 — SKILLS</div>
-                    <h2 style={S.sectionHeading}>スキル選択</h2>
-                    <p style={sectionNote}>
-                        Lv{form.level}では{SKILL_SLOTS_BY_LEVEL[form.level] || 2}スロット。解放された軸のスキルから選択してください。背景スキルはスロット不要で自動取得されます。
-                    </p>
-
-                    {/* 背景スキル（自動取得） */}
-                    {bgSkill && (
-                        <div style={{ padding: '12px', background: 'rgba(68,204,136,0.06)', border: '1px solid rgba(68,204,136,0.2)', marginBottom: 'var(--space-lg)' }}>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#44cc88', marginBottom: '4px' }}>自動取得（背景: {form.background}）</div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--text-heading)' }}>{bgSkill.id}</div>
-                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>{bgSkill.effect}</div>
-                        </div>
-                    )}
-
-                    {/* スロット残り */}
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= (SKILL_SLOTS_BY_LEVEL[form.level] || 2) ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
-                        スロット: {(form.skills || []).length} / {SKILL_SLOTS_BY_LEVEL[form.level] || 2}
-                    </div>
-
-                    {/* スキル一覧 */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
-                        {availableSkills.filter(s => s.level <= form.level).map(skill => {
-                            const selected = (form.skills || []).includes(skill.id);
-                            const axisColor = getAxisColor(skill.axis);
-                            const typeColor = getSkillTypeColor(skill.type);
-                            return (
-                                <button key={skill.id} type="button" onClick={() => toggleSkill(skill.id)}
-                                    style={{
-                                        ...cardStyle(selected),
-                                        borderColor: selected ? axisColor : undefined,
-                                        background: selected ? `${axisColor}12` : 'rgba(0,0,0,0.2)',
-                                    }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: selected ? axisColor : 'var(--text-primary)' }}>
-                                            {skill.id}
-                                        </span>
-                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '1px 6px', border: `1px solid ${typeColor}40`, color: typeColor }}>
-                                            {skill.type}
-                                        </span>
-                                    </div>
-                                    <div style={{ fontSize: '10px', color: axisColor, marginBottom: '2px', fontFamily: 'var(--font-mono)' }}>
-                                        [{skill.axis}] {skill.attr}判定 Lv{skill.level}
-                                    </div>
-                                    <div style={cardDesc}>{skill.effect}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* 現在のレベルより上のスキルは参考表示 */}
-                    {availableSkills.filter(s => s.level > form.level).length > 0 && (
-                        <details style={{ marginTop: 'var(--space-lg)' }}>
-                            <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                                Lv{form.level + 1}以降で取得可能なスキル（{availableSkills.filter(s => s.level > form.level).length}種）
-                            </summary>
-                            <div style={{ ...gridCards, marginTop: 'var(--space-sm)' }}>
-                                {availableSkills.filter(s => s.level > form.level).map(skill => (
-                                    <div key={skill.id} style={{ padding: '10px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', opacity: 0.6 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-xs)' }}>{skill.id}</span>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: getSkillTypeColor(skill.type) }}>{skill.type}</span>
-                                        </div>
-                                        <div style={{ fontSize: '10px', color: getAxisColor(skill.axis), fontFamily: 'var(--font-mono)' }}>
-                                            [{skill.axis}] {skill.attr}判定 Lv{skill.level}
-                                        </div>
-                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{skill.effect}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </details>
-                    )}
-                </div>
-
-                {/* ====== SEC 8: ギフト ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 8 — GIFT</div>
-                    <h2 style={S.sectionHeading}>初期ギフト</h2>
-                    <p style={sectionNote}>キャラクター作成時に1つ選択。覚醒段階は不要。</p>
-                    <div style={gridCards}>
-                        {GIFTS.map(gift => {
-                            const selected = form.gift === gift.id;
-                            return (
-                                <button key={gift.id} type="button" onClick={() => set('gift', selected ? '' : gift.id)} style={cardStyle(selected)}>
-                                    <div style={cardTitle(selected)}>{gift.id}</div>
-                                    <div style={cardDesc}>{gift.desc}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* ====== SEC 9: 魔法言語 ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 9 — LANGUAGE</div>
-                    <h2 style={S.sectionHeading}>得意言語・苦手言語</h2>
-                    <p style={sectionNote}>得意と苦手は同じ数だけ選んでください（0〜3個ずつ）。P言語は全員使用可能。</p>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.proficient_languages || []).length === (form.weak_languages || []).length ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-lg)' }}>
-                        得意: {(form.proficient_languages || []).length} / 苦手: {(form.weak_languages || []).length}
-                        {(form.proficient_languages || []).length === (form.weak_languages || []).length ? ' ✓' : ' — 数を揃えてください'}
-                    </div>
-
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: 'var(--space-sm)' }}>得意言語（術判定+1）</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: 'var(--space-xl)' }}>
-                        {LANGUAGES.map(lang => {
-                            const selected = (form.proficient_languages || []).includes(lang.id);
-                            const inWeak = (form.weak_languages || []).includes(lang.id);
-                            return (
-                                <button key={lang.id} type="button" onClick={() => toggleLanguage('proficient', lang.id)} disabled={inWeak}
-                                    style={{
-                                        padding: '10px 12px', textAlign: 'left', cursor: inWeak ? 'not-allowed' : 'pointer',
-                                        border: selected ? `2px solid ${lang.hex}` : 'var(--border-subtle)',
-                                        background: selected ? `${lang.hex}15` : inWeak ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.2)',
-                                        color: selected ? lang.hex : inWeak ? 'var(--text-muted)' : 'var(--text-secondary)',
-                                        opacity: inWeak ? 0.4 : 1, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
-                                    }}>
-                                    <div style={{ fontWeight: 700 }}>{lang.id} <span style={{ fontWeight: 400, fontSize: 'var(--font-size-xs)', color: lang.hex }}>({lang.color})</span></div>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{lang.desc}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>苦手言語（術判定-1）</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
-                        {LANGUAGES.map(lang => {
-                            const selected = (form.weak_languages || []).includes(lang.id);
-                            const inProf = (form.proficient_languages || []).includes(lang.id);
-                            return (
-                                <button key={lang.id} type="button" onClick={() => toggleLanguage('weak', lang.id)} disabled={inProf}
-                                    style={{
-                                        padding: '10px 12px', textAlign: 'left', cursor: inProf ? 'not-allowed' : 'pointer',
-                                        border: selected ? '2px solid var(--accent-danger)' : 'var(--border-subtle)',
-                                        background: selected ? 'rgba(230, 57, 70, 0.1)' : inProf ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.2)',
-                                        color: selected ? 'var(--accent-danger)' : inProf ? 'var(--text-muted)' : 'var(--text-secondary)',
-                                        opacity: inProf ? 0.4 : 1, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', transition: 'all 0.2s',
-                                    }}>
-                                    <div style={{ fontWeight: 700 }}>{lang.id}</div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* ====== SEC 10: 装備（STEP 3〜6 — SEC 5の続き） ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 10 — EQUIPMENT DETAIL</div>
-                    <h2 style={S.sectionHeading}>装備構成</h2>
-
-                    {/* STEP 3: 装備形態 */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
-                            STEP 3 — 装備形態（どう装備する？）
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
-                            {EQUIPMENT_FORM_NAMES.map(formName => {
-                                const storeVal = FORM_TO_OLD[formName];
-                                const selected = form.equipment_type === storeVal;
-                                const ef = EQUIPMENT_FORM_STATS[formName];
-                                return (
-                                    <button key={formName} type="button"
-                                        onClick={() => set('equipment_type', storeVal)}
-                                        style={cardStyle(selected)}>
-                                        <div style={{ ...cardTitle(selected), color: selected ? '#44ccff' : 'var(--text-primary)' }}>{formName}</div>
-                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{ef.desc}</div>
-                                        <div style={{ fontSize: '10px', color: '#44ccff', marginTop: '2px' }}>CP:{ef.cpBase} / スロット:{ef.baseSlot}</div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        {/* 形態固有サブオプション（搭乗/独立/半装身） */}
-                        {(() => {
-                            const formKey = OLD_TO_FORM[form.equipment_type] || form.equipment_type;
-                            const formSubs = FORM_OPTIONS[formKey] || [];
-                            if (formSubs.length === 0) return null;
-                            return (
-                                <div style={{ marginTop: '8px' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '6px' }}>形態オプション</div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                        {formSubs.map(sub => {
-                                            const selected = form.equipment_name === sub.id;
-                                            return (
-                                                <button key={sub.id} type="button"
-                                                    onClick={() => set('equipment_name', selected ? '' : sub.id)}
-                                                    style={{
-                                                        padding: '8px 14px', cursor: 'pointer', transition: 'all 0.2s',
-                                                        border: selected ? '1px solid #44ccff' : 'var(--border-subtle)',
-                                                        background: selected ? 'rgba(68,204,255,0.12)' : 'rgba(0,0,0,0.3)',
-                                                        color: selected ? '#44ccff' : 'var(--text-secondary)',
-                                                        fontFamily: 'var(--font-mono)', fontSize: '12px',
-                                                    }}
-                                                    title={`修正${sub.modAdj > 0 ? '+' : ''}${sub.modAdj !== 0 ? sub.modAdj : '±0'} / ${sub.reach || '—'} — ${sub.note}`}
-                                                >
-                                                    <span style={{ fontWeight: 700 }}>{sub.id}</span>
-                                                    {sub.modAdj !== 0 && (
-                                                        <span style={{ marginLeft: '4px', fontSize: '10px', color: sub.modAdj > 0 ? '#44cc88' : '#ff8844' }}>
-                                                            {sub.modAdj > 0 ? '+' : ''}{sub.modAdj}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-                    </div>
-
-                    {/* STEP 4: 出自 */}
-                    <div style={{ marginBottom: 'var(--space-lg)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '8px' }}>
-                            STEP 4 — 出自（どこの？）
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
-                            {ORIGIN_NAMES.map(name => {
-                                const selected = form.equipment_maker === name;
-                                const ot = ORIGIN_TIER[name];
-                                return (
-                                    <button key={name} type="button"
-                                        onClick={() => set('equipment_maker', selected ? '' : name)}
-                                        style={cardStyle(selected)}>
-                                        <div style={{ ...cardTitle(selected), color: selected ? '#bb88ff' : 'var(--text-primary)' }}>{name}</div>
-                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '2px' }}>{ot.desc}</div>
-                                        <div style={{ fontSize: '10px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                            {ot.modBonus > 0 && <span style={{ color: 'var(--accent-gold)' }}>修正+{ot.modBonus}</span>}
-                                            {ot.slotBonus > 0 && <span style={{ color: '#44ccff' }}>スロット+{ot.slotBonus}</span>}
-                                            <span style={{ color: ot.cpMul > 1 ? '#ff8844' : 'var(--text-muted)' }}>CP×{ot.cpMul}</span>
-                                            <span style={{ color: '#88aacc' }}>{ot.fit}</span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* STEP 5: 固有名 */}
-                    <FormInput label="固有名（自由記入）" value={form.custom_equipment_name || ''} onChange={v => set('custom_equipment_name', v)} placeholder="例：蒼鉄制式太刀、雷禽カスタムライフル、自作の魔導杖…" />
-                    <FormTextArea label="装備の詳細・カスタム（任意）" value={form.equipment_detail} onChange={v => set('equipment_detail', v)} placeholder="改造内容、特殊機能、入手経緯など" />
-
-                    {/* カスタムオプション選択 */}
-                    <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
-                            カスタムオプション（任意）
-                        </div>
-                        <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                            装備に搭載するカスタムオプションを選択。汎用は全装備共通、専用は装備種別に対応。
-                        </p>
-                        {Object.entries(CUSTOM_OPTIONS).map(([catName, opts]) => {
-                            const isExclusive = catName.endsWith('専用');
-                            const matchType = catName.replace('専用', '');
-                            if (isExclusive && matchType !== form.equipment_type) return null;
-                            return (
-                                <div key={catName} style={{ marginBottom: '12px' }}>
-                                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '4px' }}>
-                                        {catName}
-                                    </div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                        {opts.map(opt => {
-                                            const selected = form.equipment_options.includes(opt.name);
-                                            return (
-                                                <button key={opt.name} type="button"
-                                                    onClick={() => {
-                                                        if (selected) {
-                                                            set('equipment_options', form.equipment_options.filter(n => n !== opt.name));
-                                                        } else {
-                                                            set('equipment_options', [...form.equipment_options, opt.name]);
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        padding: '6px 10px', cursor: 'pointer', transition: 'all 0.2s',
-                                                        border: selected ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)',
-                                                        background: selected ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
-                                                        color: selected ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                                        fontFamily: 'var(--font-mono)', fontSize: '11px',
-                                                    }}
-                                                    title={`${opt.cp}CP / 修正:${opt.mod} / 共鳴:${opt.resonance} / リスク:${opt.risk}`}
-                                                >
-                                                    {opt.name}
-                                                    <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.7 }}>{opt.cp}CP</span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                        {form.equipment_options.length > 0 && (
-                            <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(212, 175, 55, 0.06)', border: '1px solid rgba(212, 175, 55, 0.15)' }}>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px' }}>選択中のオプション</div>
-                                {form.equipment_options.map(name => {
-                                    const o = findOption(name);
-                                    return o ? (
-                                        <div key={name} style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', padding: '2px 0' }}>
-                                            {o.name} — {o.cp}CP / 修正:{o.mod} / 共鳴:{o.resonance} / リスク:{o.risk}
-                                        </div>
-                                    ) : null;
-                                })}
-                                <div style={{ marginTop: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-gold)', fontFamily: 'var(--font-mono)' }}>
-                                    オプション合計: {form.equipment_options.reduce((s, n) => { const o = findOption(n); return s + (o ? o.cp : 0); }, 0)}CP
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* 武器ステータスパネル */}
-                    {weaponStats && (
-                        <WeaponStatsPanel
-                            stats={weaponStats}
-                            weaponType={form.weapon_type}
-                            abilityRank={attackAbilityKey ? getEffectiveRank(attackAbilityKey) : 'D'}
-                            hasPlus={attackAbilityKey ? (form.stage_plus || []).includes(attackAbilityKey) : false}
-                            damageRange={damageRange}
-                        />
-                    )}
-
-                    {/* 投稿済み装備の紐づけ */}
-                    <div style={{ marginTop: 'var(--space-lg)', padding: '16px', background: 'rgba(212, 175, 55, 0.04)', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', color: 'var(--accent-gold)', fontWeight: 700, marginBottom: '12px' }}>
-                            投稿済み装備を連携
-                        </div>
-                        {myGear.length > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {myGear.map(g => {
-                                    const isLinked = form.linked_gear_id === g.id;
-                                    return (
-                                        <div key={g.id} onClick={() => set('linked_gear_id', isLinked ? '' : g.id)}
-                                            style={{
-                                                padding: '10px 14px', cursor: 'pointer', transition: 'all 0.2s',
-                                                background: isLinked ? 'rgba(212, 175, 55, 0.12)' : 'rgba(0,0,0,0.3)',
-                                                border: isLinked ? '2px solid var(--accent-gold)' : 'var(--border-subtle)',
-                                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            }}>
-                                            <div>
-                                                <span style={{ fontWeight: 700, color: 'var(--text-heading)', fontSize: 'var(--font-size-sm)' }}>{g.gear_name}</span>
-                                                <span style={{ marginLeft: '8px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                                    {g.category || ''} {g.manufacturer ? `/ ${g.manufacturer}` : ''}
-                                                </span>
-                                            </div>
-                                            {isLinked && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', fontWeight: 700 }}>連携中</span>}
-                                        </div>
-                                    );
-                                })}
-                                {form.linked_gear_id && (
-                                    <button type="button" onClick={() => set('linked_gear_id', '')}
-                                        style={{ padding: '6px 12px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', background: 'transparent', border: '1px solid rgba(255,77,77,0.3)', color: '#ff6666', cursor: 'pointer', alignSelf: 'flex-start' }}>
-                                        連携を解除
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            <div style={{ padding: '16px', textAlign: 'center', background: 'rgba(0,0,0,0.2)' }}>
-                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '12px' }}>まだ装備を投稿していません</p>
-                                <a href="/create/weapon/" target="_blank" style={{ display: 'inline-block', padding: '8px 20px', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, background: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--accent-gold-border)', color: 'var(--accent-gold)', textDecoration: 'none' }}>
-                                    装備を新規投稿する
-                                </a>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* CP予算 */}
-                    {(() => {
-                        let cpBudget = 10;
-                        if (form.background === '鋼の肉体' && (form.equipment_type === '武装型' || form.equipment_type === '半装身型')) cpBudget += 4;
-                        if (form.background === 'ハッカー上がり' && form.equipment_type === '独立型') cpBudget += 3;
-
-                        let usedCp = 0;
-                        let cpSource = '';
-                        const optionsCp = form.equipment_options.reduce((s, n) => { const o = findOption(n); return s + (o ? o.cp : 0); }, 0);
-                        const linkedGear = form.linked_gear_id ? myGear.find(g => g.id === form.linked_gear_id) : null;
-                        if (linkedGear && linkedGear.total_cp != null) {
-                            usedCp = Number(linkedGear.total_cp);
-                            cpSource = linkedGear.gear_name;
-                        } else if (form.weapon_type) {
-                            const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
-                            if (spec) { usedCp = spec.cp; cpSource = `${OLD_TO_STYLE[form.weapon_type] || form.weapon_type}×${form.equipment_maker || '汎用品'}`; }
-                            usedCp += optionsCp;
-                            if (optionsCp > 0) cpSource += ` +OPT${optionsCp}CP`;
-                        }
-
-                        const remaining = cpBudget - usedCp;
-                        const pct = cpBudget > 0 ? Math.min(100, Math.max(0, (usedCp / cpBudget) * 100)) : 0;
-                        const barColor = remaining < 0 ? 'var(--accent-danger)' : remaining <= 2 ? '#ffaa00' : 'var(--accent-gold)';
-
-                        return (
-                            <div style={{ marginTop: 'var(--space-sm)', padding: '12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: usedCp > 0 ? '8px' : 0 }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
-                                        装備CP予算
-                                        {cpBudget > 10 && <span style={{ color: 'var(--accent-gold)', marginLeft: '4px' }}>(基本10 +背景{cpBudget - 10})</span>}
-                                    </span>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)' }}>{cpBudget}CP</span>
-                                </div>
-                                {usedCp > 0 && (
-                                    <>
-                                        <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: '6px' }}>
-                                            <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width 0.3s' }} />
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{cpSource}: {usedCp}CP</span>
-                                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: barColor }}>
-                                                {remaining >= 0 ? `残り ${remaining}CP` : `${Math.abs(remaining)}CP 超過`}
-                                            </span>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        );
-                    })()}
-                </div>
-
-                {/* ====== SEC 11: サイバネティクス ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 11 — CYBERNETICS</div>
-                    <h2 style={S.sectionHeading}>サイバネティクス（身体改造）</h2>
-                    <p style={sectionNote}>任意。身体の一部を魔導機関で置換・増強する処置。等級が上がるほど強力だがリスクが増す。</p>
-                    <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ff6666' }}>
-                        一度施術すると取り外せません。慎重に選択してください。
-                    </div>
-                    <FormSelect label="改造等級" value={form.cyber_grade} onChange={v => set('cyber_grade', v)} options={CYBER_GRADES.map(g => g.id)} />
-                    {form.cyber_grade === 'II' && form.level < 4 && (
-                        <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,170,0,0.1)', border: '1px solid rgba(255,170,0,0.3)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ffaa00' }}>
-                            等級Ⅱにはレベル4以上が必要です（現在 Lv.{form.level}）
-                        </div>
-                    )}
-                    {form.cyber_grade === 'III' && form.level < 9 && (
-                        <div style={{ padding: '8px 12px', marginBottom: 'var(--space-md)', background: 'rgba(255,170,0,0.1)', border: '1px solid rgba(255,170,0,0.3)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: '#ffaa00' }}>
-                            等級Ⅲにはレベル9以上が必要です（現在 Lv.{form.level}）
-                        </div>
-                    )}
-                    {form.cyber_grade !== 'none' && (() => {
-                        const grade = CYBER_GRADES.find(g => g.id === form.cyber_grade);
-                        const availList = [];
-                        const gradeOrder = ['I', 'II', 'III'];
-                        const gradeIdx = gradeOrder.indexOf(form.cyber_grade);
-                        for (let i = 0; i <= gradeIdx; i++) {
-                            (CYBERNETICS[gradeOrder[i]] || []).forEach(c => availList.push(c));
-                        }
-                        const usedCP = form.cybernetics.reduce((sum, c) => {
-                            const found = findCybernetic(c.name);
-                            return sum + (found ? found.cp : 0);
-                        }, 0);
-                        return (
-                            <>
-                                <div style={{ padding: '10px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{grade.label}</span>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: usedCP > grade.cpLimit ? 'var(--accent-danger)' : 'var(--accent-gold)' }}>
-                                        {usedCP} / {grade.cpLimit} CP
-                                    </span>
-                                </div>
-                                {form.cybernetics.map((slot, i) => (
-                                    <div key={i} style={{ marginBottom: 'var(--space-sm)', padding: '10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
-                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-gold)', marginBottom: '6px' }}>スロット {i + 1}</div>
-                                        <select value={slot.name}
-                                            onChange={e => {
-                                                const name = e.target.value;
-                                                const arr = [...form.cybernetics];
-                                                const found = findCybernetic(name);
-                                                arr[i] = { name, part: found ? found.part : '' };
-                                                set('cybernetics', arr);
-                                            }}
-                                            style={{ width: '100%', padding: '8px 12px', background: 'rgba(0,0,0,0.3)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)' }}>
-                                            <option value="">— 選択なし —</option>
-                                            {availList.map(c => <option key={c.name} value={c.name}>{c.name}（{c.cp}CP / {c.part} / {c.maker}）</option>)}
-                                        </select>
-                                        {slot.name && (() => {
-                                            const c = findCybernetic(slot.name);
-                                            if (!c) return null;
-                                            return <div style={{ marginTop: '6px', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>効果: {c.effect} · 共鳴: {c.resonance}</div>;
-                                        })()}
-                                    </div>
-                                ))}
-                            </>
-                        );
-                    })()}
-                </div>
-
-                {/* ====== SEC 12: 因縁・バックストーリー ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 12 — STORY</div>
-                    <h2 style={S.sectionHeading}>因縁・バックストーリー</h2>
-                    <div style={S.fieldGroup}>
-                        <label style={S.label}>簡略来歴（250文字以内） — 資格証の画像に表示されます</label>
-                        <textarea
-                            value={form.brief_history}
-                            onChange={e => { if (e.target.value.length <= 250) set('brief_history', e.target.value); }}
-                            maxLength={250}
-                            placeholder="例：灰嶺市底澱出身。幼少期に怪異に家族を奪われ、独学で祓いの術を身につけた。祓部への入隊を拒み、裏社会の情報網を頼りに単独で怪異を追い続けている。「あの日の借りは、必ず返す」——それだけが、この街で生き延びる理由。"
-                            style={{ width: '100%', minHeight: '80px', padding: '10px 12px', background: 'var(--bg-elevated)', border: 'var(--border-subtle)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', resize: 'vertical' }}
-                        />
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: form.brief_history.length >= 230 ? '#ffaa00' : 'var(--text-muted)', textAlign: 'right', marginTop: '4px' }}>
-                            {form.brief_history.length} / 250
-                        </div>
-                    </div>
-                    <FormTextArea label="外見（任意） — RP用シートに表示されます" value={form.appearance} onChange={v => set('appearance', v)} placeholder="身長・体格・髪・瞳・服装・目を引く特徴など" />
-                    <FormTextArea label="性格（任意） — RP用シートに表示されます" value={form.personality} onChange={v => set('personality', v)} placeholder="基本的な気質、対人傾向、譲れない信条など" />
-                    <FormTextArea label="口調・一人称（任意） — RP用シートに表示されます" value={form.speech_style} onChange={v => set('speech_style', v)} placeholder="一人称・二人称、話し方の癖、口癖など" />
-                    <FormTextArea label="因縁" value={form.fate} onChange={v => set('fate', v)} placeholder="何を失ったか、何を追っているか。この世界で戦い続ける理由。" />
-                    <FormTextArea label="バックストーリー（任意）" value={form.backstory} onChange={v => set('backstory', v)} placeholder="キャラクターの過去、人間関係、転機となった出来事..." />
-                </div>
-
-                {/* ====== SEC 13: 二次創作ガイドライン ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 13 — FANART POLICY</div>
-                    <h2 style={S.sectionHeading}>二次創作ガイドライン</h2>
-                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: 'var(--space-md)', fontFamily: 'var(--font-mono)' }}>
-                        このキャラクターの二次創作（ファンアート）で許可する表現を設定します。資格証の画像にも反映されます。
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '6px' }}>
-                        {[
-                            { key: 'coupling', label: 'カップリング表現' },
-                            { key: 'bl', label: 'BL' },
-                            { key: 'gl', label: 'GL' },
-                            { key: 'nl', label: 'NL' },
-                            { key: 'yume', label: '夢表現' },
-                            { key: 'commission', label: 'FAの外部発注' },
-                            { key: 'body_change', label: '身体的特徴の変更' },
-                            { key: 'gender_swap', label: '性転換' },
-                            { key: 'hairstyle_change', label: '髪型変更' },
-                            { key: 'costume_change', label: '衣装変更' },
-                            { key: 'parody', label: 'パロディ' },
-                            { key: 'mild_sexual', label: '性表現（軽度）' },
-                            { key: 'mild_violence', label: '暴力（軽度の傷や流血）' },
-                            { key: 'r18', label: 'R18' },
-                            { key: 'r18g', label: 'R18G' },
-                        ].map(item => {
-                            const val = (form.fanart_policy || {})[item.key] || 'ok';
-                            return (
-                                <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
-                                    <span style={{ flex: 1, fontSize: '12px', color: 'var(--text-primary)' }}>{item.label}</span>
-                                    {['ok', 'ask', 'ng'].map(v => (
-                                        <button key={v} type="button"
-                                            onClick={() => set('fanart_policy', { ...(form.fanart_policy || {}), [item.key]: v })}
-                                            style={{
-                                                padding: '2px 8px', fontSize: '10px', fontFamily: 'var(--font-mono)', cursor: 'pointer',
-                                                fontWeight: val === v ? 700 : 400,
-                                                background: val === v
-                                                    ? v === 'ok' ? 'rgba(0,255,170,0.15)' : v === 'ask' ? 'rgba(255,170,0,0.15)' : 'rgba(255,77,77,0.15)'
-                                                    : 'transparent',
-                                                border: val === v
-                                                    ? v === 'ok' ? '1px solid rgba(0,255,170,0.4)' : v === 'ask' ? '1px solid rgba(255,170,0,0.4)' : '1px solid rgba(255,77,77,0.4)'
-                                                    : '1px solid rgba(255,255,255,0.06)',
-                                                color: val === v
-                                                    ? v === 'ok' ? '#00ffaa' : v === 'ask' ? '#ffaa00' : '#ff4d4d'
-                                                    : 'var(--text-muted)',
-                                            }}
-                                        >
-                                            {v === 'ok' ? 'OK' : v === 'ask' ? '要相談' : 'NG'}
-                                        </button>
-                                    ))}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div style={{ marginTop: 'var(--space-md)' }}>
-                        <FormTextArea label="備考（任意）" value={(form.fanart_policy || {}).note || ''} onChange={v => set('fanart_policy', { ...(form.fanart_policy || {}), note: v })} placeholder="その他の条件や補足事項があれば記入..." />
-                    </div>
-                </div>
-
-                {/* ====== SEC 14: 関連リンク ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 14 — LINKS</div>
-                    <h2 style={S.sectionHeading}>関連リンク</h2>
-                    <div style={S.row}>
-                        <FormInput label="関連怪異" value={form.related_anomalies} onChange={v => set('related_anomalies', v)} placeholder="TMP-??? / KAI-####" />
-                        <FormInput label="関連キャラ" value={form.related_characters} onChange={v => set('related_characters', v)} placeholder="CHAR-???" />
-                        <FormInput label="関連組織" value={form.related_factions} onChange={v => set('related_factions', v)} placeholder="FAC-???" />
-                    </div>
-                </div>
-
-                {/* ====== SEC 15: ソーシャルリンク ====== */}
-                <div style={S.section}>
-                    <div style={S.sectionTitle}>SECTION 15 — SOCIAL</div>
-                    <h2 style={S.sectionHeading}>SNSアカウント</h2>
-                    <p style={sectionNote}>プレイヤーの連絡先としてキャラクターシートに表示されます（すべて任意）。</p>
-                    <div style={S.row}>
-                        <FormInput label="X（旧Twitter）" value={form.social_x} onChange={v => set('social_x', v)} placeholder="@username" />
-                        <FormInput label="VRChat" value={form.social_vrc} onChange={v => set('social_vrc', v)} placeholder="VRChat表示名" />
-                        <FormInput label="URL" value={form.social_url} onChange={v => set('social_url', v)} placeholder="https://..." />
-                    </div>
-                </div>
-
-                {/* ====== SEC 16: 出力（カード／テキスト） ====== */}
-                <ExportSection form={form} />
+                {/* ====== 出力 ====== */}
+                <ExportSection form={form} gameEnabled={gameEnabled} ranks={ranks} innateChoice={innateChoice} />
 
                 {/* ====== 結果 + 送信 ====== */}
                 {result && (
@@ -1460,203 +361,9 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 <button type="submit" style={S.submitBtn} disabled={submitting}
                     onMouseEnter={e => { e.target.style.background = 'rgba(212, 175, 55, 0.2)'; e.target.style.boxShadow = '0 0 30px var(--accent-gold-glow)'; }}
                     onMouseLeave={e => { e.target.style.background = S.submitBtn.background; e.target.style.boxShadow = 'none'; }}>
-                    {submitting ? 'SUBMITTING...' : isEdit ? '▶ シートを更新' : '▶ キャラクターシートを投稿'}
+                    {submitting ? 'SUBMITTING...' : isEdit ? '▶ シートを更新' : gameEnabled ? '▶ キャラクターシートを投稿（ゲームデータ付き）' : '▶ RPシートを投稿'}
                 </button>
             </form>
-        </div>
-    );
-}
-
-// ===== ExportSection =====
-// 投稿前でも使える出力UI：名刺サイズキャラカード PNG / RP用IDカード PNG / プレーンテキスト
-function ExportSection({ form }) {
-    const charCardRef = useRef(null);
-    const rpCardRef = useRef(null);
-    const fullSheetRef = useRef(null);
-    const [exporting, setExporting] = useState(null);
-    const [textCopied, setTextCopied] = useState(false);
-
-    // フォームの値を CharacterCard / RpIdCard が期待する形に変換
-    const character = useMemo(() => ({
-        id: form.character_name || 'draft',
-        character_name: form.character_name,
-        affiliation: form.affiliation,
-        sub_affiliation: form.sub_affiliation || '',
-        awakening: form.awakening,
-        background: form.background,
-        brief_history: form.brief_history || '',
-        image_url: form.image_url || form.thumbnail_url || '',
-        thumbnail_url: form.thumbnail_url || form.image_url || '',
-        age: form.age || '',
-        gender: form.gender || '',
-        active_title: form.title || '',
-        title: form.title || '',
-        approved_status: 'pending',
-        author_name: form.author_name || '',
-        fanart_policy: form.fanart_policy || null,
-        created_at: new Date().toISOString(),
-    }), [form]);
-
-    // プレーンテキスト形式（Discord等への貼り付け用）
-    const buildText = useCallback(() => {
-        const c = character;
-        const lines = [];
-        lines.push('═══════════════════════════════════');
-        lines.push('  KAI-I//KILL キャラクターシート');
-        lines.push('═══════════════════════════════════');
-        lines.push('');
-        lines.push('【基本情報】');
-        lines.push(`名前：${c.character_name || '（名前なし）'}`);
-        if (c.title)            lines.push(`二つ名：${c.title}`);
-        if (c.age || c.gender)  lines.push(`年齢／性別：${c.age || '—'} / ${c.gender || '—'}`);
-        if (c.affiliation)      lines.push(`所属：${c.affiliation}${c.sub_affiliation ? `（${c.sub_affiliation}）` : ''}`);
-        if (c.awakening)        lines.push(`覚醒：${c.awakening}`);
-        if (c.background)       lines.push(`背景：${c.background}`);
-        if (form.weapon_type)   lines.push(`戦闘流派：${form.weapon_type}`);
-        if (form.level)         lines.push(`レベル：${form.level}`);
-        lines.push('');
-        lines.push('【能力値】');
-        const ABS = [
-            { key: 'rank_tai', name: '体' },  { key: 'rank_haya', name: '疾' },
-            { key: 'rank_shiki', name: '識' }, { key: 'rank_han', name: '判' },
-            { key: 'rank_shiya', name: '察' }, { key: 'rank_jutsu', name: '術' },
-            { key: 'rank_kon', name: '魂' },
-        ];
-        ABS.forEach(a => {
-            const rank = form[a.key] || 'D';
-            const plus = (form.stage_plus || []).includes(a.key) ? '+' : '';
-            lines.push(`  ${a.name}：${rank}${plus}`);
-        });
-        if (form.skills && form.skills.length > 0) {
-            lines.push('');
-            lines.push('【スキル】');
-            form.skills.forEach(s => lines.push(`  • ${s}`));
-        }
-        if (form.gift) {
-            lines.push('');
-            lines.push(`【ギフト】${form.gift}`);
-        }
-        if (form.brief_history) {
-            lines.push('');
-            lines.push('【経歴】');
-            lines.push(form.brief_history);
-        }
-        lines.push('');
-        lines.push('═══════════════════════════════════');
-        return lines.join('\n');
-    }, [character, form]);
-
-    const fileBaseName = (form.character_name || 'character').replace(/[^\w\u3040-\u30ff\u4e00-\u9fff-]/g, '_');
-
-    const handleExportCharCard = useCallback(async () => {
-        if (!charCardRef.current) return;
-        setExporting('char');
-        try {
-            await exportAsImage(charCardRef.current, `${fileBaseName}_card`);
-        } catch (err) {
-            console.error('キャラカード出力エラー:', err);
-            alert('キャラカード出力に失敗しました');
-        }
-        setExporting(null);
-    }, [fileBaseName]);
-
-    const handleExportRpCard = useCallback(async () => {
-        if (!rpCardRef.current) return;
-        setExporting('rp');
-        try {
-            await exportAsImage(rpCardRef.current, `${fileBaseName}_rpid`);
-        } catch (err) {
-            console.error('RP用IDカード出力エラー:', err);
-            alert('RP用IDカード出力に失敗しました');
-        }
-        setExporting(null);
-    }, [fileBaseName]);
-
-    const handleExportFullSheet = useCallback(async () => {
-        if (!fullSheetRef.current) return;
-        setExporting('full');
-        try {
-            await exportAsImage(fullSheetRef.current, `${fileBaseName}_sheet`);
-        } catch (err) {
-            console.error('ステータスシート出力エラー:', err);
-            alert('ステータスシート出力に失敗しました');
-        }
-        setExporting(null);
-    }, [fileBaseName]);
-
-    const handleCopyText = useCallback(async () => {
-        const text = buildText();
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-            } else {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.left = '-9999px';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-            }
-            setTextCopied(true);
-            setTimeout(() => setTextCopied(false), 2000);
-        } catch (err) {
-            console.error('クリップボードコピーエラー:', err);
-            alert('コピーに失敗しました');
-        }
-    }, [buildText]);
-
-    const btnStyle = {
-        padding: '10px 18px',
-        background: 'rgba(255, 255, 255, 0.04)',
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        color: 'var(--text-primary)',
-        fontFamily: 'var(--font-mono)',
-        fontSize: 'var(--font-size-sm)',
-        cursor: 'pointer',
-    };
-
-    return (
-        <div style={S.section}>
-            <div style={S.sectionTitle}>SECTION 16 — EXPORT</div>
-            <h2 style={S.sectionHeading}>出力</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', marginBottom: 'var(--space-md)' }}>
-                投稿前でも使える。名刺サイズのキャラカード／RP用IDカード／プレーンテキストとしてダウンロード・コピーできる。
-            </p>
-
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: 'var(--space-md)' }}>
-                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportCharCard}>
-                    {exporting === 'char' ? '⏳ 生成中...' : '🃏 名刺カード PNG'}
-                </button>
-                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportRpCard}>
-                    {exporting === 'rp' ? '⏳ 生成中...' : '🪪 RP用IDカード PNG'}
-                </button>
-                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleExportFullSheet}>
-                    {exporting === 'full' ? '⏳ 生成中...' : '📊 ステータスシート PNG'}
-                </button>
-                <button type="button" style={btnStyle} disabled={!!exporting} onClick={handleCopyText}>
-                    {textCopied ? '✓ コピー済み' : '💬 テキストコピー'}
-                </button>
-            </div>
-
-            {/* キャラカード プレビュー（画面表示用） */}
-            <div style={{ marginBottom: 'var(--space-md)', overflowX: 'auto' }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: '6px' }}>キャラカード プレビュー</div>
-                <div ref={charCardRef}>
-                    <CharacterCard character={character} />
-                </div>
-            </div>
-
-            {/* RP用IDカード／ステータスシート（画面外配置でキャプチャ用） */}
-            <div style={{ position: 'absolute', left: '-9999px', top: 0 }} aria-hidden="true">
-                <div ref={rpCardRef}>
-                    <RpIdCard character={character} />
-                </div>
-                <div ref={fullSheetRef}>
-                    <FullCharacterSheet form={form} />
-                </div>
-            </div>
         </div>
     );
 }

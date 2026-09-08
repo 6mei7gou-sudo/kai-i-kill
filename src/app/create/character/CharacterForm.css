@@ -1,0 +1,118 @@
+/* キャラクターシートフォーム — ゲームデータ2カラムレイアウト */
+
+.cf-game-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+.cf-game-side {
+    position: sticky;
+    top: 16px;
+}
+
+.cf-summary-full { display: block; }
+.cf-summary-compact { display: none; }
+
+@media (max-width: 960px) {
+    .cf-game-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .cf-game-side {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        order: -1;
+        background: var(--bg-primary);
+        padding-bottom: 8px;
+    }
+    .cf-summary-full { display: none; }
+    .cf-summary-compact { display: block; }
+}
+
+/* モバイルではサイドバー開閉ボタン（左上固定）と重ならないよう左に余白を取る */
+@media (max-width: 768px) {
+    .cf-game-side {
+        padding-left: 44px;
+    }
+}
+
+/* モード切替ヘッダー */
+.cf-mode-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    margin-bottom: var(--space-xl);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-gold-border);
+}
+
+.cf-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.cf-switch__track {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.cf-switch__track--on {
+    background: rgba(212, 175, 55, 0.35);
+    border-color: var(--accent-gold);
+}
+
+.cf-switch__knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #9a9a9a;
+    transition: left 0.2s, background 0.2s;
+}
+
+.cf-switch__track--on .cf-switch__knob {
+    left: 22px;
+    background: var(--accent-gold);
+}
+
+.cf-jump-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.cf-jump-nav a {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.cf-jump-nav a:hover {
+    color: var(--accent-gold);
+    border-color: var(--accent-gold-border);
+}
