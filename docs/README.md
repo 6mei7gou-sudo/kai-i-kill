@@ -40,13 +40,14 @@ docs/
 ├── gm/                  GM専用（秘匿情報含む）
 │   ├── world_bible.md   世界観バイブル v1.1【復元版】
 │   ├── glossary.md      用語集 v1.0【復元版】
-│   ├── geography.md     地理設定 v1.0【復元版】
+│   ├── geography.md     地理設定 v1.1（地理の正本。全資料から統合、要決定事項リスト付き）
 │   └── factions/        勢力別詳細（祓部・傭兵・企業・無所属）【復元版】
 │
 ├── player/              プレイヤー向け（秘匿除去済み）
 │   ├── world_bible.md   世界観バイブル v1.0
 │   ├── glossary.md      用語集 v1.0
 │   ├── timeline.md      年表 v1.0
+│   ├── geography.md     地理設定 v1.0（gm/geography.md の秘匿除去版。現在はページ未紐付け）
 │   ├── character_concept_guide.md   キャラクター造形ガイド（世界観指針）
 │   ├── factions/        勢力別詳細（祓部・傭兵・企業・無所属）
 │   └── special/         特設記事（elevator.md — /world/elevator で表示）
@@ -84,7 +85,7 @@ docs/
 `docs/gm/` のMarkdown原稿は一時リポジトリから失われていたため、2026-07に以下のソースから復元した：
 
 - 世界観バイブル・勢力別詳細・用語集 ← `_build/gm_rulebook_full.html`（2026-03頃のGM用総合ルールブックビルド）
-- 地理設定 ← `_build/gen_geography_pdf.py`（PDF生成スクリプトの埋め込みコンテンツ）
+- 地理設定 ← `_build/gen_geography_pdf.py`（PDF生成スクリプトの埋め込みコンテンツ）。2026-09に全資料から統合改稿してv1.1化した（復元版の扱いは終了）
 
 復元元のHTMLと旧PDF出力物（`pdf/gm-beta/`）は内容が重複するため復元完了後に削除した（git履歴には残存）。
 
