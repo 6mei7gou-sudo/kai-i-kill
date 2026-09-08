@@ -6,6 +6,8 @@ import { BACKGROUNDS, GIFTS, GAME_DATA_STEPS } from '@/data/characterBuildData';
 describe('QuickstartPage', () => {
     test('RPシート → ゲームデータの二段構成で章が並ぶ', () => {
         render(<QuickstartPage />);
+        expect(screen.getByRole('heading', { name: /最低限これだけ知っておけばいい/ })).toBeInTheDocument();
+        expect(screen.getByText(/怪異は必ず「核」と「ルール」を持つ/)).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: /RPシートを作る/ })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: /ゲームデータの読み方/ })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: /ゲームデータを作る/ })).toBeInTheDocument();

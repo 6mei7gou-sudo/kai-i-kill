@@ -26,6 +26,20 @@ const SAMPLE = {
 };
 const SAMPLE_RANKS = computeRanks(SAMPLE, { innateChoice: 'rank_jutsu' });
 
+// ===== 世界設定の最小セット（正本：docs/player/world_bible.md。秘匿情報は含めない） =====
+const WORLD_BASICS = [
+    { title: '舞台は近未来の架空日本', body: '地名も地図も現実とは違うが、文化と民俗は日本のもの。表層はサイバーパンクな情報社会で、魔法はガスや電気と同じインフラとして資格制度と安全基準のもとに使われている。' },
+    { title: '怪異は「噂が実体化したバグ」', body: '噂・言説・信念が臨界を超えると、現実にバグとして出力される。それが怪異。信じる人間が増えるほど強くなる。オカルトの噂話は怪異の燃料だ。' },
+    { title: '怪異の存在は秘匿されている', body: '一般人にも怪異は見えるし触れる。ただし話しても誰も信じない。幻覚と笑われ、ストレスと処理され、SNSでは創作扱いになる。' },
+    { title: '怪異は必ず「核」と「ルール」を持つ', body: '核は物・場所・記録媒体に宿り、壊せば怪異は消える。ルールは人を害する条件で、破るほど捕捉される。だから討伐者は「調べて、暴いて、討つ」。' },
+    { title: '討伐は免許制', body: '魔導省が管轄し、実務は祓部が担う。素養検査と講習を経て免許を取れば討伐者。無免許の討伐は犯罪だ。日常業務の大半は五級怪異の駆除で、三級以上は祓部の管理案件になる。' },
+    { title: '討伐者は三種類', body: '祓部（魔導省の公的機関。訓練と装備は最高だが縛りも多い）、傭兵（《Anonymous》に登録したライセンス持ち。本業は問わない）、無所属（免許を取れない事情を抱え、組織に「属せない」者）。企業所属のPCは作れない。' },
+    { title: '魔法はチートコード、異能はアプリ', body: '魔法は素養と訓練で覚え、世界のソースコードに介入する。再現性は高いが、大きな魔法ほど怪異を生む。異能は執着や体験から内側に生まれ、使うほど使用者が怪異に近づく。PCが持てるのは魔法だけ。' },
+    { title: '装備は魔導具', body: '手持ちの武装型から搭乗型まで形態はさまざま。国家系の蒼鉄機工（安全重視・祓部標準）と独立系の雷禽重工（高出力・傭兵向け）が二大メーカーで、鴉羽技研の違法改造品や銀鎚精機の専用機も流通している。' },
+    { title: '素養は3〜4割に眠っているが、開花するのは一握り', body: '生まれつき（先天）、強烈な体験（ショック）、人体実験（実験）、核や特殊素材への長期接触（接触）。覚醒の経緯が討伐者の過去を決める。' },
+    { title: '五つの管区', body: '東の灰嶺市（かいれいし）は最大都市圏で怪異最多。中の千隼市（ちはやし）に魔導省本庁と祓部中央本部。西の錆ヶ浜（さびがはま）は傭兵の街。北は禁足地が密集する山岳、南は孤立した島々。' },
+];
+
 // ===== 小物 =====
 const th = (w) => (w ? { width: w } : undefined);
 const nameCell = { fontWeight: 700, color: 'var(--text-heading)', whiteSpace: 'nowrap' };
@@ -97,7 +111,31 @@ export default function QuickstartPage() {
                 判定を伴うセッションに出るときに<strong style={{ color: 'var(--text-primary)' }}>ゲームデータ</strong>を付け足す。詳細なルールはGMが持つルールブックを参照。
             </Callout>
 
+            {/* ===== 00 この世界 ===== */}
+            <SectionHead no="00" title="最低限これだけ知っておけばいい" en="THIS WORLD" />
+            <div style={{ marginBottom: 'var(--space-3xl)' }}>
+                <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
+                    世界観バイブルを読まなくてもキャラクターは作れる。卓に座る前に押さえておくのは、この{WORLD_BASICS.length}項目だけでいい。
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '8px', marginBottom: 'var(--space-lg)' }}>
+                    {WORLD_BASICS.map((w, i) => (
+                        <div key={i} style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: '10px', padding: '12px 14px', background: 'var(--bg-card)', border: 'var(--border-subtle)', borderLeft: '3px solid var(--accent-gold)' }}>
+                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-lg)', fontWeight: 700, color: 'var(--accent-gold)', lineHeight: 1.2 }}>{String(i + 1).padStart(2, '0')}</div>
+                            <div>
+                                <div style={{ fontWeight: 700, color: 'var(--text-heading)', marginBottom: '4px' }}>{w.title}</div>
+                                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{w.body}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <Callout>
+                    <strong style={{ color: 'var(--text-primary)' }}>あなたは、その怪異と向き合う討伐者の一人だ。</strong>英雄でも超人でもない。
+                    もっと知りたくなったら <Link href="/world/" style={{ color: 'var(--accent-gold)' }}>世界観バイブル</Link>、地名や固有名詞は <Link href="/glossary/" style={{ color: 'var(--accent-gold)' }}>用語集</Link> へ。
+                </Callout>
+            </div>
+
             {/* 2つの遊び方 */}
+            <SectionHead no="START" title="2つの遊び方" en="TWO WAYS TO PLAY" />
             <div className="card-grid" style={{ marginBottom: 'var(--space-3xl)' }}>
                 <Link href="/create/character/" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <div className="card">
