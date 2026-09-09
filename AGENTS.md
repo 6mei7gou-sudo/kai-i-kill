@@ -26,6 +26,8 @@ npm run build && npm test
 - `.claude/skills/lore-sync/SKILL.md` — GM版⇔プレイヤー版・用語集の同期チェック（`docs/gm/`・`docs/player/` 編集後に実行）
 - `.claude/skills/secret-check/SKILL.md` — 公開コンテンツへの秘匿情報混入チェック（公開前に実行）
 - `.claude/skills/verify-site/SKILL.md` — ビルド→テスト→全文書ページの表示確認（コミット前に実行）
+- `.agents/skills/unity-vrc-udon-sharp/SKILL.md` — VRChat UdonSharp スクリプト作成・レビュー用（外部スキル。`.claude/skills/` からシンボリックリンク）
+- `.agents/skills/unity-vrc-world-sdk-3/SKILL.md` — VRChat World SDK 3 のシーン設定・最適化・アップロード用（外部スキル。同上）
 
 ## コミット
 
