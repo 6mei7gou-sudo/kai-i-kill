@@ -172,10 +172,11 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'この派遣は既に完了しています' }, { status: 409 });
     }
 
-    // 成功時に実績を保存（クエスト定義の実績のみ）
+    // 成功時に実績を保存（クエスト定義の実績のみ）。DBエラーは握りつぶさず応答に含める
+    const achievementErrors = [];
     if (success && Array.isArray(rewards?.achievements)) {
       for (const ach of rewards.achievements) {
-        await supabase
+        const { error: achErr } = await supabase
           .from('character_achievements')
           .upsert({
             user_id: userId,
@@ -185,6 +186,10 @@ export async function PATCH(request) {
             achievement_type: ach.type || 'dispatch',
             source_id: data.quest_id,
           }, { onConflict: 'character_id,achievement_id' });
+        if (achErr) {
+          console.error('派遣実績の保存に失敗:', ach.id, achErr.message);
+          achievementErrors.push({ id: ach.id, message: achErr.message });
+        }
       }
     }
 
@@ -200,7 +205,7 @@ export async function PATCH(request) {
       } catch (_) { /* CP付与失敗は派遣結果に影響させない */ }
     }
 
-    return NextResponse.json({ ok: true, data, cpAwarded, successRate: rate });
+    return NextResponse.json({ ok: true, data, cpAwarded, successRate: rate, achievementErrors });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

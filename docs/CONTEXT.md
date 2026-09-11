@@ -28,12 +28,14 @@ Webサイト（世界観読み物・Webゲーム・投稿コミュニティ・SN
 - **必須の環境変数（本番）**：`SUPABASE_SERVICE_ROLE_KEY`（Supabase → Project Settings → API の service_role。`NEXT_PUBLIC_` を付けない）。未設定なら anon キーにフォールバックして警告を出す
 - **RLS強化マイグレーション** `supabase/migration_security_hardening.sql`：anon/authenticated の INSERT/UPDATE/DELETE を全廃、非公開テーブル（reports・user_migration_map・account_cp・cp_transactions・serial_codes・dispatch_quests・mission_results・adv_completions）の SELECT を閉鎖、novels は「公開」のみ、入場制限スレッドとその返信は anon から読めない。加えて `cp_adjust()`（CP残高の原子的更新）と SNS カウンターのトリガーを定義する
 - **適用順序（厳守）**：① Vercel に `SUPABASE_SERVICE_ROLE_KEY` を設定してデプロイ → ② SQL Editor でマイグレーションを実行。逆にすると API の書き込みが全て失敗する
+- **同マイグレーションの追加分（第2回レビュー）**：既存DBの CHECK 制約更新（SNS layer に meta/rp、実績種別に dispatch）、公開実績に残る生シリアルコードの不透明ID化、`migrate_user_data()`（Dev→Production 移行を1トランザクションで実行。失敗時は移行済みにならず再試行できる）
 - **適用後の確認**：匿名で `account_cp`/`reports` の SELECT が拒否されること、非公開小説がIDでも取れないこと、いいね・返信でカウンターが増えること、`npm test` の `__tests__/api/*-security.test.js`・`concurrency.test.js` が通ること
 - **未対応（運用側）**：Storage バケット `uploads` の RLS（匿名アップロード・他人の画像削除の可否）、main ブランチ保護、`docs/gm/`・`docs/rules/` が公開リポジトリで閲覧できる件は本対応の範囲外。別途判断が必要
 - **残存リスク**：ミッション／ADVの進行はクライアントで計算しているため、勝敗そのものはサーバーで検証していない（実在コンテンツ・所有キャラ・定義上の難易度／エンディングのみ検証）。サーバー側ゲームエンジン化は別タスク
 
 ## 変更ログ（新しい順）
 
+- 2026-09-11：第2回セキュリティレビュー R2-01〜R2-08 対応。移行APIの全エラー検査と原子化（所有者列の対応表に novels・sns_chat_rooms.created_by・reports を追加）、キャラ下書きのユーザー別キー化、シリアル引換の source_id を不透明IDに、派遣実績の保存エラーを応答に含める、チャットルーム作成時のメンバー表示名保存と失敗時のルーム取消、既存DBの CHECK 制約更新（layer / achievement_type）。回帰テスト10件追加
 - 2026-09-11：セキュリティレビュー（F01〜F11）対応。service role によるサーバー専用DBアクセス、RLS強化マイグレーション、投稿APIの列制限・非公開保護・装備CPのサーバー計算と先払い、CP加算APIの管理者専用化、ゲーム結果・派遣のサーバー検証、CP／能力値／レベルの原子的更新、いいね実行者の認証固定、SNSカウンターのトリガー化、スレッド一覧の本文非返却、Next 16.3.4／Clerk 7.9.2 へ更新。回帰テスト39件追加（計103件）
 
 - 2026-09-08：v1.1.0 リリース（サイドバー表記・package.json を 1.1.0 に更新、`src/data/siteNews.js` にリリースノート4件を追加）

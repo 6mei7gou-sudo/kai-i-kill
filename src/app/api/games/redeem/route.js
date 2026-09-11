@@ -83,7 +83,7 @@ export async function POST(request) {
         achievement_id: serial.achievement_id,
         achievement_name: serial.achievement_name,
         achievement_type: serial.achievement_type,
-        source_id: `serial:${serial.code}`,
+        source_id: `serial:${serial.id}`,  // 生コードは公開実績に残さない（不透明ID）
       });
 
     if (insertErr) {

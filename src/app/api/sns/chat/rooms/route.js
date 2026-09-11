@@ -41,11 +41,14 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { name, description, layer, mission_id, max_members, expires_at } = body;
+        const { name, description, layer, mission_id, max_members, expires_at, display_name, character_id } = body;
 
         if (!name || !layer) {
             return NextResponse.json({ error: 'name と layer は必須です' }, { status: 400 });
         }
+
+        // 作成者の表示名（メンバー行の必須列）。未指定なら既定名
+        const memberName = String(display_name || '').trim().slice(0, 100) || '名無しの討伐者';
 
         const payload = {
             name,
@@ -66,12 +69,15 @@ export async function POST(request) {
 
         if (roomError) throw roomError;
 
-        // 作成者をメンバーとして追加
+        // 作成者をメンバーとして追加（失敗したらルームを取り消す）
         const { error: memberError } = await supabase
             .from('sns_chat_members')
-            .insert([{ room_id: room.id, user_id: userId }]);
+            .insert([{ room_id: room.id, user_id: userId, display_name: memberName, character_id: character_id || null }]);
 
-        if (memberError) throw memberError;
+        if (memberError) {
+            await supabase.from('sns_chat_rooms').delete().eq('id', room.id);
+            throw memberError;
+        }
 
         return NextResponse.json({ ok: true, data: room });
     } catch (err) {

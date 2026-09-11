@@ -78,35 +78,19 @@ function inferInnateChoice(data) {
 }
 
 export default function CharacterForm({ editId = null, initialData = null }) {
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
     const router = useRouter();
     const isEdit = !!editId;
     const isOfficial = !!(initialData?.is_official);
 
-    const DRAFT_KEY = `kaiii_char_draft_${editId || 'new'}`;
+    // 下書きキーはユーザーIDごとに分ける（同じブラウザーで別アカウントに復元させない）
+    const draftUserId = user?.id || null;
+    const DRAFT_KEY = draftUserId ? `kaiii_char_draft_${editId || 'new'}_${draftUserId}` : null;
+    const LEGACY_DRAFT_KEY = 'kaiii_char_draft_new';
 
-    const [form, setForm] = useState(() => {
-        if (typeof window !== 'undefined' && !editId) {
-            try {
-                const saved = localStorage.getItem(DRAFT_KEY);
-                if (saved) return normalizeRecord(JSON.parse(saved));
-            } catch {}
-        }
-        return INITIAL;
-    });
-    const [gameEnabled, setGameEnabled] = useState(() => {
-        if (typeof window !== 'undefined' && !editId) {
-            try {
-                const saved = localStorage.getItem(DRAFT_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (typeof parsed._game_enabled === 'boolean') return parsed._game_enabled;
-                    return hasGameData(parsed);
-                }
-            } catch {}
-        }
-        return false;
-    });
+    const [form, setForm] = useState(INITIAL);
+    const [gameEnabled, setGameEnabled] = useState(false);
+    const [draftLoaded, setDraftLoaded] = useState(false);
     const [innateChoice, setInnateChoice] = useState(DEFAULT_INNATE_CHOICE);
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
@@ -123,21 +107,38 @@ export default function CharacterForm({ editId = null, initialData = null }) {
         }
     }, [initialData, isOfficial]);
 
+    // 認証情報の読み込み後に、そのユーザーの下書きだけを復元する。
+    // 所有者の無い旧キーは別ユーザーへ取り込まず削除する。アカウントが変わればフォームは初期化する
     useEffect(() => {
-        if (isEdit) return;
-        try { setHasDraft(!!localStorage.getItem(DRAFT_KEY)); } catch {}
-    }, [isEdit, DRAFT_KEY]);
+        if (isEdit || !isLoaded) return;
+        setDraftLoaded(false);
+        setForm(INITIAL);
+        setGameEnabled(false);
+        setHasDraft(false);
+        try { localStorage.removeItem(LEGACY_DRAFT_KEY); } catch {}
+        if (!DRAFT_KEY) return;
+        try {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                setForm(normalizeRecord(parsed));
+                setGameEnabled(typeof parsed._game_enabled === 'boolean' ? parsed._game_enabled : hasGameData(parsed));
+                setHasDraft(true);
+            }
+        } catch {}
+        setDraftLoaded(true);
+    }, [isEdit, isLoaded, DRAFT_KEY]);
 
-    // 自動保存（2秒デバウンス）
+    // 自動保存（2秒デバウンス）。ログイン済みで下書き復元が終わった後のみ
     useEffect(() => {
-        if (isEdit) return;
+        if (isEdit || !DRAFT_KEY || !draftLoaded) return;
         const timer = setTimeout(() => {
             try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...form, _game_enabled: gameEnabled })); } catch {}
         }, 2000);
         return () => clearTimeout(timer);
-    }, [form, gameEnabled, isEdit, DRAFT_KEY]);
+    }, [form, gameEnabled, isEdit, DRAFT_KEY, draftLoaded]);
 
-    const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch {} };
+    const clearDraft = () => { try { if (DRAFT_KEY) localStorage.removeItem(DRAFT_KEY); } catch {} };
 
     useEffect(() => {
         if (user && !form.author_name && !isEdit) {

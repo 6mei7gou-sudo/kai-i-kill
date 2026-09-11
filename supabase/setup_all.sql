@@ -338,7 +338,7 @@ CREATE TABLE IF NOT EXISTS serial_codes (
   code TEXT NOT NULL UNIQUE,
   achievement_id TEXT NOT NULL,
   achievement_name TEXT NOT NULL,
-  achievement_type TEXT NOT NULL DEFAULT 'special' CHECK (achievement_type IN ('mission','adv','special','levelup')),
+  achievement_type TEXT NOT NULL DEFAULT 'special' CHECK (achievement_type IN ('mission','adv','special','levelup','dispatch')),
   max_uses INT DEFAULT 1,
   current_uses INT DEFAULT 0,
   expires_at TIMESTAMPTZ
@@ -417,7 +417,7 @@ CREATE TABLE IF NOT EXISTS character_achievements (
   character_id UUID NOT NULL REFERENCES character_sheets(id) ON DELETE CASCADE,
   achievement_id TEXT NOT NULL,
   achievement_name TEXT NOT NULL,
-  achievement_type TEXT NOT NULL CHECK (achievement_type IN ('mission','adv','special','levelup')),
+  achievement_type TEXT NOT NULL CHECK (achievement_type IN ('mission','adv','special','levelup','dispatch')),
   source_id TEXT,
   UNIQUE(character_id, achievement_id)
 );

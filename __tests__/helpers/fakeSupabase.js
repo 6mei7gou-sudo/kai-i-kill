@@ -112,6 +112,11 @@ class FakeQuery {
 
     _run() {
         this.db.log.push({ table: this.table, op: this.op, payload: clone(this.payload) });
+        // エラー注入（テストから db.errorHook = (table, op) => error|null を設定）
+        if (typeof this.db.errorHook === 'function') {
+            const injected = this.db.errorHook(this.table, this.op, this);
+            if (injected) return { data: null, error: injected };
+        }
         const rows = this._rows();
 
         if (this.op === 'select') {
@@ -201,8 +206,12 @@ function createFakeSupabase(tables = {}, options = {}) {
             ...(options.schema || {}),
         },
         log: [],
+        errorHook: null,
         from(table) { return new FakeQuery(db, table); },
         rpc(name, args) {
+            if (typeof options.rpc === 'object' && options.rpc && typeof options.rpc[name] === 'function') {
+                return Promise.resolve(options.rpc[name](db, args));
+            }
             if (name === 'cp_adjust' && options.withCpRpc) {
                 return Promise.resolve(cpAdjustRpc(db, args));
             }

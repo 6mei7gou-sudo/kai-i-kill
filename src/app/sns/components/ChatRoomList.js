@@ -37,7 +37,7 @@ export default function ChatRoomList({ layer }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user.id,
+          display_name: user.username || user.firstName || user.fullName || '名無しの討伐者',
           name: formName.trim(),
           description: formDescription.trim() || null,
           expires_at: formExpires || null,
