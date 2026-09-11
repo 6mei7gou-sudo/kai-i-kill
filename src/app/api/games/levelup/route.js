@@ -1,13 +1,8 @@
 // レベルアップAPI — CP消費 / シリアルコード / 公式キャラ（無制限）
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { deductCp } from '@/lib/cpService';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
+import { deductCp, adjustCp, CpInsufficientError } from '@/lib/cpService';
 
 // レベルごとの必要CP（現在のレベル → 次のレベルに上がるためのコスト）
 const LEVELUP_CP_TABLE = {
@@ -75,6 +70,8 @@ export async function POST(request) {
         }
 
         const newLevel = currentLevel + 1;
+        let cpPaid = 0;
+        let serialUsed = null;
 
         // === 方法別の処理 ===
 
@@ -92,8 +89,10 @@ export async function POST(request) {
             try {
                 await deductCp(supabase, userId, cost, character_id,
                     `「${char.character_name}」レベルアップ（Lv${currentLevel}→${newLevel}、${cost}CP）`);
+                cpPaid = cost;
             } catch (err) {
-                return NextResponse.json({ error: err.message }, { status: 400 });
+                const status = err instanceof CpInsufficientError ? 400 : 500;
+                return NextResponse.json({ error: err.message }, { status });
             }
         } else if (method === 'serial') {
             // シリアルコードでレベルアップ
@@ -125,24 +124,46 @@ export async function POST(request) {
                 return NextResponse.json({ error: 'このコードは使用上限に達しています' }, { status: 400 });
             }
 
-            // 使用回数をインクリメント
-            await supabase
+            // 使用回数をインクリメント（読み取った回数と一致する場合のみ。同時使用で上限超過させない）
+            const { data: usedRows, error: useErr } = await supabase
                 .from('serial_codes')
                 .update({ current_uses: serial.current_uses + 1 })
-                .eq('id', serial.id);
+                .eq('id', serial.id)
+                .eq('current_uses', serial.current_uses)
+                .select('id');
+            if (useErr) throw useErr;
+            if (!usedRows || usedRows.length === 0) {
+                return NextResponse.json({ error: 'コードの使用が競合しました。もう一度お試しください' }, { status: 409 });
+            }
+            serialUsed = serial;
         } else {
             return NextResponse.json({ error: '不正なレベルアップ方法です' }, { status: 400 });
         }
 
-        // レベルを更新
-        const { data: updated, error: updateErr } = await supabase
+        // レベルを更新（読み取ったレベルと一致する場合のみ成立させ、並行リクエストの二重適用を防ぐ）
+        const { data: updatedRows, error: updateErr } = await supabase
             .from('character_sheets')
             .update({ level: newLevel, updated_at: new Date().toISOString() })
             .eq('id', character_id)
-            .select()
-            .single();
+            .eq('level', char.level || 1)
+            .select();
 
-        if (updateErr) throw updateErr;
+        const updated = updatedRows?.[0];
+        if (updateErr || !updated) {
+            // 競合・失敗時は支払い済みCP／シリアル使用回数を戻す
+            if (cpPaid > 0) {
+                try {
+                    await adjustCp(supabase, userId, cpPaid, 'gear_craft', character_id, 'レベルアップ失敗による返還');
+                } catch (_) { console.error('レベルアップ返還に失敗:', character_id); }
+            }
+            if (serialUsed) {
+                await supabase.from('serial_codes')
+                    .update({ current_uses: serialUsed.current_uses })
+                    .eq('id', serialUsed.id);
+            }
+            if (updateErr) throw updateErr;
+            return NextResponse.json({ error: '他の更新と競合しました。再読み込みしてやり直してください' }, { status: 409 });
+        }
 
         // 次のレベルアップコストも返す
         const nextCost = LEVELUP_CP_TABLE[newLevel] || null;

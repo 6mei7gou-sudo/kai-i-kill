@@ -1,12 +1,7 @@
 // SNS投稿API — タイムライン取得・投稿作成・削除
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 
 // GET: タイムライン取得（カーソルページネーション）
 export async function GET(request) {
@@ -87,23 +82,7 @@ export async function POST(request) {
 
         if (error) throw error;
 
-        // リプライの場合、親投稿の reply_count をインクリメント
-        if (parent_id) {
-            const { error: updateError } = await supabase.rpc('increment', {
-                table_name: 'sns_posts',
-                column_name: 'reply_count',
-                row_id: parent_id,
-            }).catch(() => null);
-
-            // rpc が無い場合のフォールバック
-            if (updateError) {
-                await supabase
-                    .from('sns_posts')
-                    .update({ reply_count: supabase.raw('reply_count + 1') })
-                    .eq('id', parent_id);
-            }
-        }
-
+        // 親投稿の reply_count は DB トリガーが更新する（supabase/migration_security_hardening.sql）
         return NextResponse.json({ ok: true, data });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -140,20 +119,7 @@ export async function DELETE(request) {
         const { error } = await supabase.from('sns_posts').delete().eq('id', id);
         if (error) throw error;
 
-        // リプライだった場合、親投稿の reply_count をデクリメント
-        if (existing.parent_id) {
-            await supabase.rpc('decrement', {
-                table_name: 'sns_posts',
-                column_name: 'reply_count',
-                row_id: existing.parent_id,
-            }).catch(async () => {
-                await supabase
-                    .from('sns_posts')
-                    .update({ reply_count: supabase.raw('GREATEST(reply_count - 1, 0)') })
-                    .eq('id', existing.parent_id);
-            });
-        }
-
+        // 親投稿の reply_count は DB トリガーが更新する
         return NextResponse.json({ ok: true });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });

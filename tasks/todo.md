@@ -23,12 +23,16 @@
 ## 進行中・持ち越しタスク（2026-07-08時点：Phase 3期間）
 
 - [ ] Phase 3本体：PBWセッションルーム、IC投稿、状態パネル、リソース変換
-- [ ] Supabase CLIマイグレーション正式化、RLSポリシー強化（Phase 1持ち越し）
+- [ ] Supabase CLIマイグレーション正式化（Phase 1持ち越し）。RLS強化は `supabase/migration_security_hardening.sql` で実装済み → **本番適用待ち**（手順は `docs/CONTEXT.md` セキュリティ運用）
+- [ ] セキュリティレビュー残件（運用）：Storage `uploads` バケットの RLS 確認、main ブランチ保護、`docs/gm/`・`docs/rules/` の公開リポジトリ上の扱い
+- [ ] ミッション／ADVの勝敗をサーバーで検証する（サーバー側ゲームエンジン化）
 - [ ] `/game-guide/` 新設（判定の基本概念のみ。Phase 1予定が未着手。2026-09-08の改稿で `/quickstart/` がWebゲームの遊び方を担うようになったため、TRPG判定の解説ページを別に持つかは要判断）
 - [ ] GM復元版の突き合わせ更新：`docs/gm/factions/companies.md` の「羅刹技研」を現行5社体制（鴉羽技研・朱鷺崎財閥）に改稿。他の復元ファイルも冒頭注記に従い確認
 - [ ] `.claude/settings.local.json` の旧版に個人パスが残存（git履歴）。履歴からの完全除去（filter-repo＋force push）を行うかはオーナー判断待ち
 
 ## 完了ログ（新しい順）
+
+- 2026-09-11：セキュリティレビュー F01〜F11 のコード対応（詳細は `docs/CONTEXT.md` 変更ログ）
 
 - 2026-09-08：クイックスタートをWebゲーム向けに改稿（TRPGルール解説・サイバネ解説を除去、Webゲーム5モードとCP成長の解説を追加）
 - 2026-09-08：スキル枠をWeb実装に統一（Lv1=1、3レベルごとに+1）。`rules_unified.md` 9-1・13-3・13-4・付録、`chapters/`、`system_data.json` を更新

@@ -1,12 +1,7 @@
 // ステータスポイント消費API — 5レベルごとに獲得するポイントで能力値ランクを1段階上げる
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 
 // 7属性のフィールド名
 const VALID_ATTRS = ['tai', 'haya', 'shiki', 'han', 'shiya', 'jutsu', 'kon'];
@@ -76,8 +71,8 @@ export async function POST(request) {
         const newRank = RANK_ORDER[currentIdx + 1];
         const newUsed = (char.status_points_used || 0) + 1;
 
-        // 更新
-        const { data: updated, error: updateErr } = await supabase
+        // 更新（読み取った消費数・ランクと一致する場合のみ成立させ、並行リクエストの二重消費を防ぐ）
+        let updateQuery = supabase
             .from('character_sheets')
             .update({
                 [rankField]: newRank,
@@ -85,10 +80,16 @@ export async function POST(request) {
                 updated_at: new Date().toISOString(),
             })
             .eq('id', character_id)
-            .select()
-            .single();
+            .eq('status_points_used', char.status_points_used || 0);
+        // ランク列が未設定（NULL）のキャラは is() で照合する
+        updateQuery = char[rankField] ? updateQuery.eq(rankField, char[rankField]) : updateQuery.is(rankField, null);
+        const { data: updatedRows, error: updateErr } = await updateQuery.select();
 
         if (updateErr) throw updateErr;
+        const updated = updatedRows?.[0];
+        if (!updated) {
+            return NextResponse.json({ error: '他の更新と競合しました。再読み込みしてやり直してください' }, { status: 409 });
+        }
 
         return NextResponse.json({
             ok: true,

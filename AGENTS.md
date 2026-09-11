@@ -19,7 +19,7 @@ export CLERK_SECRET_KEY=sk_test_dummy
 npm run build && npm test
 ```
 
-環境変数は実値がなければ上記ダミー値で通る。
+環境変数は実値がなければ上記ダミー値で通る。本番はさらに `SUPABASE_SERVICE_ROLE_KEY`（サーバー専用）が必須で、APIルートは `src/lib/supabaseServer.js` 経由でDBに書き込む。ブラウザー側の anon キーは公開行の読取専用（RLS は `supabase/migration_security_hardening.sql`）。
 
 ## 定型手順書（プレーンなMarkdown。どのエージェントでも読んで実行できる）
 

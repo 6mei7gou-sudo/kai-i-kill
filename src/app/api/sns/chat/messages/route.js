@@ -1,12 +1,7 @@
 // SNSチャットメッセージAPI — メッセージ取得・送信
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 
 // GET: ルーム内メッセージ取得（カーソルページネーション）
 export async function GET(request) {

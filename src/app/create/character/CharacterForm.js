@@ -190,6 +190,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
 
             // 新規作成時、戦闘流派が選択されていたら自動で武器投稿して紐づける
             let gearPosted = false;
+            let gearError = null;
             if (!isEdit && gameEnabled && form.weapon_type && !form.linked_gear_id) {
                 try {
                     const spec = getWeaponSpec(form.weapon_type, form.equipment_maker || '汎用品', form.equipment_type, form.equipment_name);
@@ -217,6 +218,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                     };
                     const gearRes = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ table: 'gear_posts', data: gearPayload }) });
                     const gearJson = await gearRes.json();
+                    if (!gearRes.ok) gearError = gearJson.error || '装備の自動投稿に失敗しました';
                     if (gearRes.ok && gearJson.data?.id && json.data?.id) {
                         await fetch('/api/posts', {
                             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -229,7 +231,7 @@ export default function CharacterForm({ editId = null, initialData = null }) {
                 }
             }
 
-            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : `キャラクターシートを投稿しました！${gearPosted ? '装備も自動投稿されました。' : ''}` });
+            setResult({ ok: true, msg: isEdit ? 'シートを更新しました！' : `キャラクターシートを投稿しました！${gearPosted ? '装備も自動投稿されました。' : ''}${gearError ? `（装備の自動投稿は行われませんでした：${gearError}）` : ''}` });
             clearDraft();
             if (!isEdit) setForm(INITIAL);
             setTimeout(() => router.push(`/community/characters/${json.data?.id || editId}/`), 1500);

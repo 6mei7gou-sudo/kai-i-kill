@@ -53,14 +53,13 @@ export default function PostCard({ post, layer, currentUserId, onReply, onDelete
       const res = await fetch('/api/sns/like', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          post_id: post.id,
-          user_id: currentUserId,
-        }),
+        body: JSON.stringify({ post_id: post.id }),
       });
       if (res.ok) {
-        setLiked(!liked);
-        setLikeCount((c) => (liked ? c - 1 : c + 1));
+        const json = await res.json();
+        setLiked(!!json.liked);
+        if (typeof json.like_count === 'number') setLikeCount(json.like_count);
+        else setLikeCount((c) => (json.liked ? c + 1 : Math.max(0, c - 1)));
       }
     } catch {
       // silent fail

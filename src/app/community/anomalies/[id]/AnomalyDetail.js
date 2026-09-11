@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
 
@@ -59,12 +59,8 @@ export default function AnomalyDetail({ id }) {
     const isOwner = user && entry?.user_id && user.id === entry.user_id;
     useEffect(() => {
         (async () => {
-            const { data, error } = await supabase
-                .from('anomaly_drafts')
-                .select('*')
-                .eq('id', id)
-                .single();
-            if (!error && data) setEntry(data);
+            const data = await fetchPost('anomaly_drafts', id);
+            if (data) setEntry(data);
             setLoading(false);
         })();
     }, [id]);

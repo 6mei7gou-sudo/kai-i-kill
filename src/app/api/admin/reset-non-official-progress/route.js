@@ -4,14 +4,8 @@
 // ③ 全キャラクターに「未開の開拓者」称号を配布
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase, ADMIN_IDS } from '@/lib/supabaseServer';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 const FLAT_CP = 50;
 const PIONEER_TITLE = {

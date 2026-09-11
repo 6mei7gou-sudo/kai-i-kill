@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import CharacterForm from '../CharacterForm';
 
 const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
@@ -16,8 +16,8 @@ export default function EditCharacterClient({ id }) {
 
     useEffect(() => {
         (async () => {
-            const { data, error: e } = await supabase.from('character_sheets').select('*').eq('id', id).single();
-            if (e) setError('データの取得に失敗しました');
+            const data = await fetchPost('character_sheets', id);
+            if (!data) setError('データの取得に失敗しました');
             else setEntry(data);
             setLoading(false);
         })();

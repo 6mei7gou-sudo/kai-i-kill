@@ -39,7 +39,8 @@
 
 ## 開発
 
-- **ビルド/テスト**：`npm run build`・`npm test`。環境変数 `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`・`CLERK_SECRET_KEY` が必要（ローカル検証はダミー値で可）。検証は /verify-site を使う
+- **ビルド/テスト**：`npm run build`・`npm test`。環境変数 `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`・`CLERK_SECRET_KEY` が必要（ローカル検証はダミー値で可）。本番はさらに `SUPABASE_SERVICE_ROLE_KEY`（サーバー専用。`NEXT_PUBLIC_` を付けない）が必須。検証は /verify-site を使う
+- **DBアクセスの鉄則**：APIルートは `src/lib/supabaseServer.js`（service role）経由で書き込み、認可は `auth()`＋所有権チェックで行う。ブラウザーの `src/lib/supabase.js`（anon）は公開行の読取と Realtime 購読のみ。管理用列（`user_id`・`is_official`・`approved_*`・`level`・`status_points_used`・`active_title`）とCP残高は専用API以外から書き換えない。RLSの正本は `supabase/migration_security_hardening.sql`
 - **コミットメッセージ**：`fix(scope): 日本語の要約` 形式（type: feat / fix / refactor / chore / docs）
 - **主要ディレクトリ**：`src/`（App Router）・`src/lib/siteDocs.js`（docs⇔ページ紐付け）・`src/data/`（ゲームデータ）・`supabase/`（マイグレーション）・`archive/sheet-app-legacy/`（旧キャラシ、参照のみ）
 - **他のAIエージェント**（OpenAI Codex等）の入口は `AGENTS.md`（本ファイルを正本とする要約）。恒久ルールを変えたら AGENTS.md の要約もずれていないか確認する

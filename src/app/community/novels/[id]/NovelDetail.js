@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 
 const REPORT_REASONS = [
     { value: 'inappropriate', label: '不適切な内容（公序良俗違反など）' },
@@ -59,7 +59,7 @@ export default function NovelDetail({ id }) {
 
     useEffect(() => {
         (async () => {
-            const { data } = await supabase.from('novels').select('*').eq('id', id).single();
+            const data = await fetchPost('novels', id);
             setEntry(data || null);
             setLoading(false);
         })();

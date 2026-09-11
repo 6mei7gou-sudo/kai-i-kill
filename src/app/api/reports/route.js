@@ -5,14 +5,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase, ADMIN_IDS } from '@/lib/supabaseServer';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 const VALID_TARGET_TYPES = ['novel', 'character_sheet', 'gear_post', 'anomaly_draft', 'other'];
 const VALID_REASONS = ['inappropriate', 'copyright', 'spam', 'harassment', 'gore_excess', 'other'];

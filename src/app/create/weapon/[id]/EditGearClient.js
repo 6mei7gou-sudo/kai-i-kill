@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import WeaponForm from '../WeaponForm';
 
 export default function EditGearClient({ id }) {
@@ -14,19 +14,22 @@ export default function EditGearClient({ id }) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!isLoaded) return;
         (async () => {
             // 武器データ取得
-            const { data, error: e } = await supabase
-                .from('gear_posts').select('*').eq('id', id).single();
-            if (e) { setError('データの取得に失敗しました'); setLoading(false); return; }
+            const data = await fetchPost('gear_posts', id);
+            if (!data) { setError('データの取得に失敗しました'); setLoading(false); return; }
             setEntry(data);
 
-            // この武器に紐づくキャラクターを検索してCP補正を計算
-            const { data: chars } = await supabase
-                .from('character_sheets')
-                .select('character_name, background, equipment_type, sub_affiliation')
-                .eq('linked_gear_id', id)
-                .limit(1);
+            // この武器に紐づくキャラクターを検索してCP補正を計算（自分のキャラは限定公開でも取得できる）
+            let chars = [];
+            try {
+                const params = new URLSearchParams({ table: 'character_sheets', linked_gear_id: id });
+                if (user?.id) params.set('user_id', user.id);
+                const res = await fetch(`/api/posts?${params.toString()}`);
+                const json = await res.json();
+                if (json.ok) chars = json.data || [];
+            } catch (_) {}
 
             if (chars && chars.length > 0) {
                 const ch = chars[0];
@@ -46,7 +49,7 @@ export default function EditGearClient({ id }) {
             }
             setLoading(false);
         })();
-    }, [id]);
+    }, [id, isLoaded, user?.id]);
 
     if (!isLoaded || loading) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--text-muted)' }}>読み込み中...</div>;
     if (error) return <div className="container" style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--accent-danger)' }}>{error}</div>;

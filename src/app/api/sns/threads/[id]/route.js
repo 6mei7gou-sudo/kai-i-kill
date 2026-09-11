@@ -1,19 +1,13 @@
 // SNSスレッド詳細API — スレッド詳細取得・返信投稿・パスワード認証
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase, ADMIN_IDS } from '@/lib/supabaseServer';
 import { createHash } from 'crypto';
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 function hashPassword(password) {
     return createHash('sha256').update(password).digest('hex');
 }
 
-const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 // GET: スレッド詳細 + 返信一覧
 export async function GET(request, { params }) {
@@ -127,32 +121,7 @@ export async function POST(request, { params }) {
 
         if (insertError) throw insertError;
 
-        // スレッドの reply_count をインクリメント、last_replied_at を更新
-        const now = new Date().toISOString();
-        const { error: updateError } = await supabase.rpc('increment_thread_reply_count', {
-            thread_id_input: id,
-            new_last_replied_at: now,
-        });
-
-        // RPC未作成の場合はフォールバック（手動更新）
-        if (updateError) {
-            const { data: currentThread } = await supabase
-                .from('sns_threads')
-                .select('reply_count')
-                .eq('id', id)
-                .single();
-
-            if (currentThread) {
-                await supabase
-                    .from('sns_threads')
-                    .update({
-                        reply_count: (currentThread.reply_count || 0) + 1,
-                        last_replied_at: now,
-                    })
-                    .eq('id', id);
-            }
-        }
-
+        // スレッドの reply_count / last_replied_at は DB トリガーが更新する
         return NextResponse.json({ ok: true, data: reply });
     } catch (err) {
         return NextResponse.json({ error: err.message }, { status: 500 });

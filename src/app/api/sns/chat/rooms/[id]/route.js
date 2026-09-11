@@ -1,14 +1,8 @@
 // SNSチャットルーム詳細API — ルーム詳細取得・閉鎖
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase, ADMIN_IDS } from '@/lib/supabaseServer';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 // GET: ルーム詳細 + メンバー一覧
 export async function GET(request, { params }) {

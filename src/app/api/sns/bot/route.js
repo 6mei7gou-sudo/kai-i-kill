@@ -1,14 +1,8 @@
 // SNSボット投稿API — 管理者のみがボット投稿を作成可能
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase, ADMIN_IDS } from '@/lib/supabaseServer';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 // POST: ボット投稿作成（管理者のみ）
 export async function POST(request) {

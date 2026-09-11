@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import AnomalyForm from '../AnomalyForm';
 
 export default function EditAnomalyClient({ id }) {
@@ -14,9 +14,8 @@ export default function EditAnomalyClient({ id }) {
 
     useEffect(() => {
         (async () => {
-            const { data, error: e } = await supabase
-                .from('anomaly_drafts').select('*').eq('id', id).single();
-            if (e) setError('データの取得に失敗しました');
+            const data = await fetchPost('anomaly_drafts', id);
+            if (!data) setError('データの取得に失敗しました');
             else setEntry(data);
             setLoading(false);
         })();

@@ -3,7 +3,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { Show, RedirectToSignIn, useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import NovelForm from '../NovelForm';
 
 export default function EditNovelPage({ params }) {
@@ -14,7 +14,7 @@ export default function EditNovelPage({ params }) {
 
     useEffect(() => {
         (async () => {
-            const { data } = await supabase.from('novels').select('*').eq('id', id).single();
+            const data = await fetchPost('novels', id);
             setEntry(data || null);
             setLoading(false);
         })();

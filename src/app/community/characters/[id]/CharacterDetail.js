@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
 import { getBackgroundSkill, getSkillTypeColor, getAxisColor, getAvailableSkills } from '@/data/skillData';
@@ -84,14 +85,12 @@ export default function CharacterDetail({ id }) {
 
     useEffect(() => {
         (async () => {
-            const { data } = await supabase.from('character_sheets').select('*').eq('id', id).single();
+            const data = await fetchPost('character_sheets', id);
             if (data) {
                 setE(data);
                 if (data.linked_gear_id) {
-                    try {
-                        const { data: gearData } = await supabase.from('gear_posts').select('gear_name, total_cp, category, manufacturer').eq('id', data.linked_gear_id).single();
-                        if (gearData) setLinkedGear(gearData);
-                    } catch (_) {}
+                    const gearData = await fetchPost('gear_posts', data.linked_gear_id);
+                    if (gearData) setLinkedGear(gearData);
                 }
             }
             try {

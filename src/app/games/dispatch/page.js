@@ -5,26 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { dispatches } from '@/data/dispatches';
 import { isRankAtLeast } from '@/lib/dice';
-
-const RANK_ORDER = ['D', 'C', 'B', 'A', 'S'];
-
-// 成功率計算
-function calcSuccessRate(character, recommendedRank) {
-  // キャラの最高属性ランクを取得
-  const ranks = ['rank_tai', 'rank_haya', 'rank_shiki', 'rank_han', 'rank_shiya', 'rank_jutsu', 'rank_kon'];
-  const bestRank = ranks.reduce((best, attr) => {
-    const r = character[attr] || 'D';
-    return RANK_ORDER.indexOf(r) > RANK_ORDER.indexOf(best) ? r : best;
-  }, 'D');
-
-  const bestIdx = RANK_ORDER.indexOf(bestRank);
-  const reqIdx = RANK_ORDER.indexOf(recommendedRank);
-  const diff = bestIdx - reqIdx;
-
-  if (diff >= 0) return 90;
-  if (diff === -1) return 60;
-  return 30;
-}
+import { calcDispatchSuccessRate as calcSuccessRate } from '@/lib/dispatchCalc';
 
 // 残り時間フォーマット
 function formatTimeLeft(startedAt, durationHours) {
@@ -81,7 +62,7 @@ export default function DispatchPage() {
       try {
         const [charRes, dispatchRes] = await Promise.all([
           fetch(`/api/posts?table=character_sheets&user_id=${user.id}`),
-          fetch(`/api/games/dispatch?user_id=${user.id}`),
+          fetch('/api/games/dispatch'),
         ]);
         const [charJson, dispatchJson] = await Promise.all([charRes.json(), dispatchRes.json()]);
 
@@ -111,8 +92,6 @@ export default function DispatchPage() {
         body: JSON.stringify({
           character_id: selectedChar.id,
           quest_id: selectedQuest.id,
-          quest_name: selectedQuest.name,
-          duration_hours: selectedQuest.duration_hours,
         }),
       });
       const json = await res.json();
@@ -134,29 +113,19 @@ export default function DispatchPage() {
     if (completing) return;
     setCompleting(dispatch.id);
 
-    // 成功判定
-    const char = characters.find(c => c.id === dispatch.character_id);
-    const quest = dispatches.find(q => q.id === dispatch.quest_id);
-    const rate = char && quest ? calcSuccessRate(char, quest.recommended_rank) : 50;
-    const roll = Math.random() * 100;
-    const success = roll < rate;
-    const result = success ? '成功' : '失敗';
-    const rewards = success && quest ? quest.rewards : null;
-
+    // 成功判定・報酬はサーバー側で行う（完了時刻もサーバー時刻で検証される）
     try {
       const res = await fetch('/api/games/dispatch', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dispatch_id: dispatch.id,
-          result,
-          rewards,
-        }),
+        body: JSON.stringify({ dispatch_id: dispatch.id }),
       });
       const json = await res.json();
       if (json.ok) {
         setActiveDispatches(prev => prev.filter(d => d.id !== dispatch.id));
         setCompletedDispatches(prev => [json.data, ...prev]);
+      } else {
+        alert(json.error || '完了処理に失敗しました');
       }
     } catch (e) {
       console.error(e);

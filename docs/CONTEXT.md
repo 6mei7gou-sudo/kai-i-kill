@@ -22,7 +22,19 @@ Webサイト（世界観読み物・Webゲーム・投稿コミュニティ・SN
 - 魔導具の具体的な組み込みルール
 - GM復元版と現行正典との突き合わせ更新（上記 companies.md ほか）
 
+## セキュリティ運用（2026-09-11 レビュー対応）
+
+- **アクセス経路**：DBへの書き込みは Next.js APIルート（`src/app/api/**`）が `src/lib/supabaseServer.js`（service role キー）で行う。ブラウザーの anon キー（`src/lib/supabase.js`）は公開行の読取と Realtime 購読だけに使う
+- **必須の環境変数（本番）**：`SUPABASE_SERVICE_ROLE_KEY`（Supabase → Project Settings → API の service_role。`NEXT_PUBLIC_` を付けない）。未設定なら anon キーにフォールバックして警告を出す
+- **RLS強化マイグレーション** `supabase/migration_security_hardening.sql`：anon/authenticated の INSERT/UPDATE/DELETE を全廃、非公開テーブル（reports・user_migration_map・account_cp・cp_transactions・serial_codes・dispatch_quests・mission_results・adv_completions）の SELECT を閉鎖、novels は「公開」のみ、入場制限スレッドとその返信は anon から読めない。加えて `cp_adjust()`（CP残高の原子的更新）と SNS カウンターのトリガーを定義する
+- **適用順序（厳守）**：① Vercel に `SUPABASE_SERVICE_ROLE_KEY` を設定してデプロイ → ② SQL Editor でマイグレーションを実行。逆にすると API の書き込みが全て失敗する
+- **適用後の確認**：匿名で `account_cp`/`reports` の SELECT が拒否されること、非公開小説がIDでも取れないこと、いいね・返信でカウンターが増えること、`npm test` の `__tests__/api/*-security.test.js`・`concurrency.test.js` が通ること
+- **未対応（運用側）**：Storage バケット `uploads` の RLS（匿名アップロード・他人の画像削除の可否）、main ブランチ保護、`docs/gm/`・`docs/rules/` が公開リポジトリで閲覧できる件は本対応の範囲外。別途判断が必要
+- **残存リスク**：ミッション／ADVの進行はクライアントで計算しているため、勝敗そのものはサーバーで検証していない（実在コンテンツ・所有キャラ・定義上の難易度／エンディングのみ検証）。サーバー側ゲームエンジン化は別タスク
+
 ## 変更ログ（新しい順）
+
+- 2026-09-11：セキュリティレビュー（F01〜F11）対応。service role によるサーバー専用DBアクセス、RLS強化マイグレーション、投稿APIの列制限・非公開保護・装備CPのサーバー計算と先払い、CP加算APIの管理者専用化、ゲーム結果・派遣のサーバー検証、CP／能力値／レベルの原子的更新、いいね実行者の認証固定、SNSカウンターのトリガー化、スレッド一覧の本文非返却、Next 16.3.4／Clerk 7.9.2 へ更新。回帰テスト39件追加（計103件）
 
 - 2026-09-08：v1.1.0 リリース（サイドバー表記・package.json を 1.1.0 に更新、`src/data/siteNews.js` にリリースノート4件を追加）
 - 2026-09-08：`/quickstart/` をWebゲーム向けに全面改稿。TRPG卓向けのルール解説（ダイス判定・共鳴記録・核護衛戦・調査解明の手順）とサイバネティクスの解説を削除し、「世界設定10項目 → RPシート → ゲームデータの読み方（能力値がWebゲームのどこに効くか）→ 作り方 STEP1〜7 → Webゲーム5モードの遊び方 → CPとレベルアップ」の構成にした。TRPGルールの解説は `docs/rules/` のみが担う

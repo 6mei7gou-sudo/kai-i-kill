@@ -1,12 +1,7 @@
 // 称号設定API
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 
 // PATCH: 称号を設定
 export async function PATCH(request) {

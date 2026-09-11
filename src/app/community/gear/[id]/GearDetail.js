@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { supabase } from '@/lib/supabase';
+import { fetchPost } from '@/lib/postsApi';
 import Link from 'next/link';
 import IdBadge from '@/components/IdBadge';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
@@ -35,8 +35,8 @@ export default function GearDetail({ id }) {
     const isOwner = user && entry?.user_id && user.id === entry.user_id;
     useEffect(() => {
         (async () => {
-            const { data, error } = await supabase.from('gear_posts').select('*').eq('id', id).single();
-            if (!error && data) setEntry(data);
+            const data = await fetchPost('gear_posts', id);
+            if (data) setEntry(data);
             setLoading(false);
         })();
     }, [id]);

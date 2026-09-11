@@ -1,12 +1,7 @@
 // シリアルコード引換API
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 
 // POST: シリアルコード引換
 export async function POST(request) {
@@ -67,6 +62,18 @@ export async function POST(request) {
       return NextResponse.json({ error: 'この称号は既に獲得済みです' }, { status: 409 });
     }
 
+    // 使用回数を先に加算（読み取った回数と一致する場合のみ。同時使用で上限超過させない）
+    const { data: usedRows, error: useErr } = await supabase
+      .from('serial_codes')
+      .update({ current_uses: serial.current_uses + 1 })
+      .eq('id', serial.id)
+      .eq('current_uses', serial.current_uses)
+      .select('id');
+    if (useErr) throw useErr;
+    if (!usedRows || usedRows.length === 0) {
+      return NextResponse.json({ error: 'コードの使用が競合しました。もう一度お試しください' }, { status: 409 });
+    }
+
     // 称号を付与
     const { error: insertErr } = await supabase
       .from('character_achievements')
@@ -79,13 +86,14 @@ export async function POST(request) {
         source_id: `serial:${serial.code}`,
       });
 
-    if (insertErr) throw insertErr;
-
-    // 使用回数を加算
-    await supabase
-      .from('serial_codes')
-      .update({ current_uses: serial.current_uses + 1 })
-      .eq('id', serial.id);
+    if (insertErr) {
+      // 付与に失敗したら使用回数を戻す
+      await supabase.from('serial_codes').update({ current_uses: serial.current_uses }).eq('id', serial.id);
+      if (insertErr.code === '23505') {
+        return NextResponse.json({ error: 'この称号は既に獲得済みです' }, { status: 409 });
+      }
+      throw insertErr;
+    }
 
     return NextResponse.json({
       ok: true,

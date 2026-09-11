@@ -1,13 +1,15 @@
 // SNSスレッドAPI — スレッド一覧取得・作成
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseServer as supabase } from '@/lib/supabaseServer';
 import { createHash } from 'crypto';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// 一覧で返す列（本文 content は entry モードでは null に置き換える）
+const THREAD_LIST_COLUMNS = [
+    'id', 'user_id', 'character_id', 'layer', 'category', 'title', 'content',
+    'display_name', 'display_icon', 'affiliation', 'is_pinned', 'reply_count',
+    'last_replied_at', 'created_at', 'updated_at', 'password_mode',
+].join(', ');
 
 function hashPassword(password) {
     return createHash('sha256').update(password).digest('hex');
@@ -22,9 +24,10 @@ export async function GET(request) {
         const cursor = searchParams.get('cursor');
         const limit = parseInt(searchParams.get('limit') || '20', 10);
 
+        // 一覧に必要な列だけを取得する（password_hash は取得しない）
         let query = supabase
             .from('sns_threads')
-            .select('*')
+            .select(THREAD_LIST_COLUMNS)
             .order('is_pinned', { ascending: false })
             .order('last_replied_at', { ascending: false })
             .limit(limit);
@@ -42,8 +45,10 @@ export async function GET(request) {
         const { data, error } = await query;
         if (error) throw error;
 
-        // password_hash をクライアントに返さない
-        const safeData = data.map(({ password_hash, ...rest }) => rest);
+        // 入場制限（entry）スレッドの本文は、パスワード照合後の詳細APIからのみ返す
+        const safeData = data.map(({ password_hash, ...rest }) => (
+            rest.password_mode === 'entry' ? { ...rest, content: null, locked: true } : rest
+        ));
 
         const nextCursor = safeData.length === limit ? safeData[safeData.length - 1].last_replied_at : null;
 
