@@ -1,0 +1,966 @@
+{
+  "styles": [
+    {
+      "id": "blade",
+      "name": "斬撃",
+      "en": "BLADE",
+      "abilities": "体／疾",
+      "abilityKeys": [
+        "rank_tai",
+        "rank_haya"
+      ],
+      "role": "近接で手数を刻む",
+      "meter": "怒り"
+    },
+    {
+      "id": "crush",
+      "name": "重撃",
+      "en": "CRUSH",
+      "abilities": "体",
+      "abilityKeys": [
+        "rank_tai"
+      ],
+      "role": "一撃で層を割る",
+      "meter": "怒り"
+    },
+    {
+      "id": "snipe",
+      "name": "射撃",
+      "en": "SNIPE",
+      "abilities": "疾／察",
+      "abilityKeys": [
+        "rank_haya",
+        "rank_shiya"
+      ],
+      "role": "距離と精密",
+      "meter": "焦燥"
+    },
+    {
+      "id": "spell",
+      "name": "術式",
+      "en": "SPELL",
+      "abilities": "術",
+      "abilityKeys": [
+        "rank_jutsu"
+      ],
+      "role": "魔法による範囲・変則",
+      "meter": "渇望"
+    },
+    {
+      "id": "decode",
+      "name": "解明",
+      "en": "DECODE",
+      "abilities": "識／判",
+      "abilityKeys": [
+        "rank_shiki",
+        "rank_han"
+      ],
+      "role": "調べて弱点を暴く",
+      "meter": "哀愁"
+    },
+    {
+      "id": "scan",
+      "name": "感知",
+      "en": "SCAN",
+      "abilities": "察",
+      "abilityKeys": [
+        "rank_shiya"
+      ],
+      "role": "先読みと回避",
+      "meter": "恐怖"
+    },
+    {
+      "id": "seal",
+      "name": "封印",
+      "en": "SEAL",
+      "abilities": "魂",
+      "abilityKeys": [
+        "rank_kon"
+      ],
+      "role": "浄化・共鳴の操作",
+      "meter": "浄化"
+    },
+    {
+      "id": "support",
+      "name": "支援",
+      "en": "SUPPORT",
+      "abilities": "判／魂",
+      "abilityKeys": [
+        "rank_han",
+        "rank_kon"
+      ],
+      "role": "味方の強化と蘇生",
+      "meter": "浄化"
+    },
+    {
+      "id": "anomaly",
+      "name": "異能",
+      "en": "ANOMALY",
+      "abilities": "魂",
+      "abilityKeys": [
+        "rank_kon"
+      ],
+      "role": "自分を怪異に寄せる",
+      "meter": "渇望"
+    }
+  ],
+  "gradeUnlock": [
+    {
+      "lv": 1,
+      "slot": "main",
+      "grade": 1
+    },
+    {
+      "lv": 3,
+      "slot": "sub",
+      "grade": 1
+    },
+    {
+      "lv": 5,
+      "slot": "main",
+      "grade": 2
+    },
+    {
+      "lv": 8,
+      "slot": "sub",
+      "grade": 2
+    },
+    {
+      "lv": 10,
+      "slot": "main",
+      "grade": 3
+    },
+    {
+      "lv": 13,
+      "slot": "third",
+      "grade": 1
+    },
+    {
+      "lv": 16,
+      "slot": "sub",
+      "grade": 3
+    },
+    {
+      "lv": 20,
+      "slot": "main",
+      "grade": "極"
+    }
+  ],
+  "techniques": [
+    {
+      "id": "blade_1",
+      "style": "blade",
+      "grade": 1,
+      "name": "連斬",
+      "timing": "main",
+      "ability": [
+        "rank_tai",
+        "rank_haya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "roll_twice",
+          "keep": "choice"
+        },
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense"
+        }
+      ],
+      "text": "攻撃判定を2回行い、どちらか好きな方の結果を採用する。共鳴は採用した方のみ"
+    },
+    {
+      "id": "blade_2",
+      "style": "blade",
+      "grade": 2,
+      "name": "崩し斬り",
+      "timing": "main",
+      "ability": [
+        "rank_tai",
+        "rank_haya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense"
+        },
+        {
+          "type": "status",
+          "target": "layer",
+          "stat": "defense",
+          "value": -2,
+          "duration": "next_round_end",
+          "condition": "on_damage"
+        }
+      ],
+      "text": "攻撃。ダメージを与えたら、その層の防御力を次のラウンド終了まで −2"
+    },
+    {
+      "id": "blade_3",
+      "style": "blade",
+      "grade": 3,
+      "name": "奔流",
+      "timing": "main",
+      "ability": [
+        "rank_tai",
+        "rank_haya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": {
+        "per": "round",
+        "count": 1
+      },
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense"
+        },
+        {
+          "type": "extra_action",
+          "action": "attack",
+          "condition": "layer_broken"
+        }
+      ],
+      "text": "攻撃。この攻撃で層を剥離させたら、続けてもう1回攻撃できる（1ラウンド1回）"
+    },
+    {
+      "id": "crush_1",
+      "style": "crush",
+      "grade": 1,
+      "name": "重撃",
+      "timing": "main",
+      "ability": [
+        "rank_tai"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense + 2"
+        }
+      ],
+      "text": "攻撃。ダメージ +2"
+    },
+    {
+      "id": "crush_2",
+      "style": "crush",
+      "grade": 2,
+      "name": "兜割り",
+      "timing": "main",
+      "ability": [
+        "rank_tai"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "ignore_defense"
+        },
+        {
+          "type": "damage",
+          "formula": "achievement + weapon"
+        }
+      ],
+      "text": "攻撃。対象の防御力を無視する"
+    },
+    {
+      "id": "crush_3",
+      "style": "crush",
+      "grade": 3,
+      "name": "粉砕",
+      "timing": "passive",
+      "ability": null,
+      "cost": null,
+      "target": "self",
+      "uses": null,
+      "resonance": {
+        "meter": "rage",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "pierce",
+          "mode": "always",
+          "ignoreCoreDefense": true
+        }
+      ],
+      "text": "層を剥離させた時の余剰ダメージが、次の層または核へ**必ず**貫通する（核防御を無視）"
+    },
+    {
+      "id": "snipe_1",
+      "style": "snipe",
+      "grade": 1,
+      "name": "精密射撃",
+      "timing": "main",
+      "ability": [
+        "rank_haya",
+        "rank_shiya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "haste",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "modifier",
+          "value": 1,
+          "scope": "this_check"
+        },
+        {
+          "type": "flag",
+          "flag": "ignore_range"
+        },
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense"
+        }
+      ],
+      "text": "攻撃。判定に +1。射程を問わない"
+    },
+    {
+      "id": "snipe_2",
+      "style": "snipe",
+      "grade": 2,
+      "name": "制圧射撃",
+      "timing": "main",
+      "ability": [
+        "rank_haya",
+        "rank_shiya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "haste",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense"
+        },
+        {
+          "type": "stance",
+          "target": "ally",
+          "condition": "on_damage"
+        }
+      ],
+      "text": "攻撃。ダメージを与えたら、味方1人に「構え」を付与する"
+    },
+    {
+      "id": "snipe_3",
+      "style": "snipe",
+      "grade": 3,
+      "name": "狙撃",
+      "timing": "main",
+      "ability": [
+        "rank_haya",
+        "rank_shiya"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "haste",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "ignore_defense"
+        },
+        {
+          "type": "damage",
+          "formula": "achievement + weapon + 4"
+        }
+      ],
+      "text": "サブ行動で「照準」を宣言した次の手番にのみ使える。攻撃。ダメージ +4・防御力無視",
+      "requires": {
+        "previousSub": "aim"
+      }
+    },
+    {
+      "id": "spell_1",
+      "style": "spell",
+      "grade": 1,
+      "name": "術式装填",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "self",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "modifier",
+          "value": 1,
+          "scope": "next_spell"
+        }
+      ],
+      "text": "次の魔法行使の判定に +1"
+    },
+    {
+      "id": "spell_2",
+      "style": "spell",
+      "grade": 2,
+      "name": "広域術式",
+      "timing": "main",
+      "ability": [
+        "rank_jutsu"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "thirst",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + weapon - defense",
+          "kind": "spell"
+        },
+        {
+          "type": "threat_mod",
+          "value": -2,
+          "duration": "next_anomaly_turn",
+          "condition": "on_damage"
+        }
+      ],
+      "text": "魔法攻撃。ダメージを与えたら、怪異の次の手番の脅威度 −2"
+    },
+    {
+      "id": "spell_3",
+      "style": "spell",
+      "grade": 3,
+      "name": "大術式",
+      "timing": "main",
+      "ability": [
+        "rank_jutsu"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": {
+        "per": "scenario",
+        "count": 1
+      },
+      "resonance": {
+        "meter": "thirst",
+        "mode": "fixed",
+        "value": 3
+      },
+      "effects": [
+        {
+          "type": "ignore_defense"
+        },
+        {
+          "type": "damage",
+          "formula": "achievement * 2",
+          "kind": "spell"
+        },
+        {
+          "type": "flag",
+          "flag": "force_anomaly_induction"
+        }
+      ],
+      "text": "魔法攻撃。防御力無視、ダメージ ＝ 達成値×2。渇望 +3（固定）。怪異誘発判定が必ず発生（1シナリオ1回）"
+    },
+    {
+      "id": "decode_1",
+      "style": "decode",
+      "grade": 1,
+      "name": "文献照合",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "self",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "modifier",
+          "value": 2,
+          "scope": "decode_checks_this_scene"
+        }
+      ],
+      "text": "このシーンの解明判定に +2"
+    },
+    {
+      "id": "decode_2",
+      "style": "decode",
+      "grade": 2,
+      "name": "戦場解明",
+      "timing": "main",
+      "ability": [
+        "rank_shiki",
+        "rank_han"
+      ],
+      "cost": null,
+      "target": "anomaly",
+      "uses": null,
+      "resonance": {
+        "meter": "sorrow",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "key_progress",
+          "value": 2
+        }
+      ],
+      "text": "解明判定。成功で解明鍵を**2つ**進める"
+    },
+    {
+      "id": "decode_3",
+      "style": "decode",
+      "grade": 3,
+      "name": "真名暴露",
+      "timing": "main",
+      "ability": [
+        "rank_han"
+      ],
+      "cost": null,
+      "target": "core",
+      "uses": {
+        "per": "scenario",
+        "count": 1
+      },
+      "resonance": {
+        "meter": "sorrow",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "target": "core",
+          "value": 8,
+          "ignoreDefense": true
+        },
+        {
+          "type": "status",
+          "target": "anomaly",
+          "stat": "layer_traits",
+          "value": "disabled",
+          "duration": "battle"
+        }
+      ],
+      "text": "4鍵取得後のみ。【判】判定成功で核に **8** ダメージ（防御無視）、全層特性を戦闘終了まで無効化（1シナリオ1回）",
+      "requires": {
+        "keys": 4
+      }
+    },
+    {
+      "id": "scan_1",
+      "style": "scan",
+      "grade": 1,
+      "name": "予兆",
+      "timing": "passive",
+      "ability": null,
+      "cost": null,
+      "target": "self",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "dice_bonus",
+          "value": 1,
+          "scope": "evade_check"
+        }
+      ],
+      "text": "怪異の手番の回避判定でダイス +1個"
+    },
+    {
+      "id": "scan_2",
+      "style": "scan",
+      "grade": 2,
+      "name": "看破",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "anomaly",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "reveal",
+          "what": "layer_trait",
+          "count": 1
+        }
+      ],
+      "text": "層特性を1つ即座に公開する"
+    },
+    {
+      "id": "scan_3",
+      "style": "scan",
+      "grade": 3,
+      "name": "未来視",
+      "timing": "reaction",
+      "ability": null,
+      "cost": null,
+      "target": "self_or_ally",
+      "uses": [
+        {
+          "per": "round",
+          "count": 1
+        },
+        {
+          "per": "scenario",
+          "count": 3
+        }
+      ],
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "reroll",
+          "target": "self_or_ally"
+        }
+      ],
+      "text": "自分または味方の判定を振り直させる（1ラウンド1回・1シナリオ3回）"
+    },
+    {
+      "id": "seal_1",
+      "style": "seal",
+      "grade": 1,
+      "name": "浄化",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "self_or_ally",
+      "uses": null,
+      "resonance": {
+        "meter": "purge",
+        "mode": "fixed",
+        "value": 1
+      },
+      "effects": [
+        {
+          "type": "resonance",
+          "meter": "choice",
+          "value": -3
+        }
+      ],
+      "text": "自分か味方1人の共鳴メーター1種を −3。共鳴は浄化 +1（固定）"
+    },
+    {
+      "id": "seal_2",
+      "style": "seal",
+      "grade": 2,
+      "name": "結界",
+      "timing": "main",
+      "ability": [
+        "rank_kon"
+      ],
+      "cost": null,
+      "target": "all_allies",
+      "uses": null,
+      "resonance": {
+        "meter": "purge",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "status",
+          "target": "all_allies",
+          "stat": "incoming_damage",
+          "value": "half",
+          "duration": "next_anomaly_turn"
+        }
+      ],
+      "text": "【魂】判定。成功で、怪異の次の手番の襲撃・貫通ダメージを全員**半減**"
+    },
+    {
+      "id": "seal_3",
+      "style": "seal",
+      "grade": 3,
+      "name": "封印術式",
+      "timing": "main",
+      "ability": [
+        "rank_kon"
+      ],
+      "cost": null,
+      "target": "core",
+      "uses": {
+        "per": "battle",
+        "count": 2
+      },
+      "resonance": {
+        "meter": "purge",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "seal_gauge",
+          "value": 5,
+          "condition": "special_grade"
+        },
+        {
+          "type": "damage",
+          "target": "core",
+          "value": 6,
+          "ignoreDefense": true,
+          "allowUnresolved": true,
+          "condition": "not_special_grade"
+        }
+      ],
+      "text": "【魂】判定。特級なら封印ゲージ +5。他等級なら核に 6 ダメージ（防御無視・未解明でも通る）（1戦闘2回）"
+    },
+    {
+      "id": "support_1",
+      "style": "support",
+      "grade": 1,
+      "name": "鼓舞",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "ally",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "modifier",
+          "value": 1,
+          "target": "ally",
+          "scope": "next_check"
+        }
+      ],
+      "text": "味方1人の次の判定に +1"
+    },
+    {
+      "id": "support_2",
+      "style": "support",
+      "grade": 2,
+      "name": "応急",
+      "timing": "sub",
+      "ability": null,
+      "cost": null,
+      "target": "ally",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "heal",
+          "value": 5,
+          "target": "ally"
+        },
+        {
+          "type": "status",
+          "target": "ally",
+          "stat": "down",
+          "value": "revive"
+        }
+      ],
+      "text": "味方1人のHPを 5 回復する。気絶していれば復帰させる"
+    },
+    {
+      "id": "support_3",
+      "style": "support",
+      "grade": 3,
+      "name": "共鳴共有",
+      "timing": "main",
+      "ability": null,
+      "cost": null,
+      "target": "all_allies",
+      "uses": null,
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "resonance",
+          "meter": "choice",
+          "value": -5,
+          "target": "self"
+        },
+        {
+          "type": "modifier",
+          "value": 2,
+          "target": "all_allies",
+          "duration": "round"
+        }
+      ],
+      "text": "自分のメーター1種を −5 し、味方全員の判定に +2（このラウンド）。共鳴なし"
+    },
+    {
+      "id": "anomaly_1",
+      "style": "anomaly",
+      "grade": 1,
+      "name": "発現",
+      "timing": "main",
+      "ability": [
+        "rank_kon"
+      ],
+      "cost": null,
+      "target": "anomaly",
+      "uses": null,
+      "resonance": {
+        "meter": "thirst",
+        "mode": "roll"
+      },
+      "effects": [
+        {
+          "type": "modifier",
+          "value": 2,
+          "scope": "this_check"
+        },
+        {
+          "type": "resonance",
+          "meter": "thirst",
+          "value": 2
+        }
+      ],
+      "text": "異能を発動する（第9章）。達成値 +2。渇望 +2（判定の共鳴に追加）"
+    },
+    {
+      "id": "anomaly_2",
+      "style": "anomaly",
+      "grade": 2,
+      "name": "暴走",
+      "timing": "main",
+      "ability": [
+        "rank_kon"
+      ],
+      "cost": null,
+      "target": "layer",
+      "uses": null,
+      "resonance": {
+        "meter": "thirst",
+        "mode": "fixed",
+        "value": 3
+      },
+      "effects": [
+        {
+          "type": "damage",
+          "formula": "achievement + meter(thirst)"
+        }
+      ],
+      "text": "異能攻撃。ダメージ ＝ 達成値 ＋ 現在の渇望メーター値。渇望 +3（固定）"
+    },
+    {
+      "id": "anomaly_3",
+      "style": "anomaly",
+      "grade": 3,
+      "name": "怪異化",
+      "timing": "main",
+      "ability": null,
+      "cost": {
+        "belief": 1
+      },
+      "target": "self",
+      "uses": {
+        "per": "scenario",
+        "count": 1
+      },
+      "resonance": {
+        "mode": "none"
+      },
+      "effects": [
+        {
+          "type": "dice_bonus",
+          "value": 2,
+          "duration": "round"
+        },
+        {
+          "type": "resonance_set",
+          "meter": "thirst",
+          "value": 10,
+          "timing": "round_end"
+        }
+      ],
+      "text": "コスト：信念1。このラウンド、すべての判定でダイス +2個。ラウンド終了時、渇望メーターを **10**（臨界）にする（1シナリオ1回）"
+    }
+  ],
+  "schema": {
+    "timing": [
+      "main",
+      "sub",
+      "passive",
+      "reaction"
+    ],
+    "target": [
+      "self",
+      "ally",
+      "self_or_ally",
+      "all_allies",
+      "layer",
+      "core",
+      "anomaly"
+    ],
+    "resonance.mode": [
+      "roll",
+      "fixed",
+      "none"
+    ],
+    "uses.per": [
+      "round",
+      "battle",
+      "scenario"
+    ],
+    "effects.type": [
+      "damage",
+      "heal",
+      "modifier",
+      "dice_bonus",
+      "resonance",
+      "resonance_set",
+      "roll_twice",
+      "reroll",
+      "ignore_defense",
+      "pierce",
+      "reveal",
+      "extra_action",
+      "status",
+      "stance",
+      "threat_mod",
+      "seal_gauge",
+      "key_progress",
+      "flag"
+    ]
+  }
+}

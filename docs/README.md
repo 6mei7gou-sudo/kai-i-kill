@@ -54,6 +54,7 @@ docs/
 ├── rules/               TRPGルール
 │   ├── rules_unified    ★主文書★ 統合ルールブック v4.0
 │   ├── core_design      v5.0 コアルールブック（ドラフト。確定後に rules_unified へ移す）
+│   ├── data/            ★ルールデータの正本★（能力値・共鳴・等級・キャラ作成選択肢・スタイル27技・ギフト・装備・レベル表）
 │   ├── combat_hp        戦闘補遺 v4.0
 │   ├── cybernetics      サイバネティクス補遺 v1.0
 │   ├── weapon_custom_data  武器データ
@@ -74,6 +75,8 @@ docs/
 ├── legal/               利用規約・プライバシー・ガイドライン（Web公開）
 │
 ├── _build/              ビルドスクリプト（非コンテンツ）
+│   ├── render_tables.mjs  data/*.json → core_design.md の表を再生成（--check で整合検査）
+│   ├── check_rules_sync.mjs  data/*.json ⇔ src/data/characterBuildData.js の整合検査
 │   └── book/            v5.0 コアルールブックの組版（core_design.md → B5 PDF。`npm install && npm run build`）
 ├── site/                サイト設計
 ├── specs/               技術仕様書（ゲームエンジン等）
@@ -152,8 +155,10 @@ rules/rules_unified.md（★主文書・全体を統合）
 rules/system_data.json ← rules_unified.md v4.0 のデータを構造化
 rules/chapters/ ← rules_unified.md をWeb表示用に章別分割
 
-rules/core_design.md（v5.0 ドラフト。確定後の再編方針は同ファイル付録C）
-└── _build/book/ ← 書籍版PDFを生成（唯一の原稿は core_design.md）
+rules/data/*.json（★v5.0 ルールデータの正本）
+├── rules/core_design.md ← 表は render_tables.mjs で data/ から生成（マーカー区間は手で編集しない）
+│   └── _build/book/ ← 書籍版PDFを生成（唯一の原稿は core_design.md）
+└── src/data/characterBuildData.js ← check_rules_sync.mjs で共通項目の一致を検査（v5.0 実装後は data/ を import する）
 ```
 
 ---

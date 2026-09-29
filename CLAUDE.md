@@ -17,6 +17,7 @@
 4. **秘匿管理**：次の話題は `docs/player/` およびWebに出さない — 教団の内部実態と目的／成仏・霧散の原理／祓部の内部対立の詳細／雷禽重工・特別研究部門／怪異核素材の仕様。該当するか判断がつかない場合は、変更を止めてユーザーに確認する。公開前に /secret-check を実行する。
 5. **紐付けの更新**：`docs/` のファイルを移動・改名したら `src/lib/siteDocs.js` を必ず更新する（対応表は `docs/README.md`）。ページ側コードにdocsのパスを直書きしない。
 6. **ファイル名に版番号を入れない**：版は各ファイル冒頭に記載する（改版時のリンク切れ防止）。
+7. **ルールデータの正本は `docs/rules/data/*.json`**：ルールブック原稿（`docs/rules/core_design.md`）の `<!-- table:NAME -->` 区間は `node docs/_build/render_tables.mjs` で生成するので手で編集しない。数値・技・ギフト・等級・レベル表を変えるときは JSON を直して再生成し、`node docs/_build/check_rules_sync.mjs` で Web実装（`src/data/characterBuildData.js`）との整合を確認する。作業後に /rules-sync で確認する。
 
 ## 絶対保護領域
 
@@ -39,7 +40,7 @@
 
 ## 開発
 
-- **ビルド/テスト**：`npm run build`・`npm test`。環境変数 `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`・`CLERK_SECRET_KEY` が必要（ローカル検証はダミー値で可）。本番はさらに `SUPABASE_SERVICE_ROLE_KEY`（サーバー専用。`NEXT_PUBLIC_` を付けない）が必須。検証は /verify-site を使う
+- **ビルド/テスト**：`npm run build`・`npm test`（`__tests__/rules/` はルールデータ⇔原稿⇔Web実装の整合テスト）。環境変数 `NEXT_PUBLIC_SUPABASE_URL`・`NEXT_PUBLIC_SUPABASE_ANON_KEY`・`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`・`CLERK_SECRET_KEY` が必要（ローカル検証はダミー値で可）。本番はさらに `SUPABASE_SERVICE_ROLE_KEY`（サーバー専用。`NEXT_PUBLIC_` を付けない）が必須。検証は /verify-site を使う
 - **DBアクセスの鉄則**：APIルートは `src/lib/supabaseServer.js`（service role）経由で書き込み、認可は `auth()`＋所有権チェックで行う。ブラウザーの `src/lib/supabase.js`（anon）は公開行の読取と Realtime 購読のみ。管理用列（`user_id`・`is_official`・`approved_*`・`level`・`status_points_used`・`active_title`）とCP残高は専用API以外から書き換えない。RLSの正本は `supabase/migration_security_hardening.sql`
 - **コミットメッセージ**：`fix(scope): 日本語の要約` 形式（type: feat / fix / refactor / chore / docs）
 - **主要ディレクトリ**：`src/`（App Router）・`src/lib/siteDocs.js`（docs⇔ページ紐付け）・`src/data/`（ゲームデータ）・`supabase/`（マイグレーション）・`archive/sheet-app-legacy/`（旧キャラシ、参照のみ）

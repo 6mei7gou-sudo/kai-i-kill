@@ -9,7 +9,7 @@
 // ── ランクとダイス ──
 export const RANKS = ['D', 'C', 'B', 'A', 'S'];
 export const RANK_VALUE = { D: 0, C: 1, B: 2, A: 3, S: 4 };
-export const RANK_DICE = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6+特典' };
+export const RANK_DICE = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6＋固有特典' };
 export const RANK_LABEL = {
     D: '初期値。出目がそのまま結果になる',
     C: '一人前。2つ振って良い方を選べる',
