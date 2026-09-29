@@ -78,7 +78,7 @@ export const GAME_DATA_STEPS = [
     { no: 1, key: 'background',  title: '背景',           en: 'BACKGROUND',  effect: '2つの能力値が D→C に昇格し、背景スキルを自動取得する', required: true },
     { no: 2, key: 'assignment',  title: '配属',           en: 'ASSIGNMENT',  effect: '所属の中での役割。1つの能力値が →B に昇格し、配属スキルが解放される', required: true },
     { no: 3, key: 'abilities',   title: '能力値の確認',   en: 'ABILITIES',   effect: 'ここまでの選択で決まったランクを確認し、+段階を2つ選ぶ。先天覚醒型は術か魂を選ぶ' },
-    { no: 4, key: 'skills',      title: 'スキル',         en: 'SKILLS',      effect: '解放された軸から Lv1 は1つ選ぶ。背景スキルはスロット不要で自動取得' },
+    { no: 4, key: 'styles',      title: 'スタイル',       en: 'STYLES',      effect: '戦い方。主スタイルを1つ選ぶ（副はLv3、第三はLv13で解禁）。段位はレベルで上がり、使える技が増える', required: true },
     { no: 5, key: 'gift',        title: '初期ギフト',     en: 'GIFT',        effect: '1つ選ぶ。特定の場面で使える切り札' },
     { no: 6, key: 'languages',   title: '魔法言語',       en: 'LANGUAGES',   effect: '得意（術判定+1）と苦手（-1）を同じ数だけ選ぶ（0〜3個ずつ）' },
     { no: 7, key: 'armament',    title: '装備',           en: 'ARMAMENT',    effect: '戦闘流派→ベース武器→形態→出自の順に選ぶと武器スペックが自動で決まる', required: true },

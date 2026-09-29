@@ -3,12 +3,14 @@ import {
     computeRanks, calcBeliefPoints, calcCpBudget, getSkillSlots,
     hasGameData, getGameDataStatus, validateCharacterForm,
     buildCharacterPayload, buildPlainText,
+    getStyleGrades, normalizeStyles, getCharacterTechniques,
 } from '@/lib/characterBuild';
 
 const BASE = {
     character_name: '黒崎 蓮', affiliation: '傭兵', sub_affiliation: '突撃型',
     awakening: '先天覚醒型', background: '鋼の肉体', weapon_type: '斬撃型',
     stage_plus: ['rank_tai', 'rank_shiya'], skills: [], level: 1,
+    styles: { main: 'crush', sub: null, third: null },
 };
 
 describe('computeRanks', () => {
@@ -69,7 +71,7 @@ describe('ゲームデータの有無', () => {
         expect(hasGameData({ level: 3 })).toBe(true);
     });
     test('未完成項目を列挙する', () => {
-        expect(getGameDataStatus({ background: '神社育ち' })).toEqual({ started: true, complete: false, missing: ['配属', '戦闘流派'] });
+        expect(getGameDataStatus({ background: '神社育ち' })).toEqual({ started: true, complete: false, missing: ['配属', '戦闘流派', 'スタイル'] });
         expect(getGameDataStatus(BASE).complete).toBe(true);
     });
 });
@@ -130,5 +132,43 @@ describe('buildPlainText', () => {
         expect(full).toMatch('【能力値】');
         expect(full).toMatch('体B+');
         expect(full).toMatch('背景:鋼の肉体');
+    });
+});
+
+describe('スタイル（v5.0）', () => {
+    test('レベル別の段位：Lv1=主I、Lv3=副I、Lv5=主II、Lv10=主III・副II、Lv13=第三I', () => {
+        expect(getStyleGrades(1)).toMatchObject({ main: 1, sub: 0, third: 0 });
+        expect(getStyleGrades(3)).toMatchObject({ main: 1, sub: 1, third: 0 });
+        expect(getStyleGrades(5)).toMatchObject({ main: 2, sub: 1 });
+        expect(getStyleGrades(10)).toMatchObject({ main: 3, sub: 2, third: 0 });
+        expect(getStyleGrades(13)).toMatchObject({ third: 1 });
+    });
+    test('normalizeStyles は不明なIDと配列を捨てる', () => {
+        expect(normalizeStyles({ main: 'blade', sub: 'nope', third: undefined })).toEqual({ main: 'blade', sub: null, third: null });
+        expect(normalizeStyles(['blade'])).toEqual({ main: null, sub: null, third: null });
+        expect(normalizeStyles(null)).toEqual({ main: null, sub: null, third: null });
+    });
+    test('使える技は枠の段位でゲートされる（Lv1 は主の段位Iだけ）', () => {
+        const form = { ...BASE, styles: { main: 'crush', sub: 'seal', third: null } };
+        expect(getCharacterTechniques(form).map(t => t.id)).toEqual(['crush_1']);
+        expect(getCharacterTechniques({ ...form, level: 5 }).map(t => t.id)).toEqual(['crush_1', 'crush_2', 'seal_1']);
+        expect(getCharacterTechniques({ ...form, level: 10 }).map(t => t.id)).toEqual(['crush_1', 'crush_2', 'crush_3', 'seal_1', 'seal_2']);
+        expect(getCharacterTechniques(form, { isOfficial: true })).toHaveLength(6);
+    });
+    test('主スタイル未選択は「スタイル」が未完成、同じスタイルの重複はエラー', () => {
+        expect(getGameDataStatus({ ...BASE, styles: {} }).missing).toContain('スタイル');
+        expect(getGameDataStatus(BASE).complete).toBe(true);
+        expect(validateCharacterForm({ ...BASE, styles: { main: 'blade', sub: 'blade' } }, { gameEnabled: true })).toMatch(/別のスタイル/);
+        expect(validateCharacterForm(BASE, { gameEnabled: true })).toBeNull();
+    });
+    test('ペイロードとテキスト出力にスタイルが含まれる', () => {
+        const payload = buildCharacterPayload({ ...BASE, styles: { main: 'crush', sub: 'bogus' } }, { gameEnabled: true });
+        expect(payload.styles).toEqual({ main: 'crush', sub: null, third: null });
+        const off = buildCharacterPayload(BASE, { gameEnabled: false });
+        expect(off.styles).toEqual({ main: null, sub: null, third: null });
+        const text = buildPlainText(BASE);
+        expect(text).toMatch(/【スタイル】/);
+        expect(text).toMatch(/主：重撃（段位I）/);
+        expect(text).toMatch(/重撃（メイン）/);
     });
 });

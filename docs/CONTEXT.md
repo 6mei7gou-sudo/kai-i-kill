@@ -24,7 +24,8 @@ Webサイト（世界観読み物・Webゲーム・投稿コミュニティ・SN
 - draft-2 で決めたこと：魔法（怪異誘発判定はスペシャル選択時・押し通し時・ファンブル時）／覚醒ギフト18種＋大浄化の刷新（取得不要・段階で自動解放）／装備（武器修正の上限+4、防御+3、メーカー補正を共鳴ベースに）／サイバネティクス（改造CP廃止・装備CPから購入・常時共鳴で表現・GM許可制）／レベル1〜20の全定義（スタイル解禁 Lv1/3/5/8/10/13/16/20、ランク+1 Lv3/5/7/10/13/16/20、専心+1 Lv2/6/11/17）／文書構造の再編方針（付録C。`chapters/` 廃止、`docs/rules/data/*.json` をデータ正本化、表はJSONから生成）
 - 確定済みの設計方針：判定は「振った中から1個選び、その出目が達成値かつ共鳴量（出目−3）」／共鳴ダイスと段階13ステップを廃止し専心・負傷（ダイス±1個）へ／押し通し（共鳴+3で成功に変える）で詰み防止／共鳴は6メーター維持で上昇先を行為の種類から一意に決める／護衛の個体管理を廃止し防壁層1〜3へ／スキル6軸74個を廃止しスタイル9種×段位3（27技）へ／効果は部品合成式の構造化データ
 - **据え置き**：7能力値・ランクD〜S・所属3・背景6・配属12・覚醒4・信念ポイント・CP予算・レベル20。既存の投稿キャラの能力値まわりはそのまま通用する
-- 状態：draft-2 は Codex レビュー（P1×2・P2×6）を反映して **main にマージ済み**（PR #1）。付録Cの手順2〜3を実施済み：`docs/rules/data/*.json`（8ファイル）をルールデータの正本とし、`docs/_build/render_tables.mjs` が rules_unified.md の40表を JSON から再生成、`docs/_build/check_rules_sync.mjs` が Web実装との共通項目を検査、`__tests__/rules/data-integrity.test.js` と `/rules-sync` スキルで運用。**次は手順5（Web実装の JSON 駆動化）**
+- 状態：draft-2 は Codex レビュー（P1×2・P2×6）を反映して **main にマージ済み**（PR #1）。付録Cの手順2〜3を実施済み：`docs/rules/data/*.json`（8ファイル）をルールデータの正本とし、`docs/_build/render_tables.mjs` が rules_unified.md の40表を JSON から再生成、`docs/_build/check_rules_sync.mjs` が Web実装との共通項目を検査、`__tests__/rules/data-integrity.test.js` と `/rules-sync` スキルで運用。手順5は段階実施中：(a) ✓ `src/data/rulesData.js` 新設と `characterBuildData.js` の JSON 駆動化、(b) ✓ キャラシのスキル欄→スタイル欄（`styles` JSONB 列・主／副／第三・レベル別段位・技一覧）、詳細ページ・フルシート・クイックスタートの表示更新。**未了：(c) `gameEngine.js` の effects ディスパッチャ化とミッションデータの v5.0 化（防壁層・怪異の手番）、`skillData.js` の廃止**。移行が終わるまで討伐シミュレーションは v4.0 のスキルで動く
+- **DB 適用（本番）**：`supabase/migration_characters_v7_styles.sql` を **v5.0 フォームのデプロイ前に** SQL Editor で実行する（`styles` 列の追加＋既存シートの武器型→主／配属→副の写像）。列がない状態で新フォームから投稿・編集すると失敗する
 - 27技は `styles.json` に部品合成式（timing/target/uses/resonance/effects）で構造化済み。`gameEngine.js` の置換はこの `effects` を解釈するディスパッチャとして実装する
 - Claude側スキル：`rules-sync` は新設済み。`verify-site` の改訂（ルート導出化＋キャラシ生成器・Webゲームのスモーク追加）は未着手
 

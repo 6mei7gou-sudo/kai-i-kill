@@ -41,6 +41,10 @@ export const STYLE_GRADES_BY_LEVEL = Array.from({ length: levelTable.maxLevel + 
     const g = styleGradesAtLevel(lv || 1);
     return lv === 0 ? 0 : g.main + g.sub + g.third;
 });
+/** 枠と段位の解禁レベル（未定義なら null） */
+export function styleGradeUnlockLevel(slot, grade) {
+    return STYLE_GRADE_UNLOCK.find(u => u.slot === slot && u.grade === grade)?.lv ?? null;
+}
 /** スタイルIDと段位から技を引く */
 export function techniquesOf(styleId, maxGrade) {
     return TECHNIQUES.filter(t => t.style === styleId && t.grade <= (maxGrade ?? 3)).sort((a, b) => a.grade - b.grade);
