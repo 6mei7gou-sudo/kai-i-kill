@@ -11,6 +11,9 @@ const { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '../..');
 const load = (n) => JSON.parse(fs.readFileSync(path.join(ROOT, 'docs/rules/data', `${n}.json`), 'utf8'));
 
+const CBD = require('@/data/characterBuildData');
+const RD = require('@/data/rulesData');
+
 describe('docs/rules/data の構造', () => {
     test('スタイルは9種、技は27（各スタイル段位I〜III）', () => {
         const S = load('styles');
@@ -58,6 +61,39 @@ describe('docs/rules/data の構造', () => {
         }
         const unlockLvs = load('styles').gradeUnlock.map(u => u.lv);
         for (const lv of unlockLvs) expect(LV.levels[lv - 1].style).not.toBe('—');
+    });
+});
+
+describe('Web実装（characterBuildData.js）はデータから組み立てられている', () => {
+    test('能力値・ランク', () => {
+        const A = load('abilities');
+        expect(CBD.ABILITIES.map(a => [a.key, a.name, a.reading])).toEqual(A.abilities.map(a => [a.key, a.name, a.reading]));
+        expect(CBD.RANK_DICE).toEqual(Object.fromEntries(A.ranks.map(r => [r.rank, r.dice])));
+    });
+    test('背景・配属・覚醒・言語', () => {
+        const C = load('character_options');
+        expect(CBD.BACKGROUNDS.map(b => [b.id, b.upgrades])).toEqual(C.backgrounds.map(b => [b.id, b.upgradeKeys]));
+        for (const aff of CBD.AFFILIATIONS) {
+            expect(CBD.ASSIGNMENTS[aff].map(a => [a.id, a.upgrade])).toEqual(C.assignments.filter(x => x.affiliation === aff).map(x => [x.id, x.upgradeKey]));
+        }
+        expect(CBD.AWAKENING_IDS).toEqual(C.awakenings.map(a => a.id));
+        expect(CBD.LANGUAGES.map(l => l.id)).toEqual(C.languages.filter(l => l.id !== 'P').map(l => l.id));
+        expect(CBD.STAGE_PLUS_MAX).toBe(C.focus.initial);
+    });
+    test('レベル・CP・信念・サイバネ解禁', () => {
+        const LV = load('level_table'); const EQ = load('equipment');
+        expect(CBD.MAX_LEVEL).toBe(LV.maxLevel);
+        expect(CBD.BASE_CP_BUDGET).toBe(LV.levels[0].cp);
+        expect(CBD.BASE_BELIEF_POINTS).toBe(LV.beliefCap[0].cap);
+        expect(CBD.CYBER_GRADE_MIN_LEVEL).toEqual(Object.fromEntries(EQ.cybernetics.grades.map(g => [g.grade, g.unlockLv])));
+    });
+    test('スタイル段位はレベル表の解禁と一致し、Lv1=1・Lv3=2・Lv5=3・Lv10=5・Lv20=7', () => {
+        expect(RD.styleGradesAtLevel(1)).toMatchObject({ main: 1, sub: 0, third: 0 });
+        expect(RD.styleGradesAtLevel(3)).toMatchObject({ main: 1, sub: 1 });
+        expect(RD.styleGradesAtLevel(10)).toMatchObject({ main: 3, sub: 2, third: 0 });
+        expect(RD.styleGradesAtLevel(20)).toMatchObject({ main: 3, sub: 3, third: 1, kiwami: true });
+        expect([1, 3, 5, 10, 20].map(lv => RD.STYLE_GRADES_BY_LEVEL[lv])).toEqual([1, 2, 3, 5, 7]);
+        expect(RD.techniquesOf('blade', 2).map(t => t.grade)).toEqual([1, 2]);
     });
 });
 

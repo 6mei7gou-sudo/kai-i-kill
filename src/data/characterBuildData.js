@@ -1,126 +1,76 @@
 // =====================================================
-// キャラクター作成 共有データモジュール（v4.0 準拠）
-// 正本：docs/rules/data/*.json（v5.0）。この実装は v4.0 準拠で、v5.0 への移行中（rules_unified.md 付録C 手順5）
-// CharacterForm（作成フォーム）・CharacterDetail（詳細）・
+// キャラクター作成 共有データモジュール
+// 正本：docs/rules/data/*.json（v5.0）。ここでは Web 表示向けの形（key・色・補足文）に整えるだけで、
+// 選択肢や数値のリテラルは持たない。CharacterForm（作成フォーム）・CharacterDetail（詳細）・
 // /quickstart/（ガイド）が同じ定義を参照する。
-// ここを変えたら 3 箇所すべてに反映される。
+// ※ スキル枠（SKILL_SLOTS_BY_LEVEL）は v4.0 の名残で、スタイル段位（STYLE_GRADES_BY_LEVEL）へ移行中。
 // =====================================================
+import { RULES, STYLE_GRADES_BY_LEVEL, MAX_LEVEL as RULES_MAX_LEVEL } from './rulesData';
+
+const { abilities: A, characterOptions: C, equipment: EQ, levelTable: LV } = RULES;
 
 // ── ランクとダイス ──
-export const RANKS = ['D', 'C', 'B', 'A', 'S'];
-export const RANK_VALUE = { D: 0, C: 1, B: 2, A: 3, S: 4 };
-export const RANK_DICE = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6＋固有特典' };
-export const RANK_LABEL = {
-    D: '初期値。出目がそのまま結果になる',
-    C: '一人前。2つ振って良い方を選べる',
-    B: '熟練。配属特化の領域',
-    A: '達人。成長の先にある',
-    S: '規格外。物語の果てに辿り着く者だけの領域',
-};
+export const RANKS = A.ranks.map(r => r.rank);
+export const RANK_VALUE = Object.fromEntries(A.ranks.map((r, i) => [r.rank, i]));
+export const RANK_DICE = Object.fromEntries(A.ranks.map(r => [r.rank, r.dice]));
+export const RANK_LABEL = Object.fromEntries(A.ranks.map(r => [r.rank, r.label]));
 export const RANK_COLOR = { S: '#ff4444', A: '#ffcc00', B: '#d4af37', C: '#88aacc', D: '#8a8a9a' };
 
-// ── 七つの能力値 ──
-export const ABILITIES = [
-    { key: 'rank_tai',   name: '体', reading: 'たい',  desc: '格闘・突破・物理耐久',         use: '近接攻撃、耐久判定、重装備の運用、援護' },
-    { key: 'rank_haya',  name: '疾', reading: 'はや',  desc: '先手・回避・追跡',             use: '回避、先制、逃走、射撃の命中' },
-    { key: 'rank_shiki', name: '識', reading: 'しき',  desc: '調査・知識・文献・解明',       use: '調査、データベース検索、ハッキング、魔法言語の読解' },
-    { key: 'rank_han',   name: '判', reading: 'はん',  desc: '解明宣言・看破・戦術判断',     use: '解明判定、怪異のルール推測、NPC交渉、状況分析' },
-    { key: 'rank_shiya', name: '察', reading: 'さつ',  desc: '怪異感知・観察・証言聴取',     use: '気配の察知、罠の発見、嘘の看破、周囲の異変' },
-    { key: 'rank_jutsu', name: '術', reading: 'じゅつ', desc: '魔法行使・魔導具操作',         use: '魔法言語による詠唱、魔導具の起動、魔法的な干渉' },
-    { key: 'rank_kon',   name: '魂', reading: 'こん',  desc: '信念維持・精神防御',           use: '恐怖への抵抗、浄化、封印処理' },
-];
+// ── 七つの能力値 ──（use はフォーム用の補足文。正本の「主な用途」は desc に入る）
+const ABILITY_USE_HINT = {
+    rank_tai: '近接攻撃、耐久判定、重装備の運用、援護',
+    rank_haya: '回避、先制、逃走、射撃の命中',
+    rank_shiki: '調査、データベース検索、ハッキング、魔法言語の読解',
+    rank_han: '解明判定、怪異のルール推測、NPC交渉、状況分析',
+    rank_shiya: '気配の察知、罠の発見、嘘の看破、周囲の異変',
+    rank_jutsu: '魔法言語による詠唱、魔導具の起動、魔法的な干渉',
+    rank_kon: '恐怖への抵抗、浄化、封印処理',
+};
+export const ABILITIES = A.abilities.map(a => ({ key: a.key, name: a.name, reading: a.reading, desc: a.use, use: ABILITY_USE_HINT[a.key] || a.use }));
 export const ABILITY_BY_KEY = Object.fromEntries(ABILITIES.map(a => [a.key, a]));
 export const abilityName = (key) => ABILITY_BY_KEY[key]?.name || key;
 
 // ── 所属 ──
-export const AFFILIATIONS = ['祓部', '傭兵', '無所属'];
-export const AFFILIATION_INFO = {
-    '祓部':   { en: 'HARAEBE',      assignmentLabel: '配属班', bonus: '識の調査+2（3回/セッション）＋援軍要請1回', constraint: '任務命令への服従が義務。装備・行動に法的制限', tagline: '公的な怪異対処組織。組織の歯車として動き、現場で成長する' },
-    '傭兵':   { en: 'MERCENARY',    assignmentLabel: '専門',   bonus: '装備1ランクUP、二つ名+1（常時）', constraint: '収益がないと活動困難。バック企業の方針に縛られる', tagline: 'ライセンスを持つ請負人。契約と実績の世界' },
-    '無所属': { en: 'UNAFFILIATED', assignmentLabel: '流儀',   bonus: '察+1常時、裏ルート（1回/セッション）', constraint: '法的保護なし。全組織から警戒。補給ルート不安定', tagline: '組織に属せない者。何も持たないが生き延びてきた' },
-};
+export const AFFILIATIONS = C.affiliations.map(a => a.id);
+export const AFFILIATION_INFO = Object.fromEntries(C.affiliations.map(a => [a.id, { en: a.en, assignmentLabel: a.assignmentLabel, bonus: a.bonus, constraint: a.constraint, tagline: a.tagline }]));
 
-// ── 背景（6種）— 2能力値がC昇格 + 背景スキル自動取得 ──
-export const BACKGROUNDS = [
-    { id: '神社育ち',       upgrades: ['rank_shiya', 'rank_kon'],  desc: '禁足地のデータベースへのアクセス権。古い怪異の解明鍵①の難易度-1' },
-    { id: '鋼の肉体',       upgrades: ['rank_tai', 'rank_haya'],   desc: '武装型・半装身型装備のCP+4。護衛への初回攻撃に+1修正' },
-    { id: '都市伝説研究者', upgrades: ['rank_shiki', 'rank_han'],  desc: '調査スペシャル時に解明鍵追加入手の可能性' },
-    { id: '元実験体',       upgrades: ['rank_kon'],                desc: '魂C昇格。渇望の覚醒ギフトを1段階低コストで使用可能' },
-    { id: 'ハッカー上がり', upgrades: ['rank_shiki', 'rank_haya'], desc: 'NGT魔法判定+1。独立型装備のCP+3' },
-    { id: '魔道資格者',     upgrades: ['rank_jutsu', 'rank_shiki'], desc: '選択した魔法言語の+1修正が2状況に拡張。怪異誘発の確率が1ランク改善' },
-];
+// ── 背景（6種）— 2能力値がC昇格 ──
+export const BACKGROUNDS = C.backgrounds.map(b => ({ id: b.id, upgrades: b.upgradeKeys, desc: b.effect }));
 export const BACKGROUND_BY_ID = Object.fromEntries(BACKGROUNDS.map(b => [b.id, b]));
 
-// ── 配属（所属に連動）— 1能力値がB昇格 + 配属スキル解放 ──
-export const ASSIGNMENTS = {
-    '祓部': [
-        { id: '古怪班',   upgrade: 'rank_shiki', desc: '古い怪異の調査・解明特化。伝承・禁足地の知識' },
-        { id: '新怪班',   upgrade: 'rank_shiya', desc: '現代型怪異の追跡・分析。SNS・デジタルメディア' },
-        { id: '封印班',   upgrade: 'rank_kon',   desc: '禁足地の管理と特級怪異の封印。浄化の専門家' },
-        { id: '機動班',   upgrade: 'rank_tai',   desc: '前線投入の実働部隊。直轄即応隊・広域機動班' },
-    ],
-    '傭兵': [
-        { id: '突撃型',   upgrade: 'rank_tai',   desc: '火力と耐久の前衛。傭兵の花形' },
-        { id: '偵察型',   upgrade: 'rank_shiya', desc: '情報収集と戦場分析。目と耳の専門家' },
-        { id: '技術型',   upgrade: 'rank_jutsu', desc: '装備改造と魔法技術。後方支援' },
-        { id: '護衛型',   upgrade: 'rank_han',   desc: '要人護衛と脅威評価。交渉と戦術判断の専門家' },
-    ],
-    '無所属': [
-        { id: '野良討伐者',   upgrade: 'rank_tai',   desc: '組織に頼らず腕一本で戦う。生存特化' },
-        { id: '裏社会の住人', upgrade: 'rank_han',   desc: '情報網と人脈で勝負。交渉と策略' },
-        { id: '在野研究者',   upgrade: 'rank_shiki', desc: '独自に怪異を研究する学者肌' },
-        { id: '退魔師',       upgrade: 'rank_kon',   desc: '独学で祓いの術を身につけた一匹狼' },
-    ],
-};
+// ── 配属（所属に連動）— 1能力値がB昇格 ──
+export const ASSIGNMENTS = Object.fromEntries(AFFILIATIONS.map(aff => [aff, C.assignments.filter(x => x.affiliation === aff).map(x => ({ id: x.id, upgrade: x.upgradeKey, desc: x.desc }))]));
 export const findAssignment = (affiliation, id) => (ASSIGNMENTS[affiliation] || []).find(a => a.id === id) || null;
 export const assignmentLabel = (affiliation) => AFFILIATION_INFO[affiliation]?.assignmentLabel || '配属';
 
 // ── 覚醒パターン ──
-export const AWAKENINGS = [
-    { id: '先天覚醒型',   desc: '生まれつき素養を持ち訓練で開花',       effect: '術または魂がCでスタート（背景とは別枠）' },
-    { id: 'ショック覚醒型', desc: '怪異に関わる強烈な体験が引き金',       effect: '恨み/喪失に対する判定+1。初期信念+1' },
-    { id: '実験覚醒型',   desc: '人体実験で強制覚醒',                   effect: '察判定+1（怪異への過敏さ）' },
-    { id: '接触覚醒型',   desc: '怪異の核や特殊素材への長期接触',       effect: '察判定に常時+1（怪異の気配への鋭敏さ）' },
-];
+export const AWAKENINGS = C.awakenings.map(a => ({ id: a.id, desc: a.desc, effect: a.bonus }));
 export const AWAKENING_IDS = AWAKENINGS.map(a => a.id);
-export const INNATE_AWAKENING = '先天覚醒型';
-export const INNATE_CHOICES = ['rank_jutsu', 'rank_kon'];
-export const DEFAULT_INNATE_CHOICE = 'rank_jutsu';
+export const INNATE_AWAKENING = C.innateAwakening.id;
+export const INNATE_CHOICES = C.innateAwakening.choices;
+export const DEFAULT_INNATE_CHOICE = C.innateAwakening.default;
 
 // ── 初期ギフト ──
-export const GIFTS = [
-    { id: '鍵の直感',     desc: '調査フェイズで1日1回、解明鍵のヒントをGMに求められる' },
-    { id: '生還の意地',   desc: 'HP0時、魂判定成功で1HP残して生存（1シナリオ1回）' },
-    { id: '装備の鬼',     desc: '武装型・半装身型装備の武器修正+1' },
-    { id: 'ネットワーク', desc: '各都市に情報源NPC1人。1シナリオ1回情報提供' },
-    { id: '怪異の残響',   desc: '怪異の気配を感知。1シナリオ1回、護衛の特性を質問可' },
-    { id: '魔法師の直感', desc: '術判定スペシャル時、怪異誘発判定を免除（1シナリオ2回）' },
-];
+export const GIFTS = RULES.gifts.initial.map(g => ({ id: g.id, desc: g.effect }));
 
-// ── 魔法言語 ──
-export const LANGUAGES = [
-    { id: 'Igniscript', color: '赤',   desc: '燃やす・爆発・熱変容',       hex: '#ff4444' },
-    { id: 'Lupis Surf', color: '青',   desc: '流す・包む・圧力',           hex: '#4488ff' },
-    { id: 'Ivyo',       color: '緑',   desc: '育てる・自然サイクル',       hex: '#44cc44' },
-    { id: 'NGT',        color: '黄',   desc: '加速・電気的処理・情報解析', hex: '#ffcc00' },
-    { id: 'Monyx',      color: '無色', desc: '最小術式・汎用転用',         hex: '#aaaaaa' },
-    { id: 'P:',         color: '紫',   desc: '弱体化・妨害・封印（P派生）', hex: '#aa44ff' },
-    { id: "P'",         color: '桃',   desc: '回復・強化・修復（P派生）',   hex: '#ff88cc' },
-];
-export const LANGUAGE_MAX = 3;
+// ── 魔法言語 ──（P は基礎言語で得意／苦手の選択対象外。hex は表示色）
+const LANGUAGE_HEX = { Igniscript: '#ff4444', 'Lupis Surf': '#4488ff', Ivyo: '#44cc44', NGT: '#ffcc00', Monyx: '#aaaaaa', 'P:': '#aa44ff', "P'": '#ff88cc' };
+export const LANGUAGES = C.languages.filter(l => l.id !== 'P').map(l => ({ id: l.id, color: l.color, desc: l.texture, hex: LANGUAGE_HEX[l.id] || '#aaaaaa' }));
+export const LANGUAGE_MAX = C.languageMax;
 
 // ── 各種初期値・上限 ──
-export const STAGE_PLUS_MAX = 2;          // +段階を付与できる能力値の数
-export const BASE_BELIEF_POINTS = 5;      // 信念ポイント初期値
-export const BASE_CP_BUDGET = 10;         // Lv1 装備CP予算
-export const MAX_LEVEL = 20;
+export const STAGE_PLUS_MAX = C.focus.initial;   // 専心（旧 +段階）を付与できる能力値の数
+export const BASE_BELIEF_POINTS = LV.beliefCap[0].cap;   // 信念ポイント初期値
+export const BASE_CP_BUDGET = LV.levels[0].cp;          // Lv1 装備CP予算
+export const MAX_LEVEL = RULES_MAX_LEVEL;
 
-// レベル別スキルスロット数（3レベルに1個のペース）
-// Lv1=1, Lv3=2, Lv6=3, Lv9=4, Lv12=5, Lv15=6, Lv18=7
+// v4.0 のレベル別スキルスロット数（3レベルに1個のペース）。スタイル移行が終わるまで残す
 export const SKILL_SLOTS_BY_LEVEL = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7];
+// v5.0 のレベル別「使える技の数」（主／副／第三スタイルの段位合計）
+export { STYLE_GRADES_BY_LEVEL };
 
 // サイバネティクス等級の必要レベル
-export const CYBER_GRADE_MIN_LEVEL = { I: 1, II: 4, III: 9 };
+export const CYBER_GRADE_MIN_LEVEL = Object.fromEntries(EQ.cybernetics.grades.map(g => [g.grade, g.unlockLv]));
 
 // ── ステップ定義（フォームとクイックスタートで共有する見出し） ──
 // 「この選択で決まること」を1行で説明する

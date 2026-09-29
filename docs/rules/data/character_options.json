@@ -3,32 +3,55 @@
     {
       "id": "神社育ち",
       "upgrades": "察・魂",
-      "effect": "禁足地データベースへの非公式アクセス権。古い怪異への解明鍵①の判定に +1"
+      "effect": "禁足地データベースへの非公式アクセス権。古い怪異への解明鍵①の判定に +1",
+      "upgradeKeys": [
+        "rank_shiya",
+        "rank_kon"
+      ]
     },
     {
       "id": "鋼の肉体",
       "upgrades": "体・疾",
-      "effect": "最大HP +2。武装型・半装身型装備のCP +4"
+      "effect": "最大HP +2。武装型・半装身型装備のCP +4",
+      "upgradeKeys": [
+        "rank_tai",
+        "rank_haya"
+      ]
     },
     {
       "id": "都市伝説研究者",
       "upgrades": "識・判",
-      "effect": "調査判定でスペシャルを出した時、解明鍵をもう1つ得る（1シナリオ1回）"
+      "effect": "調査判定でスペシャルを出した時、解明鍵をもう1つ得る（1シナリオ1回）",
+      "upgradeKeys": [
+        "rank_shiki",
+        "rank_han"
+      ]
     },
     {
       "id": "元実験体",
       "upgrades": "魂（Cへ）。専心2つのうち1つは魂に固定",
-      "effect": "渇望の覚醒ギフトを1段階低い段階で使える"
+      "effect": "渇望の覚醒ギフトを1段階低い段階で使える",
+      "upgradeKeys": [
+        "rank_kon"
+      ]
     },
     {
       "id": "ハッカー上がり",
       "upgrades": "識・疾",
-      "effect": "NGT魔法の判定に +1。独立型装備のCP +3"
+      "effect": "NGT魔法の判定に +1。独立型装備のCP +3",
+      "upgradeKeys": [
+        "rank_shiki",
+        "rank_haya"
+      ]
     },
     {
       "id": "魔道資格者",
       "upgrades": "術・識",
-      "effect": "得意言語をもう1つ選べる。怪異誘発判定の閾値が1段階改善"
+      "effect": "得意言語をもう1つ選べる。怪異誘発判定の閾値が1段階改善",
+      "upgradeKeys": [
+        "rank_jutsu",
+        "rank_shiki"
+      ]
     }
   ],
   "assignments": [
@@ -36,73 +59,85 @@
       "affiliation": "祓部",
       "id": "古怪班",
       "upgrade": "識",
-      "desc": "古い怪異の調査・解明特化。伝承・禁足地の知識"
+      "desc": "古い怪異の調査・解明特化。伝承・禁足地の知識",
+      "upgradeKey": "rank_shiki"
     },
     {
       "affiliation": "祓部",
       "id": "新怪班",
       "upgrade": "察",
-      "desc": "現代型怪異の追跡・分析。SNS・デジタルメディア"
+      "desc": "現代型怪異の追跡・分析。SNS・デジタルメディア",
+      "upgradeKey": "rank_shiya"
     },
     {
       "affiliation": "祓部",
       "id": "封印班",
       "upgrade": "魂",
-      "desc": "禁足地の管理と特級怪異の封印。浄化の専門家"
+      "desc": "禁足地の管理と特級怪異の封印。浄化の専門家",
+      "upgradeKey": "rank_kon"
     },
     {
       "affiliation": "祓部",
       "id": "機動班",
       "upgrade": "体",
-      "desc": "前線投入の実働部隊"
+      "desc": "前線投入の実働部隊",
+      "upgradeKey": "rank_tai"
     },
     {
       "affiliation": "傭兵",
       "id": "突撃型",
       "upgrade": "体",
-      "desc": "火力と耐久の前衛。傭兵の花形"
+      "desc": "火力と耐久の前衛。傭兵の花形",
+      "upgradeKey": "rank_tai"
     },
     {
       "affiliation": "傭兵",
       "id": "偵察型",
       "upgrade": "察",
-      "desc": "情報収集と戦場分析"
+      "desc": "情報収集と戦場分析",
+      "upgradeKey": "rank_shiya"
     },
     {
       "affiliation": "傭兵",
       "id": "技術型",
       "upgrade": "術",
-      "desc": "装備改造と魔法技術。後方支援"
+      "desc": "装備改造と魔法技術。後方支援",
+      "upgradeKey": "rank_jutsu"
     },
     {
       "affiliation": "傭兵",
       "id": "護衛型",
       "upgrade": "判",
-      "desc": "要人護衛と脅威評価。交渉と戦術判断"
+      "desc": "要人護衛と脅威評価。交渉と戦術判断",
+      "upgradeKey": "rank_han"
     },
     {
       "affiliation": "無所属",
       "id": "野良討伐者",
       "upgrade": "体",
-      "desc": "組織に頼らず腕一本で戦う"
+      "desc": "組織に頼らず腕一本で戦う",
+      "upgradeKey": "rank_tai"
     },
     {
       "affiliation": "無所属",
       "id": "裏社会の住人",
       "upgrade": "判",
-      "desc": "情報網と人脈で勝負"
+      "desc": "情報網と人脈で勝負",
+      "upgradeKey": "rank_han"
     },
     {
       "affiliation": "無所属",
       "id": "在野研究者",
       "upgrade": "識",
-      "desc": "独自に怪異を研究する学者肌"
+      "desc": "独自に怪異を研究する学者肌",
+      "upgradeKey": "rank_shiki"
     },
     {
       "affiliation": "無所属",
       "id": "退魔師",
       "upgrade": "魂",
-      "desc": "独学で祓いの術を身につけた一匹狼"
+      "desc": "独学で祓いの術を身につけた一匹狼",
+      "upgradeKey": "rank_kon"
     }
   ],
   "awakenings": [
@@ -180,5 +215,40 @@
   "focus": {
     "initial": 2,
     "note": "同じ能力値に2つは付けられない"
-  }
+  },
+  "affiliations": [
+    {
+      "id": "祓部",
+      "en": "HARAEBE",
+      "assignmentLabel": "配属班",
+      "bonus": "公的データベース照会（識の調査判定+2、1セッション3回）／援軍要請（1セッション1回）",
+      "constraint": "任務命令への服従が義務。装備・行動に法的制限",
+      "tagline": "公的な怪異対処組織。組織の歯車として動き、現場で成長する"
+    },
+    {
+      "id": "傭兵",
+      "en": "MERCENARY",
+      "assignmentLabel": "専門",
+      "bonus": "装備グレード（作成時に装備を1ランク上から）／コネクション（情報収集判定+2、1セッション3回）／二つ名（その分野の判定に常時+1）",
+      "constraint": "収益がないと活動困難。バック企業の方針に縛られる",
+      "tagline": "ライセンスを持つ請負人。契約と実績の世界"
+    },
+    {
+      "id": "無所属",
+      "en": "UNAFFILIATED",
+      "assignmentLabel": "流儀",
+      "bonus": "生存者の勘（察判定に常時+1）／裏のルート（1セッション1回）／改造個体センサー（1セッション1回）",
+      "constraint": "法的保護なし。全組織から警戒。補給ルート不安定",
+      "tagline": "組織に属せない者。何も持たないが生き延びてきた"
+    }
+  ],
+  "innateAwakening": {
+    "id": "先天覚醒型",
+    "choices": [
+      "rank_jutsu",
+      "rank_kon"
+    ],
+    "default": "rank_jutsu"
+  },
+  "languageMax": 3
 }
