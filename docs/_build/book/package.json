@@ -1,0 +1,14 @@
+{
+  "name": "kai-i-kill-rulebook-build",
+  "private": true,
+  "type": "module",
+  "description": "KAI-I//KILL TRPG コアルールブック（docs/rules/core_design.md）を組版して PDF を生成する",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "marked": "^15.0.0",
+    "pagedjs": "^0.4.3",
+    "playwright-core": "^1.63.0"
+  }
+}

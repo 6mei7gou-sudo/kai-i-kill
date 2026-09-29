@@ -1,0 +1,306 @@
+/* =====================================================================
+   KAI-I//KILL コアルールブック — 組版スタイル（B5・Paged.js）
+   設計原則は docs/design/system/design_system_v1.0.md に準拠する：
+   闇の中の情報／金の権威／走査線／段階的開示。
+   紙面は読みやすさを優先して明色。闇と金は表紙・パート扉・章見出しに集約する。
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --paper: #fbfaf7;
+  --ink: #1b1b20;
+  --ink-2: #4a4a52;
+  --ink-3: #8a8a92;
+  --rule: #d8d5cd;
+  --rule-2: #ecebe6;
+  --dark: #05070a;
+  --dark-2: #0f1218;
+  --gold: #b8922e;
+  --gold-bright: #d4af37;
+  --gold-subtle: rgba(184, 146, 46, 0.10);
+  --blue: #3a6ea5;
+  --blue-subtle: rgba(58, 110, 165, 0.08);
+  --danger: #b8323c;
+  --fear: #8b2030; --rage: #d45020; --sorrow: #2855a0;
+  --haste: #d48820; --thirst: #7030a0; --purge: #2f8a5e;
+  --sans: 'Noto Sans JP', 'IPAPGothic', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+  --serif: 'Noto Serif JP', 'IPAPMincho', serif;
+  --mono: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* ---------- ページ ---------- */
+@page {
+  size: 182mm 257mm;                 /* B5 */
+  margin: 17mm 15mm 19mm 15mm;
+  @bottom-center {
+    content: counter(page);
+    font-family: var(--mono);
+    font-size: 8pt;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+  }
+}
+@page :left {
+  @top-left {
+    content: "KAI-I//KILL　コアルールブック";
+    font-family: var(--mono);
+    font-size: 7pt;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    border-bottom: 0.5pt solid var(--rule);
+    padding-bottom: 2mm;
+    vertical-align: bottom;
+  }
+}
+@page :right {
+  @top-right {
+    content: string(chapter);
+    font-family: var(--sans);
+    font-size: 7pt;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    border-bottom: 0.5pt solid var(--rule);
+    padding-bottom: 2mm;
+    vertical-align: bottom;
+  }
+}
+@page bleed {
+  margin: 0;
+  @bottom-center { content: none; }
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+@page sheetpage {
+  @top-center { content: none; }
+  @top-right { content: "キャラクターシート"; text-align: right; font-family: var(--sans); font-size: 7pt; color: var(--ink-3); letter-spacing: 0.08em; border-bottom: 0.5pt solid var(--rule); padding-bottom: 2mm; vertical-align: bottom; }
+  @top-left { content: none; }
+}
+@page colophon { @top-left { content: none; } @top-right { content: none; } }
+@page frontmatter {
+  @bottom-center { content: counter(page, lower-roman); }
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+
+html { font-size: 9.6pt; }
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.75;
+  font-feature-settings: "palt" 1;
+  text-align: justify;
+  hanging-punctuation: allow-end;
+}
+/* paged.js がテキストを分割すると Chromium が最終行まで均等割付してしまうため、最終行は必ず左寄せにする */
+* { text-align-last: left; }
+p { margin: 0 0 0.9em; orphans: 2; widows: 2; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: normal; color: var(--ink-2); }
+a { color: inherit; text-decoration: none; }
+code { font-family: var(--mono); font-size: 0.9em; background: var(--rule-2); padding: 0 0.3em; border-radius: 2px; }
+hr { border: 0; border-top: 0.5pt solid var(--rule); margin: 1.6em 0; }
+
+/* ---------- 表紙 ---------- */
+.cover {
+  page: bleed;
+  break-after: page;
+  width: 182mm; height: 257mm;
+  background: var(--dark);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {            /* 走査線 */
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+}
+.cover::after {             /* 金のグロウ */
+  content: ""; position: absolute; left: -30mm; top: 120mm; width: 240mm; height: 120mm;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.18), transparent 60%);
+}
+.cover .frame {
+  position: absolute; inset: 12mm; border: 0.6pt solid rgba(212,175,55,0.45);
+}
+.cover .frame::before, .cover .frame::after {
+  content: ""; position: absolute; width: 8mm; height: 8mm; border-color: var(--gold-bright); border-style: solid;
+}
+.cover .frame::before { left: -0.6pt; top: -0.6pt; border-width: 1.2pt 0 0 1.2pt; }
+.cover .frame::after  { right: -0.6pt; bottom: -0.6pt; border-width: 0 1.2pt 1.2pt 0; }
+.cover .kicker {
+  position: absolute; left: 22mm; top: 34mm;
+  font-family: var(--mono); font-size: 8pt; letter-spacing: 0.35em; color: var(--gold-bright);
+}
+.cover .series { position: absolute; left: 22mm; top: 44mm; font-size: 12pt; letter-spacing: 0.4em; color: #cfcfd6; }
+.cover .title {
+  position: absolute; left: 20mm; top: 78mm; right: 20mm;
+  font-family: var(--mono); font-weight: 700; font-size: 44pt; line-height: 1; letter-spacing: -0.02em; color: #fff;
+}
+.cover .title small { display: block; font-family: var(--sans); font-weight: 900; font-size: 15pt; letter-spacing: 0.3em; color: var(--gold-bright); margin-top: 6mm; }
+.cover .sub {
+  position: absolute; left: 22mm; top: 128mm; right: 22mm;
+  font-family: var(--mono); font-size: 9pt; letter-spacing: 0.25em; color: #cfcfd6; line-height: 2;
+}
+.cover .sub b { color: var(--gold-bright); font-weight: 700; }
+.cover .quotes { position: absolute; left: 22mm; bottom: 44mm; right: 22mm; font-family: var(--serif); font-size: 9.5pt; line-height: 2; color: #a9a9b3; }
+.cover .quotes span { display: block; }
+.cover .foot { position: absolute; left: 22mm; bottom: 20mm; right: 22mm; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 7pt; letter-spacing: 0.2em; color: #777; }
+.cover .meter { position: absolute; right: 22mm; top: 34mm; display: flex; gap: 2mm; }
+.cover .meter i { display: block; width: 3mm; height: 12mm; border-radius: 1px; opacity: 0.85; }
+
+/* ---------- 前付 ---------- */
+.frontmatter { page: frontmatter; }
+.titlepage { break-after: page; padding-top: 40mm; text-align: center; }
+.titlepage .t1 { font-family: var(--mono); font-weight: 700; font-size: 22pt; letter-spacing: 0.05em; }
+.titlepage .t2 { font-weight: 900; font-size: 12pt; letter-spacing: 0.3em; color: var(--gold); margin-top: 4mm; }
+.titlepage .t3 { font-family: var(--mono); font-size: 8pt; letter-spacing: 0.25em; color: var(--ink-3); margin-top: 10mm; line-height: 2; }
+.titlepage .note { margin: 30mm auto 0; max-width: 120mm; font-size: 8.5pt; color: var(--ink-2); text-align: left; border-top: 0.5pt solid var(--rule); padding-top: 4mm; }
+
+.toc { break-after: page; }
+.toc h1 { font-size: 16pt; font-weight: 900; letter-spacing: 0.3em; margin: 0 0 6mm; border-bottom: 1.5pt solid var(--ink); padding-bottom: 2mm; }
+.toc ol { list-style: none; margin: 0; padding: 0; }
+.toc li { display: flex; align-items: baseline; gap: 2mm; }
+.toc li.part { margin-top: 4mm; font-weight: 900; letter-spacing: 0.15em; }
+.toc li.part .n { font-family: var(--mono); color: var(--gold); }
+.toc li.ch { font-size: 9.2pt; padding-left: 8mm; }
+.toc li.ch .n { font-family: var(--mono); color: var(--ink-3); min-width: 9mm; font-size: 8pt; }
+.toc li.sec { font-size: 8.2pt; padding-left: 20mm; color: var(--ink-2); }
+.toc li.sec .n { font-family: var(--mono); color: var(--ink-3); min-width: 9mm; font-size: 7.5pt; }
+.toc li .lbl { flex: 0 1 auto; }
+.toc li .dots { flex: 1 1 auto; border-bottom: 0.5pt dotted var(--rule); transform: translateY(-0.5em); }
+.toc li .pg { font-family: var(--mono); font-size: 8pt; }
+.toc li .pg::after { content: target-counter(attr(href url), page); }
+
+/* ---------- パート扉 ---------- */
+section.part {
+  page: bleed; break-before: page; break-after: page;
+  width: 182mm; height: 257mm; background: var(--dark); color: #fff; position: relative; overflow: hidden;
+}
+section.part::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px); }
+section.part .rule { position: absolute; left: 22mm; right: 22mm; top: 100mm; border-top: 0.6pt solid rgba(212,175,55,0.6); }
+section.part .n { position: absolute; left: 22mm; top: 80mm; font-family: var(--mono); font-size: 11pt; letter-spacing: 0.4em; color: var(--gold-bright); }
+section.part .t { position: absolute; left: 22mm; top: 106mm; font-weight: 900; font-size: 34pt; letter-spacing: 0.12em; line-height: 1.2; }
+section.part .d { position: absolute; left: 22mm; right: 22mm; top: 132mm; font-size: 9.5pt; color: #b9b9c2; line-height: 1.9; }
+section.part .list { position: absolute; left: 22mm; bottom: 26mm; font-family: var(--mono); font-size: 8pt; letter-spacing: 0.1em; color: #8d8d97; line-height: 2.1; }
+section.part .list b { color: var(--gold-bright); font-weight: 400; margin-right: 2mm; }
+
+/* ---------- 章 ---------- */
+.chapter { break-before: page; }
+.chapter > h2 {
+  string-set: chapter content(text);
+  margin: -17mm -15mm 7mm; padding: 14mm 15mm 7mm;
+  background: var(--dark-2); color: #fff;
+  font-weight: 900; font-size: 19pt; letter-spacing: 0.15em; line-height: 1.25;
+  position: relative;
+}
+.chapter > h2::before {
+  content: attr(data-kicker);
+  display: block; font-family: var(--mono); font-weight: 400; font-size: 8pt; letter-spacing: 0.35em; color: var(--gold-bright); margin-bottom: 3mm;
+}
+.chapter > h2::after {
+  content: ""; position: absolute; left: 15mm; right: 15mm; bottom: 0; border-bottom: 1.2pt solid var(--gold-bright);
+}
+.chapter > blockquote.epigraph {
+  border: 0; margin: 0 0 7mm; padding: 0 0 4mm; font-family: var(--serif); font-size: 9.5pt; color: var(--ink-2); line-height: 1.9;
+  border-bottom: 0.5pt solid var(--rule);
+}
+.chapter > blockquote.epigraph p { margin: 0; }
+
+h3 {
+  break-after: avoid; margin: 7mm 0 3mm; padding-left: 3mm; border-left: 3pt solid var(--gold);
+  font-size: 12pt; font-weight: 700; letter-spacing: 0.06em; line-height: 1.3;
+}
+h3 .num { font-family: var(--mono); color: var(--gold); font-weight: 700; margin-right: 2.5mm; font-size: 10pt; }
+h4 {
+  break-after: avoid; margin: 5mm 0 2mm; font-size: 10pt; font-weight: 700; color: var(--ink);
+}
+h4::before { content: "■"; color: var(--gold); font-size: 7pt; margin-right: 1.5mm; vertical-align: 0.2em; }
+h5 { margin: 3mm 0 1mm; font-size: 9.5pt; font-weight: 700; color: var(--ink-2); }
+
+ul, ol { margin: 0 0 0.9em; padding-left: 1.4em; }
+li { margin-bottom: 0.15em; }
+li::marker { color: var(--gold); }
+
+/* ---------- 引用・ボックス ---------- */
+blockquote {
+  margin: 0 0 1em; padding: 2.4mm 3.5mm; border-left: 2pt solid var(--gold);
+  background: var(--gold-subtle); font-size: 9pt; line-height: 1.7; break-inside: avoid;
+}
+blockquote p { margin: 0 0 0.4em; }
+blockquote p:last-child { margin: 0; }
+blockquote.flavor { font-family: var(--serif); color: var(--ink-2); background: transparent; border-left-color: var(--rule); }
+blockquote.example { border-left-color: var(--blue); background: var(--blue-subtle); }
+blockquote.example > p:first-child > strong:first-child { color: var(--blue); font-family: var(--mono); font-size: 8pt; letter-spacing: 0.15em; }
+blockquote.key { border-left-color: var(--ink); background: #fff; border: 0.6pt solid var(--ink); border-left-width: 3pt; }
+
+/* ---------- 表 ---------- */
+table {
+  width: 100%; border-collapse: collapse; margin: 1.5mm 0 4.5mm; font-size: 8.3pt; line-height: 1.5;
+  break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th, td { padding: 1.4mm 2mm; border-bottom: 0.5pt solid var(--rule); vertical-align: top; text-align: left; }
+th { background: var(--dark-2); color: var(--gold-bright); font-weight: 700; font-size: 7.8pt; letter-spacing: 0.06em; border-bottom: 1pt solid var(--gold); }
+tbody tr:nth-child(even) td { background: #f3f1ec; }
+td:first-child { font-weight: 500; }
+table.data td, table.data th { font-family: var(--mono); font-size: 7.6pt; }
+table.center td:not(:first-child) { text-align: center; }
+
+/* ---------- 図・コード ---------- */
+pre {
+  font-family: var(--mono); font-size: 7.8pt; line-height: 1.55; background: var(--dark-2); color: #dcdce2;
+  padding: 3mm 3.5mm; margin: 1mm 0 4mm; border-radius: 2px; white-space: pre-wrap; break-inside: avoid;
+  border-left: 2pt solid var(--gold);
+}
+pre.long { break-inside: auto; }
+pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+
+/* ---------- 共鳴メーター色 ---------- */
+.m-fear { color: var(--fear); } .m-rage { color: var(--rage); } .m-sorrow { color: var(--sorrow); }
+.m-haste { color: var(--haste); } .m-thirst { color: var(--thirst); } .m-purge { color: var(--purge); }
+
+/* ---------- キャラクターシート ---------- */
+.sheet { page: sheetpage; break-before: page; font-size: 8pt; }
+.sheet h2 { margin: 0 0 3mm; font-family: var(--mono); font-size: 14pt; letter-spacing: 0.15em; border-bottom: 1.5pt solid var(--ink); padding-bottom: 1.5mm; display: flex; justify-content: space-between; align-items: baseline; }
+.sheet h2 small { font-family: var(--sans); font-size: 8pt; letter-spacing: 0.2em; color: var(--ink-3); font-weight: 400; }
+.sheet .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2.5mm; }
+.sheet h4 { margin: 2.5mm 0 1.5mm !important; }
+.sheet .box { border: 0.6pt solid var(--ink); padding: 1.5mm 2mm; min-height: 8.5mm; position: relative; }
+.sheet .box .lbl { position: absolute; top: -2.2mm; left: 2mm; background: var(--paper); padding: 0 1mm; font-family: var(--mono); font-size: 6.2pt; letter-spacing: 0.15em; color: var(--ink-2); }
+.sheet .tall { min-height: 15mm; }
+.sheet .xl { min-height: 20mm; }
+.sheet .abil { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; }
+.sheet .abil .a { border: 0.6pt solid var(--ink); text-align: center; padding: 1.5mm 0 1mm; }
+.sheet .abil .a b { display: block; font-size: 13pt; font-weight: 900; line-height: 1; }
+.sheet .abil .a small { display: block; font-family: var(--mono); font-size: 6pt; color: var(--ink-3); letter-spacing: 0.1em; margin-top: 1mm; }
+.sheet .abil .a .rk { display: block; margin: 1mm auto 0; width: 8mm; height: 8mm; border: 0.6pt solid var(--ink-3); border-radius: 50%; }
+.sheet .abil .a .fc { display: block; font-size: 6pt; color: var(--ink-3); margin-top: 1mm; }
+.sheet .meters { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2mm 5mm; }
+.sheet .meter { display: flex; align-items: center; gap: 1.5mm; }
+.sheet .meter .nm { width: 22mm; font-size: 7.5pt; font-weight: 700; }
+.sheet .meter .nm small { display: block; font-family: var(--mono); font-size: 5.5pt; font-weight: 400; letter-spacing: 0.1em; color: var(--ink-3); }
+.sheet .meter .cells { display: flex; gap: 0.8mm; flex: 1; }
+.sheet .meter .cells i { flex: 1; height: 4.5mm; border: 0.5pt solid var(--ink-2); }
+.sheet .meter .cells i:nth-child(3), .sheet .meter .cells i:nth-child(6), .sheet .meter .cells i:nth-child(9) { border-right-width: 1.5pt; }
+.sheet .meter .cells i:last-child { background: repeating-linear-gradient(45deg, transparent 0 1px, rgba(0,0,0,0.18) 1px 2px); }
+.sheet table { font-size: 7.4pt; margin: 0; }
+.sheet table th { font-size: 6.8pt; padding: 1mm 1.5mm; }
+.sheet table td { padding: 1mm 1.5mm; height: 5mm; }
+.sheet .hp { display: flex; gap: 2mm; align-items: stretch; }
+.sheet .hp .big { flex: 0 0 22mm; border: 0.6pt solid var(--ink); text-align: center; font-size: 6pt; padding-top: 1mm; }
+.sheet .hp .big b { display: block; font-size: 16pt; font-weight: 900; line-height: 1.3; color: transparent; }
+.sheet .ref { font-size: 6.8pt; color: var(--ink-2); line-height: 1.55; border-top: 0.5pt solid var(--rule); margin-top: 2mm; padding-top: 1.5mm; }
+.sheet .ref b { font-family: var(--mono); color: var(--gold); }
+
+/* ---------- 奥付 ---------- */
+.colophon { page: colophon; break-before: page; padding-top: 150mm; font-size: 8pt; color: var(--ink-2); line-height: 1.9; }
+.colophon .t { font-family: var(--mono); font-weight: 700; font-size: 10pt; color: var(--ink); letter-spacing: 0.1em; margin-bottom: 3mm; }
+.colophon table { width: auto; font-size: 8pt; }
+.colophon td { border: 0; padding: 0.5mm 4mm 0.5mm 0; background: none !important; }
+
+/* ---------- 汎用 ---------- */
+.avoid { break-inside: avoid; }
+.small { font-size: 8pt; color: var(--ink-2); }

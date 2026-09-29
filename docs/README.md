@@ -53,6 +53,7 @@ docs/
 │
 ├── rules/               TRPGルール
 │   ├── rules_unified    ★主文書★ 統合ルールブック v4.0
+│   ├── core_design      v5.0 コアルールブック（ドラフト。確定後に rules_unified へ移す）
 │   ├── combat_hp        戦闘補遺 v4.0
 │   ├── cybernetics      サイバネティクス補遺 v1.0
 │   ├── weapon_custom_data  武器データ
@@ -73,6 +74,7 @@ docs/
 ├── legal/               利用規約・プライバシー・ガイドライン（Web公開）
 │
 ├── _build/              ビルドスクリプト（非コンテンツ）
+│   └── book/            v5.0 コアルールブックの組版（core_design.md → B5 PDF。`npm install && npm run build`）
 ├── site/                サイト設計
 ├── specs/               技術仕様書（ゲームエンジン等）
 ├── CONTEXT.md           引き継ぎコンテキスト
@@ -149,6 +151,9 @@ rules/rules_unified.md（★主文書・全体を統合）
 
 rules/system_data.json ← rules_unified.md v4.0 のデータを構造化
 rules/chapters/ ← rules_unified.md をWeb表示用に章別分割
+
+rules/core_design.md（v5.0 ドラフト。確定後の再編方針は同ファイル付録C）
+└── _build/book/ ← 書籍版PDFを生成（唯一の原稿は core_design.md）
 ```
 
 ---
