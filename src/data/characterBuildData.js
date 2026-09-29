@@ -1,6 +1,6 @@
 // =====================================================
 // キャラクター作成 共有データモジュール（v4.0 準拠）
-// 正本：docs/rules/rules_unified.md CHAPTER 9（キャラクター作成）
+// 正本：docs/rules/data/*.json（v5.0）。この実装は v4.0 準拠で、v5.0 への移行中（rules_unified.md 付録C 手順5）
 // CharacterForm（作成フォーム）・CharacterDetail（詳細）・
 // /quickstart/（ガイド）が同じ定義を参照する。
 // ここを変えたら 3 箇所すべてに反映される。

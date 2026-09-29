@@ -1,4 +1,4 @@
-// ルールデータ（docs/rules/data/*.json）から core_design.md の表を再生成する。
+// ルールデータ（docs/rules/data/*.json）から rules_unified.md の表を再生成する。
 //   node docs/_build/render_tables.mjs          … 表を書き換える
 //   node docs/_build/render_tables.mjs --check  … 差分があれば一覧を出して終了コード1
 // 原稿側は <!-- table:NAME --> … <!-- /table --> で囲った区間だけが対象。手で編集しない。
@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
-const DOC = path.join(ROOT, 'docs/rules/core_design.md');
+const DOC = path.join(ROOT, 'docs/rules/rules_unified.md');
 const DATA = path.join(ROOT, 'docs/rules/data');
 const load = (n) => JSON.parse(fs.readFileSync(path.join(DATA, `${n}.json`), 'utf8'));
 const A = load('abilities'), R = load('resonance'), G = load('anomaly_grades'), C = load('character_options');

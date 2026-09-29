@@ -9,22 +9,22 @@ Webサイト（世界観読み物・Webゲーム・投稿コミュニティ・SN
 
 ## 資料の現状（2026-07-08時点）
 
-- **ルールの正本は `docs/rules/rules_unified.md`（v4.0）**。ルールの要約はここには書かない。正本を読むこと
+- **ルールの正本は `docs/rules/rules_unified.md`（v5.0）とルールデータ `docs/rules/data/*.json`**。ルールの要約はここには書かない。正本を読むこと。v4.0 は `docs/rules/archive/rulebook_v4.md`
 - v4.0で廃止された旧概念（旧資料を読むときの注意）：討伐クロック → 核HP制／EP制 → レベル制／クラス制 → 所属×配属×覚醒×背景×武器型／護衛の耐久値 → フルステータス化／1ターン1行動 → メイン・サブ・リアクション制
 - **`docs/gm/` は2026-07にビルド成果物から復元**した（各ファイル冒頭の注記参照）。特に `gm/factions/companies.md` は旧構想「羅刹技研」を含み、現行正典（蒼鉄機工・雷禽重工・銀鎚精機・鴉羽技研・朱鷺崎財閥）への改稿が必要
-- **侵食率は公開面から全削除**（2026-04-19方針）。`docs/rules/expansion.md` は内部資料として残置、運用上オフ
+- **侵食率は公開面から全削除**（2026-04-19方針）。`docs/rules/archive/expansion_v1.md` は内部資料として残置、運用上オフ
 - docs⇔サイトページの紐付けは `src/lib/siteDocs.js` で一元管理（対応表は `docs/README.md`）
 - キャラクター作成の選択肢定義（背景・配属・覚醒・ギフト・魔法言語・各上限）は `src/data/characterBuildData.js`、ランク計算・完成度判定は `src/lib/characterBuild.js` が正本のWeb実装。`docs/rules/rules_unified.md` CHAPTER 9 を変えたらここも更新する（フォーム・詳細・クイックスタートに同時反映される）
 
 ## v5.0 再設計（進行中・2026-09-29〜）
 
-- **正本は依然 `docs/rules/rules_unified.md` v4.0。** v5.0 が確定するまで既存の運用・Web実装は変更しない
-- ドラフトは `docs/rules/core_design.md`（**v5.0 draft-2**：未決事項を埋めた全文版。序章＋14章＋付録A〜C、1,680行）。ブランチ `claude/lucid-cerf-35qowq`
-- **書籍版**：`docs/_build/book/`（`npm install && bash fetch-fonts.sh && npm run build`）が core_design.md から B5・74ページのPDFを組版する（Paged.js＋Chromium。表紙・目次・パート扉・章頭帯・キャラクターシート2枚・奥付）。出力 `out/` とフォント `fonts/` は git 管理外
+- **`docs/rules/rules_unified.md` は v5.0 に置換済み**（2026-09-29、付録C 手順4）。旧 v4.0 系（rulebook・combat_hp・expansion・system_data）は `archive/`、`chapters/` は廃止。**Web実装は v4.0 準拠のまま**で、手順5（JSON 駆動化・effects ディスパッチャ・キャラシUIのスタイル化）が未了。移行完了まで Web ゲームは v4.0 の判定で動く
+- ドラフトは `docs/rules/rules_unified.md`（**v5.0 draft-2**：未決事項を埋めた全文版。序章＋14章＋付録A〜C、1,680行）。ブランチ `claude/lucid-cerf-35qowq`
+- **書籍版**：`docs/_build/book/`（`npm install && bash fetch-fonts.sh && npm run build`）が rules_unified.md から B5・74ページのPDFを組版する（Paged.js＋Chromium。表紙・目次・パート扉・章頭帯・キャラクターシート2枚・奥付）。出力 `out/` とフォント `fonts/` は git 管理外
 - draft-2 で決めたこと：魔法（怪異誘発判定はスペシャル選択時・押し通し時・ファンブル時）／覚醒ギフト18種＋大浄化の刷新（取得不要・段階で自動解放）／装備（武器修正の上限+4、防御+3、メーカー補正を共鳴ベースに）／サイバネティクス（改造CP廃止・装備CPから購入・常時共鳴で表現・GM許可制）／レベル1〜20の全定義（スタイル解禁 Lv1/3/5/8/10/13/16/20、ランク+1 Lv3/5/7/10/13/16/20、専心+1 Lv2/6/11/17）／文書構造の再編方針（付録C。`chapters/` 廃止、`docs/rules/data/*.json` をデータ正本化、表はJSONから生成）
 - 確定済みの設計方針：判定は「振った中から1個選び、その出目が達成値かつ共鳴量（出目−3）」／共鳴ダイスと段階13ステップを廃止し専心・負傷（ダイス±1個）へ／押し通し（共鳴+3で成功に変える）で詰み防止／共鳴は6メーター維持で上昇先を行為の種類から一意に決める／護衛の個体管理を廃止し防壁層1〜3へ／スキル6軸74個を廃止しスタイル9種×段位3（27技）へ／効果は部品合成式の構造化データ
 - **据え置き**：7能力値・ランクD〜S・所属3・背景6・配属12・覚醒4・信念ポイント・CP予算・レベル20。既存の投稿キャラの能力値まわりはそのまま通用する
-- 状態：draft-2 は Codex レビュー（P1×2・P2×6）を反映して **main にマージ済み**（PR #1）。付録Cの手順2〜3を実施済み：`docs/rules/data/*.json`（8ファイル）をルールデータの正本とし、`docs/_build/render_tables.mjs` が core_design.md の40表を JSON から再生成、`docs/_build/check_rules_sync.mjs` が Web実装との共通項目を検査、`__tests__/rules/data-integrity.test.js` と `/rules-sync` スキルで運用。**次は手順4（rules_unified.md の v5.0 置換）と手順5（Web実装の JSON 駆動化）**
+- 状態：draft-2 は Codex レビュー（P1×2・P2×6）を反映して **main にマージ済み**（PR #1）。付録Cの手順2〜3を実施済み：`docs/rules/data/*.json`（8ファイル）をルールデータの正本とし、`docs/_build/render_tables.mjs` が rules_unified.md の40表を JSON から再生成、`docs/_build/check_rules_sync.mjs` が Web実装との共通項目を検査、`__tests__/rules/data-integrity.test.js` と `/rules-sync` スキルで運用。**次は手順5（Web実装の JSON 駆動化）**
 - 27技は `styles.json` に部品合成式（timing/target/uses/resonance/effects）で構造化済み。`gameEngine.js` の置換はこの `effects` を解釈するディスパッチャとして実装する
 - Claude側スキル：`rules-sync` は新設済み。`verify-site` の改訂（ルート導出化＋キャラシ生成器・Webゲームのスモーク追加）は未着手
 

@@ -1,6 +1,6 @@
 ---
 name: rules-sync
-description: ルール正本（docs/rules/data/*.json）⇔ ルールブック原稿（docs/rules/core_design.md）⇔ Web実装（src/data/characterBuildData.js・src/lib/gameEngine.js）の整合チェック。ルール・データ・キャラ作成の定義を変えた後、コミット前に使う。
+description: ルール正本（docs/rules/data/*.json）⇔ ルールブック原稿（docs/rules/rules_unified.md）⇔ Web実装（src/data/characterBuildData.js・src/lib/gameEngine.js）の整合チェック。ルール・データ・キャラ作成の定義を変えた後、コミット前に使う。
 ---
 
 # ルール正本⇔原稿⇔Web実装 同期チェック

@@ -1,7 +1,7 @@
 /**
  * ルールデータ（docs/rules/data/*.json）の整合性テスト。
  * - JSON 同士の構造（スタイル9×段位3、ギフト6メーター×3段階＋大浄化、レベル1〜20 など）
- * - 原稿 core_design.md の表がデータから再生成した内容と一致すること（render_tables --check）
+ * - 原稿 rules_unified.md の表がデータから再生成した内容と一致すること（render_tables --check）
  * - Web 実装 characterBuildData.js と共通項目が一致すること（check_rules_sync）
  */
 const fs = require('fs');
@@ -63,7 +63,7 @@ describe('docs/rules/data の構造', () => {
 
 describe('原稿・Web実装との同期', () => {
     const run = (script) => execFileSync(process.execPath, [path.join(ROOT, 'docs/_build', script), '--check'], { encoding: 'utf8', stdio: 'pipe' });
-    test('core_design.md の表はデータから再生成した内容と一致する', () => {
+    test('rules_unified.md の表はデータから再生成した内容と一致する', () => {
         expect(() => run('render_tables.mjs')).not.toThrow();
     });
     test('characterBuildData.js の共通項目はデータと一致する', () => {
