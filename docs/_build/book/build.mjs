@@ -92,7 +92,7 @@ function renderChapter(meta, body) {
   for (const t of tokens) {
     if (first && t.type === 'blockquote') {
       first = false;
-      out.push(marked.parser([t]).replace('<blockquote>', '<blockquote class="epigraph"'));
+      out.push(marked.parser([t]).replace('<blockquote>', '<blockquote class="epigraph">'));
       continue;
     }
     if (t.type !== 'space') first = false;
