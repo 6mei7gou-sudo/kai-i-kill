@@ -6,6 +6,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getMissionById } from '@/data/missions';
 import { calculateHP } from '@/lib/dice';
+import { LAYER_TRAITS } from '@/data/rulesData';
+
+const TRAIT_NAME = {
+  mirror: '鏡面', regen: '再生', pressure: '重圧', infect: '感染', silence: '静寂',
+  obsession: '執着', collapse: '崩落', veil: '虚飾', target: '標的', resonate: '共鳴',
+};
+const traitEffect = (id) => LAYER_TRAITS.find(t => t.name === TRAIT_NAME[id])?.effect || '';
 
 const difficultyColor = {
   E: 'var(--grade-5)', D: 'var(--grade-4)', C: 'var(--grade-3)',
@@ -24,6 +31,7 @@ export default function MissionDetailPage() {
 
   const mission = getMissionById(missionId);
   const isCoop = mission?.type === 'coop';
+  const isV5 = mission?.rules === 'v5';
   const partySize = mission?.party_size || 1;
 
   useEffect(() => {
@@ -90,8 +98,16 @@ export default function MissionDetailPage() {
               ['依頼元', mission.client],
               ['報酬', mission.reward],
               ...(isCoop ? [['形式', `協力（${partySize}人用）`]] : []),
-              ['ラウンド制限', `${mission.battle.max_rounds}ラウンド`],
-              ['核', `${mission.battle.core.name} (HP${mission.battle.core.hp} / 防御${mission.battle.core.defense})`],
+              ...(isV5 ? [
+                ['ルール', 'v5.0 核防壁戦（ランク制ダイスプール・共鳴メーター）'],
+                ['怪異', `${mission.anomaly.grade}${mission.anomaly.threatType ? '・' + mission.anomaly.threatType : ''}　脅威度${mission.anomaly.threat}`],
+                ['ラウンド制限', `${mission.anomaly.limitRounds}ラウンド`],
+                ['解明鍵', `${mission.anomaly.keys?.known ?? 0} / 4 判明${mission.anomaly.decodeRequired ? '（解明完了まで核は無敵）' : ''}`],
+                ['核', `${mission.anomaly.core.name} (HP${mission.anomaly.core.hp} / 防御${mission.anomaly.core.defense})`],
+              ] : [
+                ['ラウンド制限', `${mission.battle.max_rounds}ラウンド`],
+                ['核', `${mission.battle.core.name} (HP${mission.battle.core.hp} / 防御${mission.battle.core.defense})`],
+              ]),
             ].map(([label, value]) => (
               <tr key={label} style={{ borderBottom: 'var(--border-subtle)' }}>
                 <td style={{ padding: 'var(--space-sm) var(--space-md)', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', width: '140px' }}>
@@ -104,29 +120,55 @@ export default function MissionDetailPage() {
         </table>
       </div>
 
-      {/* 護衛一覧 */}
-      <div className="section" style={{ marginTop: 'var(--space-xl)' }}>
-        <h2 className="section__title">護衛</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
-          {mission.battle.guardians.map(g => (
-            <div key={g.id} className="card" style={{ padding: 'var(--space-md)' }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>
-                {g.name}
-              </div>
-              <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-                HP {g.hp} / ATK {g.attack} / DEF {g.defense}
-              </div>
-              {g.traits.length > 0 && (
-                <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
-                  {g.traits.map(t => (
-                    <span key={t} className="badge--gold" style={{ fontSize: 'var(--font-size-xs)' }}>{t}</span>
-                  ))}
+      {/* 防壁層（v5）／護衛（v4） */}
+      {isV5 ? (
+        <div className="section" style={{ marginTop: 'var(--space-xl)' }}>
+          <h2 className="section__title">防壁層</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-md)' }}>
+            {mission.anomaly.layers.map((l, i) => (
+              <div key={l.id || i} className="card" style={{ padding: 'var(--space-md)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>
+                  防壁層{i + 1}《{l.name}》
                 </div>
-              )}
-            </div>
-          ))}
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  HP {l.trait === 'veil' && !l.revealed ? '？？' : l.hp} / 防御 {l.defense ?? 1}
+                </div>
+                <div style={{ marginTop: 'var(--space-sm)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+                  {!l.trait ? '特性なし' : l.revealed
+                    ? <><span className="badge--gold">{TRAIT_NAME[l.trait]}</span> {traitEffect(l.trait)}</>
+                    : '特性：未判明（戦闘中の「解明」で暴ける）'}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{ marginTop: 'var(--space-md)', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
+            防壁層を上から順に剥離させると核が露出する。判定は振ったダイスから1個を選び、その出目が達成値（目標値4）と共鳴量（出目−3）になる。
+          </p>
         </div>
-      </div>
+      ) : (
+        <div className="section" style={{ marginTop: 'var(--space-xl)' }}>
+          <h2 className="section__title">護衛</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-md)' }}>
+            {mission.battle.guardians.map(g => (
+              <div key={g.id} className="card" style={{ padding: 'var(--space-md)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent-danger)', marginBottom: 'var(--space-sm)' }}>
+                  {g.name}
+                </div>
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                  HP {g.hp} / ATK {g.attack} / DEF {g.defense}
+                </div>
+                {g.traits.length > 0 && (
+                  <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
+                    {g.traits.map(t => (
+                      <span key={t} className="badge--gold" style={{ fontSize: 'var(--font-size-xs)' }}>{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* キャラクター選択 */}
       <div className="section" style={{ marginTop: 'var(--space-xl)' }}>

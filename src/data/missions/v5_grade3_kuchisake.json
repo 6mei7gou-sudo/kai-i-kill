@@ -1,0 +1,30 @@
+{
+  "id": "v5_grade3_kuchisake",
+  "rules": "v5",
+  "name": "口裂け女・改造個体《シェア型》",
+  "description": "SNSで拡散されるたび個体が増える口裂け女の改造個体。古典ルール（ポマード・鏡）は通じない。三級・甲種。解明鍵は3つまで集まっている——残り1つを戦闘中に暴けば、解明完了宣言で核の防御を剥がせる。",
+  "difficulty": "C",
+  "client": "傭兵ネットワーク《Anonymous》",
+  "reward": "信念ポイント+1",
+  "tags": ["三級", "v5.0", "改造個体", "ネットロア"],
+  "anomaly": {
+    "name": "口裂け女・改造個体《シェア型》",
+    "grade": "三級",
+    "threatType": "甲種",
+    "rumor": "この投稿を無視したら口裂け女が来る",
+    "threat": 6,
+    "limitRounds": 4,
+    "decodeRequired": false,
+    "core": { "name": "最初の投稿が保存された端末", "hp": 24, "defense": 2 },
+    "layers": [
+      { "id": "l1", "name": "拡散する分身", "hp": 14, "defense": 1, "trait": "regen", "revealed": true },
+      { "id": "l2", "name": "改変された噂", "hp": 14, "defense": 1, "trait": "veil", "revealed": false }
+    ],
+    "keys": { "known": 3, "total": 4 },
+    "openingResonance": { "fear": 1 },
+    "turnPolicy": "assault"
+  },
+  "achievements": [
+    { "id": "grade3_clear_v5", "name": "三級討伐者（核防壁戦）", "type": "mission" }
+  ]
+}

@@ -101,7 +101,7 @@ export function getAttackAbility(weaponType) {
 // ── 予想ダメージ計算 ──
 
 const RANK_EXPECTED = { D: 3.50, C: 4.47, B: 5.09, A: 5.49, S: 5.49 };
-const RANK_DICE_LABEL = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6+特典' };
+const RANK_DICE_LABEL = { D: '1d6', C: '2d6', B: '3d6', A: '4d6', S: '4d6＋固有特典' };
 
 export function calcExpectedDamage(rank, totalMod, hasPlus) {
     if (!rank) return null;

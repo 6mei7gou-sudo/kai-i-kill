@@ -192,6 +192,7 @@ CREATE TABLE IF NOT EXISTS character_sheets (
   proficient_languages TEXT[] DEFAULT '{}',
   weak_languages TEXT[] DEFAULT '{}',
   skills JSONB DEFAULT '[]'::JSONB,
+  styles JSONB DEFAULT '{}'::JSONB,
   stage_plus JSONB DEFAULT '[]'::JSONB,
   equipment_type TEXT CHECK (equipment_type IN ('武装型', '独立型', '半装身型', '全装身型', '搭乗型', '戦闘用搭乗型')),
   equipment_name TEXT,
@@ -226,6 +227,7 @@ ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS cybernetics JSONB DEFAULT 
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS linked_gear_id UUID;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS weapon_type TEXT;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS skills JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS styles JSONB DEFAULT '{}'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS stage_plus JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS equipment_options JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE character_sheets ADD COLUMN IF NOT EXISTS brief_history TEXT DEFAULT '';

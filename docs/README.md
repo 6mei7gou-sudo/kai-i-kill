@@ -1,4 +1,8 @@
-# docs/ 索引
+| system_data_v1.json | 旧版データ v1.0。2d6+属性値の旧判定 |
+| rulebook_v4.md | 旧版 v4.0 統合ルールブック。v5.0 で再設計（変更点は rules_unified.md 付録B） |
+| combat_hp_v4.md | 戦闘補遺 v4.0（HP制）。v5.0 で第5章・第12章に統合 |
+| expansion_v1.md | 追加データブック《禁域解放》v1.0（侵食率）。運用オフ |
+| system_data_v4.json | 旧版データ v4.0。v5.0 では data/*.json に置換 |# docs/ 索引
 
 電脳怪異譚 KAI-I//KILL プロジェクト資料の全体ガイド。
 
@@ -52,15 +56,11 @@ docs/
 │   └── special/         特設記事（elevator.md — /world/elevator で表示）
 │
 ├── rules/               TRPGルール
-│   ├── rules_unified    ★主文書★ 統合ルールブック v4.0
-│   ├── core_design      v5.0 コアルールブック（ドラフト。確定後に rules_unified へ移す）
-│   ├── combat_hp        戦闘補遺 v4.0
-│   ├── cybernetics      サイバネティクス補遺 v1.0
-│   ├── weapon_custom_data  武器データ
-│   ├── expansion        追加データブック《禁域解放》 v1.0
-│   ├── system_data.json 構造化データ v4.0
-│   ├── chapters/        Web用チャプター分割（15章）
-│   └── archive/         旧版（参照用）
+│   ├── rules_unified    ★主文書★ コアルールブック v5.0（判定メカニクスの正本。表は data/ から生成）
+│   ├── data/            ★ルールデータの正本★（能力値・共鳴・等級・キャラ作成選択肢・スタイル27技・ギフト・装備・レベル表）
+│   ├── cybernetics      サイバネティクス補遺 v1.0（v5.0 では第10章 10-5 のオプションルール。全リスト）
+│   ├── weapon_custom_data  武器データ（v5.0 の武器修正上限+4 に合わせた改訂が未了）
+│   └── archive/         旧版（rulebook_v4・combat_hp_v4・expansion_v1・system_data_v4 ほか。参照用）
 │
 ├── templates/           テンプレート集
 │   ├── anomaly_investigation  怪異調査書
@@ -74,7 +74,9 @@ docs/
 ├── legal/               利用規約・プライバシー・ガイドライン（Web公開）
 │
 ├── _build/              ビルドスクリプト（非コンテンツ）
-│   └── book/            v5.0 コアルールブックの組版（core_design.md → B5 PDF。`npm install && npm run build`）
+│   ├── render_tables.mjs  data/*.json → rules_unified.md の表を再生成（--check で整合検査）
+│   ├── check_rules_sync.mjs  data/*.json ⇔ src/data/characterBuildData.js の整合検査
+│   └── book/            v5.0 コアルールブックの組版（rules_unified.md → B5 PDF。`npm install && npm run build`）
 ├── site/                サイト設計
 ├── specs/               技術仕様書（ゲームエンジン等）
 ├── CONTEXT.md           引き継ぎコンテキスト
@@ -118,24 +120,22 @@ docs/
 ## 利用シーン別ガイド
 
 ### PL説明時（セッション前）
-- `rules/rules_unified.md` の CHAPTER 0〜3, 8（世界観・判定・共鳴記録・キャラ作成）
-- `rules/system_data.json` から属性・所属・背景・配属のデータを抽出
+- `rules/rules_unified.md` の序章・第1章〜第3章・第6章（世界観・判定・共鳴記録・キャラクター作成）
+- `rules/data/character_options.json`・`styles.json` から背景・配属・覚醒・スタイルの選択肢を抽出
 - `player/` 配下の世界観バイブル・用語集を配布
 
 ### セッション中（GM卓上）
-- `rules/rules_unified.md` の APPENDIX（クイックリファレンス）
-- `rules/combat_hp.md` で護衛データ・HP計算を確認
+- `rules/rules_unified.md` の付録A（クイックリファレンス）と巻末キャラクターシート（書籍版PDF）
+- 第5章（核防壁戦）・第12章（等級別データ・層特性）
 - `rules/weapon_custom_data.md` で装備の詳細修正値を確認
 
 ### GM準備（シナリオ作成）
-- `rules/rules_unified.md` の CHAPTER 13（怪異データ集）
-- `rules/expansion.md` で教団・怪異核・特殊装備のデータを参照
-- `rules/cybernetics.md` で義体関連のルールを確認
+- `rules/rules_unified.md` の第12章（怪異を作る）・第13章（サンプル怪異）・第14章（GMの心得）
+- `rules/cybernetics.md` で義体関連のオプションルールを確認
 - `gm/` 配下の世界観バイブル・勢力詳細を参照
 
 ### Web開発・データ連携
-- `rules/system_data.json` をデータソースとして使用
-- `rules/chapters/` をWeb表示用に参照
+- `rules/data/*.json` をデータソースとして使用（`docs/_build/check_rules_sync.mjs` で Web実装との整合を検査）
 - `design/system/` のトークンをフロントエンドで使用
 
 ---
@@ -143,17 +143,12 @@ docs/
 ## ルール文書の参照関係
 
 ```
-rules/rules_unified.md（★主文書・全体を統合）
-├── rules/combat_hp.md（戦闘ルールの詳細データ）
-├── rules/cybernetics.md（サイバネティクスの追加ルール）
-├── rules/weapon_custom_data.md（装備の個別データ）
-└── rules/expansion.md（追加コンテンツ）
-
-rules/system_data.json ← rules_unified.md v4.0 のデータを構造化
-rules/chapters/ ← rules_unified.md をWeb表示用に章別分割
-
-rules/core_design.md（v5.0 ドラフト。確定後の再編方針は同ファイル付録C）
-└── _build/book/ ← 書籍版PDFを生成（唯一の原稿は core_design.md）
+rules/data/*.json（★ルールデータの正本）
+├── rules/rules_unified.md（★主文書 v5.0）← 表は _build/render_tables.mjs で data/ から生成（マーカー区間は手で編集しない）
+│   ├── rules/cybernetics.md（オプションルールの全リスト）
+│   ├── rules/weapon_custom_data.md（装備の個別データ）
+│   └── _build/book/ ← 書籍版PDFを生成（唯一の原稿は rules_unified.md）
+└── src/data/characterBuildData.js ← _build/check_rules_sync.mjs で共通項目の一致を検査（v5.0 実装後は data/ を import する）
 ```
 
 ---

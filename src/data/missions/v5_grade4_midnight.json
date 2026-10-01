@@ -1,0 +1,30 @@
+{
+  "id": "v5_grade4_midnight",
+  "rules": "v5",
+  "name": "深夜廻り",
+  "description": "深夜2時、決まった道を歩く足音。振り返ると翌朝に発熱する。四級・乙種の循環型怪異。調査フェーズは済んでおり、解明鍵は4つのうち2つが手元にある。v5.0 ルール（核防壁戦）で遊ぶ最初のミッション。",
+  "difficulty": "D",
+  "client": "祓部 管区対処部",
+  "reward": "信念ポイント+1",
+  "tags": ["四級", "v5.0", "初心者向け", "循環型"],
+  "anomaly": {
+    "name": "深夜廻り",
+    "grade": "四級",
+    "threatType": "乙種",
+    "rumor": "深夜に一人で歩くと、同じ角を延々と曲がり続けて戻れなくなる",
+    "threat": 4,
+    "limitRounds": 3,
+    "decodeRequired": false,
+    "core": { "name": "道案内看板", "hp": 18, "defense": 1 },
+    "layers": [
+      { "id": "l1", "name": "迷い案内", "hp": 12, "defense": 1, "trait": "infect", "revealed": true }
+    ],
+    "keys": { "known": 2, "total": 4 },
+    "openingResonance": { "haste": 1 },
+    "turnPolicy": "assault"
+  },
+  "achievements": [
+    { "id": "v5_first_victory", "name": "核防壁戦・初陣", "type": "mission" },
+    { "id": "grade4_clear", "name": "四級討伐者", "type": "mission" }
+  ]
+}

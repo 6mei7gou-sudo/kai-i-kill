@@ -1,0 +1,193 @@
+{
+  "maxLevel": 20,
+  "levels": [
+    {
+      "lv": 1,
+      "hpBonus": 0,
+      "style": "主 I",
+      "growth": "—",
+      "cp": 10,
+      "unlock": "武装型・独立型"
+    },
+    {
+      "lv": 2,
+      "hpBonus": 1,
+      "style": "—",
+      "growth": "専心 +1",
+      "cp": 10,
+      "unlock": "—"
+    },
+    {
+      "lv": 3,
+      "hpBonus": 1,
+      "style": "副 I",
+      "growth": "ランク +1",
+      "cp": 12,
+      "unlock": "半装身型"
+    },
+    {
+      "lv": 4,
+      "hpBonus": 2,
+      "style": "—",
+      "growth": "—",
+      "cp": 12,
+      "unlock": "サイバネ II"
+    },
+    {
+      "lv": 5,
+      "hpBonus": 2,
+      "style": "主 II",
+      "growth": "ランク +1",
+      "cp": 15,
+      "unlock": "全装身型（GM許可）"
+    },
+    {
+      "lv": 6,
+      "hpBonus": 3,
+      "style": "—",
+      "growth": "専心 +1",
+      "cp": 15,
+      "unlock": "—"
+    },
+    {
+      "lv": 7,
+      "hpBonus": 3,
+      "style": "—",
+      "growth": "ランク +1",
+      "cp": 18,
+      "unlock": "搭乗型・戦闘用搭乗型（GM許可）"
+    },
+    {
+      "lv": 8,
+      "hpBonus": 4,
+      "style": "副 II",
+      "growth": "—",
+      "cp": 18,
+      "unlock": "—"
+    },
+    {
+      "lv": 9,
+      "hpBonus": 4,
+      "style": "—",
+      "growth": "—",
+      "cp": 22,
+      "unlock": "サイバネ III"
+    },
+    {
+      "lv": 10,
+      "hpBonus": 5,
+      "style": "主 III",
+      "growth": "ランク +1",
+      "cp": 25,
+      "unlock": "特殊素材解禁"
+    },
+    {
+      "lv": 11,
+      "hpBonus": 5,
+      "style": "—",
+      "growth": "専心 +1",
+      "cp": 25,
+      "unlock": "—"
+    },
+    {
+      "lv": 12,
+      "hpBonus": 6,
+      "style": "—",
+      "growth": "—",
+      "cp": 28,
+      "unlock": "—"
+    },
+    {
+      "lv": 13,
+      "hpBonus": 6,
+      "style": "第三 I",
+      "growth": "ランク +1",
+      "cp": 28,
+      "unlock": "—"
+    },
+    {
+      "lv": 14,
+      "hpBonus": 7,
+      "style": "—",
+      "growth": "—",
+      "cp": 30,
+      "unlock": "—"
+    },
+    {
+      "lv": 15,
+      "hpBonus": 7,
+      "style": "—",
+      "growth": "—",
+      "cp": 30,
+      "unlock": "—"
+    },
+    {
+      "lv": 16,
+      "hpBonus": 8,
+      "style": "副 III",
+      "growth": "ランク +1",
+      "cp": 33,
+      "unlock": "—"
+    },
+    {
+      "lv": 17,
+      "hpBonus": 8,
+      "style": "—",
+      "growth": "専心 +1",
+      "cp": 33,
+      "unlock": "—"
+    },
+    {
+      "lv": 18,
+      "hpBonus": 9,
+      "style": "—",
+      "growth": "—",
+      "cp": 36,
+      "unlock": "—"
+    },
+    {
+      "lv": 19,
+      "hpBonus": 9,
+      "style": "—",
+      "growth": "—",
+      "cp": 36,
+      "unlock": "—"
+    },
+    {
+      "lv": 20,
+      "hpBonus": 10,
+      "style": "極",
+      "growth": "ランク +1",
+      "cp": 40,
+      "unlock": "伝説"
+    }
+  ],
+  "beliefCap": [
+    {
+      "levels": "1〜4",
+      "cap": 5
+    },
+    {
+      "levels": "5〜8",
+      "cap": 4
+    },
+    {
+      "levels": "9〜12",
+      "cap": 3
+    },
+    {
+      "levels": "13〜20",
+      "cap": 2
+    }
+  ],
+  "urbanLegendFear": [
+    {
+      "minLv": 5,
+      "fear": 1
+    },
+    {
+      "minLv": 10,
+      "fear": 2
+    }
+  ]
+}

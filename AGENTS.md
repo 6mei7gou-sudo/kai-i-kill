@@ -26,6 +26,7 @@ npm run build && npm test
 - `.claude/skills/lore-sync/SKILL.md` — GM版⇔プレイヤー版・用語集の同期チェック（`docs/gm/`・`docs/player/` 編集後に実行）
 - `.claude/skills/secret-check/SKILL.md` — 公開コンテンツへの秘匿情報混入チェック（公開前に実行）
 - `.claude/skills/verify-site/SKILL.md` — ビルド→テスト→全文書ページの表示確認（コミット前に実行）
+- `.claude/skills/rules-sync/SKILL.md` — ルール正本（`docs/rules/data/*.json`）⇔原稿⇔Web実装の整合チェック（ルール・データ変更後に実行）
 
 ## コミット
 

@@ -4,6 +4,8 @@
 // CharacterForm の form データを受け取り、全ステータスを描画
 // html2canvas キャプチャ用・全値 px 固定
 
+import { normalizeStyles, getStyleGrades, getCharacterTechniques } from '@/lib/characterBuild';
+import { STYLE_BY_ID, STYLE_SLOTS, STYLE_SLOT_LABEL, GRADE_LABEL, TIMING_LABEL } from '@/data/rulesData';
 import { forwardRef } from 'react';
 import './FullCharacterSheet.css';
 
@@ -42,6 +44,9 @@ const FullCharacterSheet = forwardRef(function FullCharacterSheet({ form }, ref)
     const portrait = f.thumbnail_url || f.image_url;
     const stagePlus = Array.isArray(f.stage_plus) ? f.stage_plus : [];
     const skills = Array.isArray(f.skills) ? f.skills : [];
+    const charStyles = normalizeStyles(f.styles);
+    const styleGrades = getStyleGrades(f.level);
+    const techniques = getCharacterTechniques(f, { isOfficial: !!f.is_official });
     const profLangs = Array.isArray(f.proficient_languages) ? f.proficient_languages : [];
     const weakLangs = Array.isArray(f.weak_languages) ? f.weak_languages : [];
     const cybernetics = Array.isArray(f.cybernetics) ? f.cybernetics.filter(c => c && c.name) : [];
@@ -109,11 +114,19 @@ const FullCharacterSheet = forwardRef(function FullCharacterSheet({ form }, ref)
                 </div>
             </Section>
 
-            {/* スキル */}
-            <Section title="スキル" titleEn="SKILLS" accent={affColor}>
-                {skills.length > 0 ? (
+            {/* スタイル・技 */}
+            <Section title="スタイル" titleEn="STYLES" accent={affColor}>
+                {charStyles.main ? (
                     <ul className="fcs__skills">
-                        {skills.map((s, i) => <li key={i} className="fcs__skill">{s}</li>)}
+                        {STYLE_SLOTS.filter(k => charStyles[k]).map(k => {
+                            const grade = f.is_official ? 3 : styleGrades[k];
+                            return <li key={k} className="fcs__skill">{STYLE_SLOT_LABEL[k]}：{STYLE_BY_ID[charStyles[k]].name}{grade > 0 ? `（段位${GRADE_LABEL[grade]}）` : '（未解禁）'}</li>;
+                        })}
+                        {techniques.map(t => <li key={t.id} className="fcs__skill">・{t.name}（{TIMING_LABEL[t.timing]}）</li>)}
+                    </ul>
+                ) : skills.length > 0 ? (
+                    <ul className="fcs__skills">
+                        {skills.map((s, i) => <li key={i} className="fcs__skill">{s}（旧スキル）</li>)}
                     </ul>
                 ) : (
                     <div className="fcs__empty">未選択</div>

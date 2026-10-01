@@ -1,0 +1,78 @@
+{
+  "abilities": [
+    {
+      "key": "rank_tai",
+      "name": "体",
+      "reading": "たい",
+      "use": "格闘・突破・耐久・援護"
+    },
+    {
+      "key": "rank_haya",
+      "name": "疾",
+      "reading": "はや",
+      "use": "先手・回避・追跡・射撃の命中"
+    },
+    {
+      "key": "rank_shiki",
+      "name": "識",
+      "reading": "しき",
+      "use": "調査・知識・文献・解明"
+    },
+    {
+      "key": "rank_han",
+      "name": "判",
+      "reading": "はん",
+      "use": "解明宣言・看破・戦術・交渉"
+    },
+    {
+      "key": "rank_shiya",
+      "name": "察",
+      "reading": "さつ",
+      "use": "怪異感知・観察・証言聴取"
+    },
+    {
+      "key": "rank_jutsu",
+      "name": "術",
+      "reading": "じゅつ",
+      "use": "魔法行使・魔導具操作"
+    },
+    {
+      "key": "rank_kon",
+      "name": "魂",
+      "reading": "こん",
+      "use": "異能制御・信念維持・精神防御・浄化"
+    }
+  ],
+  "ranks": [
+    {
+      "rank": "D",
+      "dice": "1d6",
+      "diceCount": 1,
+      "label": "初期値。出目がそのまま結果になる"
+    },
+    {
+      "rank": "C",
+      "dice": "2d6",
+      "diceCount": 2,
+      "label": "一人前。2つ振って選べる"
+    },
+    {
+      "rank": "B",
+      "dice": "3d6",
+      "diceCount": 3,
+      "label": "熟練。配属特化の領域"
+    },
+    {
+      "rank": "A",
+      "dice": "4d6",
+      "diceCount": 4,
+      "label": "達人。成長の先にある"
+    },
+    {
+      "rank": "S",
+      "dice": "4d6＋固有特典",
+      "diceCount": 4,
+      "label": "規格外。物語の果てに辿り着く者だけの領域。通常の成長では到達できない"
+    }
+  ]
+}
