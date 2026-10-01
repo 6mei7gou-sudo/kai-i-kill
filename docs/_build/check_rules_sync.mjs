@@ -41,8 +41,8 @@ for (const g of EQ.cybernetics.grades) {
 }
 
 // 3. 移行待ち（v5.0 実装で解消する既知の残存）
-if (fs.existsSync(path.join(ROOT, 'src/data/skillData.js'))) pending.push('src/data/skillData.js（v4.0 の6軸スキル）が残っている。gameEngine.js のスタイル移行で削除');
-if (/getAvailableSkills/.test(read('src/lib/gameEngine.js'))) pending.push('gameEngine.js が v4.0 スキルで動いている（effects ディスパッチャへ置換待ち）');
+if (fs.existsSync(path.join(ROOT, 'src/data/skillData.js'))) pending.push('src/data/skillData.js（v4.0 の6軸スキル）が残っている。既存 v4 ミッションの v5 化が終わったら削除');
+if (/getAvailableSkills/.test(read('src/lib/gameEngine.js'))) pending.push('gameEngine.js（v4.0）が既存ミッション用に残っている。v5 は battleEngine.js、ミッション JSON の rules: "v5" で切替');
 
 if (pending.length) console.warn('移行待ち（想定内）:\n  - ' + pending.join('\n  - '));
 if (errors.length) { console.error('check_rules_sync: 不一致 ' + errors.length + ' 件\n  - ' + errors.join('\n  - ')); process.exit(1); }

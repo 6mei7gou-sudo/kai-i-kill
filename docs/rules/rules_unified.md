@@ -1765,7 +1765,11 @@ v5.0 の確定後に実施する。書籍版には含めない。
 2. ✓ `docs/rules/data/*.json` を作る
 3. ✓ `render_tables.mjs` と `rules-sync` を作り、本書の表をJSONから生成する形に切り替える
 4. ✓ `rules_unified.md` を v5.0 に置換、v4.0 を archive へ
-5. Web実装（`characterBuildData.js`・`gameEngine.js`・キャラシUI）を JSON 駆動に置換。テスト更新
+5. Web実装を JSON 駆動に置換。テスト更新
+   - (a) ✓ `src/data/rulesData.js` 新設、`characterBuildData.js` を JSON 駆動化
+   - (b) ✓ キャラシUIのスキル欄→スタイル欄（`styles` 列・移行SQL）
+   - (c) ✓ v5.0 討伐エンジン `src/lib/battleEngine.js`（`styles.json` の effects を解釈）と画面 `BattleV5.js` を新設。ミッション JSON の `"rules": "v5"` で切替（`v5_grade4_midnight`・`v5_grade3_kuchisake`）
+   - (d) 既存 v4 ミッション（ソロ3・協力2）の v5 化と協力戦の v5 対応、`gameEngine.js`・`skillData.js` の廃止
 6. 投稿キャラの `styles` 移行スクリプト
 7. `docs/README.md`・`CONTEXT.md`・`AGENTS.md` 更新
 

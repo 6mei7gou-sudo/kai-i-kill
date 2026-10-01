@@ -38,7 +38,7 @@
 - 共鳴メーター6種（恐怖・怒り・哀愁・焦燥・渇望・浄化）。10で臨界。押し通し（共鳴+3で失敗を達成値4の成功に）
 - セッション構造：調査フェーズ（解明鍵4つ）→ 解明完了宣言 → 討伐フェーズ（核防壁戦：防壁層1〜3＋怪異の手番）
 - スキルは廃止。スタイル9種×段位3（27技）。効果は `docs/rules/data/styles.json` の effects で構造化
-- Web実装 `src/lib/gameEngine.js`・`src/data/characterBuildData.js` は **v4.0 準拠のまま移行中**（rules_unified.md 付録C 手順5）。移行が終わるまで Web ゲームは v4.0 の判定で動く。旧 `system_data.json` は `docs/rules/archive/system_data_v4.json`
+- Web実装は**ミッション単位で v4／v5 を切替**（rules_unified.md 付録C 手順5）。`src/data/missions/*.json` に `"rules": "v5"` を持つミッションは v5.0 エンジン `src/lib/battleEngine.js`（`styles.json` の effects を解釈）と画面 `src/app/games/mission/[missionId]/play/BattleV5.js` で動き、それ以外は旧 `src/lib/gameEngine.js`（v4.0）のまま。`characterBuildData.js` は JSON 駆動済み。旧 `system_data.json` は `docs/rules/archive/system_data_v4.json`
 
 ## 開発
 
