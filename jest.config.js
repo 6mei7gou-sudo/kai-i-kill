@@ -9,7 +9,8 @@ const createJestConfig = nextJest({
 const config = {
     testEnvironment: 'jsdom',
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-    testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/__tests__/helpers/'],
+    // Windows ではパス区切りが \ になるため、helpers の除外は両方の区切りに対応させる
+    testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '[/\\\\]__tests__[/\\\\]helpers[/\\\\]'],
     moduleNameMapper: {
         // src/ 配下の絶対インポート対応
         '^@/(.*)$': '<rootDir>/src/$1',
