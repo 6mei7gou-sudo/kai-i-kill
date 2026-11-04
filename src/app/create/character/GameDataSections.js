@@ -1,5 +1,5 @@
 // ゲームデータ（ステータス・戦闘用データ）のセクション群
-// STEP 1 背景 → 2 配属 → 3 能力値の確認 → 4 スキル → 5 ギフト → 6 魔法言語 → 7 装備 → 8 サイバネティクス
+// STEP 1 背景 → 2 配属 → 3 能力値の確認 → 4 スタイル → 5 ギフト → 6 魔法言語 → 7 装備 → 8 サイバネティクス
 // ステータスの構造（7能力値・ランク・背景C/配属B/覚醒C/+段階）は v4.0 のまま。
 // 見せ方だけを「選ぶ → 何が決まるかが即座に見える」に揃えている。
 'use client';
@@ -12,7 +12,8 @@ import {
     INNATE_AWAKENING, INNATE_CHOICES, STAGE_PLUS_MAX, MAX_LEVEL, CYBER_GRADE_MIN_LEVEL,
     GAME_DATA_STEPS, abilityName, assignmentLabel,
 } from '@/data/characterBuildData';
-import { calcBeliefPoints, calcCpBudget, getSkillSlots } from '@/lib/characterBuild';
+import { calcBeliefPoints, calcCpBudget, getStyleGrades, normalizeStyles } from '@/lib/characterBuild';
+import { STYLES as RULE_STYLES, STYLE_BY_ID, STYLE_SLOTS, STYLE_SLOT_LABEL, GRADE_LABEL, TIMING_LABEL, styleGradeUnlockLevel, techniquesOf } from '@/data/rulesData';
 import {
     COMBAT_STYLE_NAMES, COMBAT_STYLE_STATS, STYLE_TO_OLD, OLD_TO_STYLE, BASE_WEAPONS,
     EQUIPMENT_FORM_NAMES, EQUIPMENT_FORM_STATS, FORM_TO_OLD, OLD_TO_FORM, FORM_OPTIONS,
@@ -20,7 +21,6 @@ import {
 } from '@/data/weaponData';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import { CYBER_GRADES, CYBERNETICS, findCybernetic } from '@/data/cyberneticsData';
-import { getAvailableSkills, getBackgroundSkill, getSkillTypeColor, getAxisColor } from '@/data/skillData';
 import { cardStyle, cardTitle, cardDesc, chipStyle, gridCards, infoBox, rankBadgeStyle, FormSection, SubHead, Notice, SourceChip } from './formStyles';
 
 const STEP = Object.fromEntries(GAME_DATA_STEPS.map(s => [s.key, s]));
@@ -52,14 +52,9 @@ export default function GameDataSections({ form, set, setForm, isOfficial, innat
         });
     }, [isOfficial, setForm]);
 
-    const toggleSkill = useCallback((skillId) => {
-        setForm(prev => {
-            const current = Array.isArray(prev.skills) ? [...prev.skills] : [];
-            if (current.includes(skillId)) return { ...prev, skills: current.filter(s => s !== skillId) };
-            if (!isOfficial && current.length >= getSkillSlots(prev.level)) return prev;
-            return { ...prev, skills: [...current, skillId] };
-        });
-    }, [isOfficial, setForm]);
+    const setStyle = useCallback((slot, styleId) => {
+        setForm(prev => ({ ...prev, styles: { ...normalizeStyles(prev.styles), [slot]: styleId || null } }));
+    }, [setForm]);
 
     const toggleLanguage = useCallback((type, langId) => {
         setForm(prev => {
@@ -74,11 +69,8 @@ export default function GameDataSections({ form, set, setForm, isOfficial, innat
     }, [isOfficial, setForm]);
 
     // --- 派生値 ---
-    const availableSkills = useMemo(() => getAvailableSkills({
-        affiliation: form.affiliation, assignment: form.sub_affiliation, awakening: form.awakening, weaponType: form.weapon_type,
-    }), [form.affiliation, form.sub_affiliation, form.awakening, form.weapon_type]);
-    const bgSkill = useMemo(() => getBackgroundSkill(form.background), [form.background]);
-    const skillSlots = getSkillSlots(form.level);
+    const charStyles = useMemo(() => normalizeStyles(form.styles), [form.styles]);
+    const styleGrades = useMemo(() => getStyleGrades(form.level), [form.level]);
 
     const weaponStats = useMemo(() => {
         if (!form.weapon_type) return null;
@@ -124,7 +116,6 @@ export default function GameDataSections({ form, set, setForm, isOfficial, innat
                 <div style={gridCards}>
                     {BACKGROUNDS.map(bg => {
                         const selected = form.background === bg.id;
-                        const skill = getBackgroundSkill(bg.id);
                         return (
                             <button key={bg.id} type="button" onClick={() => set('background', selected ? '' : bg.id)} style={cardStyle(selected)}>
                                 <div style={cardTitle(selected)}>{bg.id}</div>
@@ -132,7 +123,6 @@ export default function GameDataSections({ form, set, setForm, isOfficial, innat
                                     {bg.upgrades.map(abilityName).join('・')} → C
                                 </div>
                                 <div style={cardDesc}>{bg.desc}</div>
-                                {skill && <div style={{ marginTop: '6px', fontSize: '10px', color: '#44cc88', fontFamily: 'var(--font-mono)' }}>自動スキル：{skill.id}（{skill.effect}）</div>}
                             </button>
                         );
                     })}
@@ -249,59 +239,54 @@ export default function GameDataSections({ form, set, setForm, isOfficial, innat
                 </div>
             </FormSection>
 
-            {/* ====== STEP 4: スキル ====== */}
-            <FormSection id="gd-skills" no={4} en={STEP.skills.en} title={STEP.skills.title} effect={STEP.skills.effect}
-                status={stepStatus((form.skills || []).length > 0, `${(form.skills || []).length} / ${skillSlots} スロット`)}>
-                {bgSkill && (
-                    <div style={{ padding: '12px', background: 'rgba(68,204,136,0.06)', border: '1px solid rgba(68,204,136,0.2)', marginBottom: 'var(--space-lg)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#44cc88', marginBottom: '4px' }}>自動取得（背景：{form.background}）— スロット不要</div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-sm)', fontWeight: 700, color: 'var(--text-heading)' }}>{bgSkill.id}</div>
-                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>{bgSkill.effect}</div>
-                    </div>
-                )}
-                {!form.sub_affiliation || !form.weapon_type ? (
-                    <Notice tone="gold">配属（STEP 2）と戦闘流派（STEP 7）を選ぶと、それぞれの軸のスキルがここに追加される。</Notice>
-                ) : null}
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: (form.skills || []).length <= skillSlots ? 'var(--accent-gold)' : 'var(--accent-danger)', marginBottom: 'var(--space-md)' }}>
-                    Lv{form.level}：スロット {(form.skills || []).length} / {skillSlots}
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
-                    {availableSkills.filter(s => s.level <= form.level).map(skill => {
-                        const selected = (form.skills || []).includes(skill.id);
-                        const axisColor = getAxisColor(skill.axis);
-                        const typeColor = getSkillTypeColor(skill.type);
-                        return (
-                            <button key={skill.id} type="button" onClick={() => toggleSkill(skill.id)}
-                                style={{ ...cardStyle(selected), borderColor: selected ? axisColor : undefined, background: selected ? `${axisColor}12` : 'rgba(0,0,0,0.2)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: selected ? axisColor : 'var(--text-primary)' }}>{skill.id}</span>
-                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '1px 6px', border: `1px solid ${typeColor}40`, color: typeColor }}>{skill.type}</span>
+            {/* ====== STEP 4: スタイル ====== */}
+            <FormSection id="gd-styles" no={4} en={STEP.styles.en} title={STEP.styles.title} effect={STEP.styles.effect} required
+                status={stepStatus(!!charStyles.main, charStyles.main
+                    ? STYLE_SLOTS.filter(k => charStyles[k]).map(k => `${STYLE_SLOT_LABEL[k]}：${STYLE_BY_ID[charStyles[k]].name}`).join('／')
+                    : '未選択')}>
+                <Notice tone="muted">スタイルは所属・背景とは独立した「戦い方」。祓部の狙撃手も、無所属の封印術者も作れる。主スタイルはLv1から、副スタイルはLv3、第三スタイルはLv13で解禁され、段位はレベルで上がる（主：Lv5でII、Lv10でIII）。</Notice>
+                {STYLE_SLOTS.map(slot => {
+                    const grade = styleGrades[slot];
+                    const unlocked = isOfficial || grade > 0;
+                    const unlockLv = styleGradeUnlockLevel(slot, 1);
+                    const chosen = charStyles[slot];
+                    return (
+                        <div key={slot} style={{ marginTop: 'var(--space-md)', opacity: unlocked ? 1 : 0.55 }}>
+                            <SubHead>{STYLE_SLOT_LABEL[slot]}スタイル{unlocked ? `　段位 ${GRADE_LABEL[Math.max(grade, 1)]}` : `　Lv${unlockLv} で解禁`}</SubHead>
+                            <div style={gridCards}>
+                                {RULE_STYLES.map(st => {
+                                    const selected = chosen === st.id;
+                                    const usedElsewhere = STYLE_SLOTS.some(k => k !== slot && charStyles[k] === st.id);
+                                    return (
+                                        <button key={st.id} type="button" disabled={!unlocked || usedElsewhere}
+                                            onClick={() => setStyle(slot, selected ? null : st.id)}
+                                            style={{ ...cardStyle(selected), opacity: usedElsewhere ? 0.4 : 1, cursor: (!unlocked || usedElsewhere) ? 'not-allowed' : 'pointer' }}>
+                                            <div style={cardTitle(selected)}>{st.name} <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', fontWeight: 400 }}>{st.en}</span></div>
+                                            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--accent-gold)', marginBottom: '4px', fontFamily: 'var(--font-mono)' }}>{st.abilities}判定 ／ 共鳴：{st.meter}</div>
+                                            <div style={cardDesc}>{st.role}</div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {chosen && (
+                                <div style={{ marginTop: 'var(--space-sm)', display: 'grid', gap: '6px' }}>
+                                    {techniquesOf(chosen).map(t => {
+                                        const usable = isOfficial ? true : t.grade <= grade;
+                                        return (
+                                            <div key={t.id} style={{ padding: '8px 12px', background: usable ? 'rgba(212,175,55,0.06)' : 'rgba(0,0,0,0.15)', border: usable ? '1px solid var(--accent-gold-border)' : 'var(--border-subtle)', opacity: usable ? 1 : 0.55 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)' }}>段位{GRADE_LABEL[t.grade]}　{t.name}</span>
+                                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>{TIMING_LABEL[t.timing]}{usable ? '' : `　Lv${styleGradeUnlockLevel(slot, t.grade)}で解禁`}</span>
+                                                </div>
+                                                <div style={cardDesc}>{t.text}</div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                                <div style={{ fontSize: '10px', color: axisColor, marginBottom: '2px', fontFamily: 'var(--font-mono)' }}>[{skill.axis}] {skill.attr}判定 Lv{skill.level}</div>
-                                <div style={cardDesc}>{skill.effect}</div>
-                            </button>
-                        );
-                    })}
-                </div>
-                {availableSkills.filter(s => s.level > form.level).length > 0 && (
-                    <details style={{ marginTop: 'var(--space-lg)' }}>
-                        <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                            Lv{form.level + 1}以降で取得可能なスキル（{availableSkills.filter(s => s.level > form.level).length}種）
-                        </summary>
-                        <div style={{ ...gridCards, marginTop: 'var(--space-sm)' }}>
-                            {availableSkills.filter(s => s.level > form.level).map(skill => (
-                                <div key={skill.id} style={{ padding: '10px', background: 'rgba(0,0,0,0.15)', border: 'var(--border-subtle)', opacity: 0.6 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-xs)' }}>{skill.id}</span>
-                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: getSkillTypeColor(skill.type) }}>{skill.type}</span>
-                                    </div>
-                                    <div style={{ fontSize: '10px', color: getAxisColor(skill.axis), fontFamily: 'var(--font-mono)' }}>[{skill.axis}] {skill.attr}判定 Lv{skill.level}</div>
-                                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{skill.effect}</div>
-                                </div>
-                            ))}
+                            )}
                         </div>
-                    </details>
-                )}
+                    );
+                })}
             </FormSection>
 
             {/* ====== STEP 5: ギフト ====== */}

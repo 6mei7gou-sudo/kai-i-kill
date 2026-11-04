@@ -10,6 +10,7 @@ import {
   createCoopBattleState, startCoopRound, coopPlayerAttack, coopPlayerMagic,
   coopPlayerEvade, coopPlayerHeal, processCoopEnemyTurn, endCoopRound,
 } from '@/lib/gameEngine';
+import BattleV5 from './BattleV5';
 
 // HPバー
 function HPBar({ current, max, label, color = 'var(--accent-gold)' }) {
@@ -65,6 +66,7 @@ export default function BattlePage() {
   const [saved, setSaved] = useState(false);
   const [cpAwarded, setCpAwarded] = useState(0);
   const [isCoop, setIsCoop] = useState(false);
+  const [v5, setV5] = useState(null); // rules: 'v5' のミッション → { mission, character }
 
   // 初期化
   useEffect(() => {
@@ -74,6 +76,12 @@ export default function BattlePage() {
       return;
     }
     const mission = JSON.parse(missionJson);
+    if (mission.rules === 'v5') {
+      const charJson = sessionStorage.getItem('battle_character');
+      if (!charJson) { router.push(`/games/mission/${missionId}/`); return; }
+      setV5({ mission, character: JSON.parse(charJson) });
+      return;
+    }
     const coopMode = mission.type === 'coop';
     setIsCoop(coopMode);
 
@@ -92,6 +100,7 @@ export default function BattlePage() {
     }
   }, [missionId, router]);
 
+  if (v5) return <BattleV5 mission={v5.mission} character={v5.character} missionId={missionId} user={user} router={router} />;
   if (!state) return <div style={{ color: 'var(--text-muted)', padding: 'var(--space-xl)' }}>読み込み中...</div>;
 
   const isFinished = [PHASE.VICTORY, PHASE.DEFEAT, PHASE.TIMEOUT].includes(state.phase);

@@ -1,5 +1,5 @@
 // KAI-I//KILL コアルールブック 組版スクリプト
-// 入力：docs/rules/core_design.md（唯一の原稿）
+// 入力：docs/rules/rules_unified.md（唯一の原稿）
 // 出力：out/rulebook.html（Paged.js で組版）→ out/KAI-I_KILL_CoreRulebook.pdf
 //
 // 原稿側の約束：
@@ -17,7 +17,7 @@ import { chromium } from 'playwright-core';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../../..');
-const SRC = path.join(ROOT, 'docs/rules/core_design.md');
+const SRC = path.join(ROOT, 'docs/rules/rules_unified.md');
 const OUT_DIR = path.join(HERE, 'out');
 const OUT_HTML = path.join(OUT_DIR, 'rulebook.html');
 const OUT_PDF = path.join(OUT_DIR, 'KAI-I_KILL_CoreRulebook.pdf');
@@ -164,7 +164,7 @@ const titlepage = `<section class="frontmatter titlepage">
   <div class="t1">KAI-I//KILL</div>
   <div class="t2">コアルールブック</div>
   <div class="t3">TRPG CORE RULEBOOK<br>${version}</div>
-  <div class="note"><p><strong>本書はテストプレイ用のドラフトだ。</strong>数値は逆算値であり、卓で回して削る前提で置いている。第14章「テストプレイのチェック観点」を読んでから遊んでほしい。</p><p>原稿：<code>docs/rules/core_design.md</code>。この版が確定するまで、判定メカニクスの正本は統合ルールブック v4.0 のままとする。</p></div>
+  <div class="note"><p><strong>本書はテストプレイ用のドラフトだ。</strong>数値は逆算値であり、卓で回して削る前提で置いている。第14章「テストプレイのチェック観点」を読んでから遊んでほしい。</p><p>原稿：<code>docs/rules/rules_unified.md</code>（v5.0。判定メカニクスの正本）。ルールデータは <code>docs/rules/data/*.json</code>。</p></div>
 </section>`;
 
 function tocHtml() {
@@ -179,7 +179,7 @@ function tocHtml() {
 const sheet = fs.readFileSync(path.join(HERE, 'sheet.html'), 'utf8');
 const colophon = `<section class="colophon">
   <div class="t">電脳怪異譚 KAI-I//KILL　コアルールブック</div>
-  <table><tr><td>版</td><td>${version}</td></tr><tr><td>組版</td><td>${new Date().toISOString().slice(0, 10)}　docs/_build/book/build.mjs（Paged.js）</td></tr><tr><td>原稿</td><td>docs/rules/core_design.md</td></tr><tr><td>判型</td><td>B5（182×257mm）</td></tr></table>
+  <table><tr><td>版</td><td>${version}</td></tr><tr><td>組版</td><td>${new Date().toISOString().slice(0, 10)}　docs/_build/book/build.mjs（Paged.js）</td></tr><tr><td>原稿</td><td>docs/rules/rules_unified.md</td></tr><tr><td>判型</td><td>B5（182×257mm）</td></tr></table>
   <p>本書は KAI-I//KILL プロジェクトの内部ドラフトであり、頒布物ではない。</p>
 </section>`;
 

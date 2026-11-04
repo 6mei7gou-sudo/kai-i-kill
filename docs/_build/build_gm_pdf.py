@@ -1,6 +1,7 @@
 """
-GM用総合ルールブック PDF生成スクリプト
-全世界観・ルールファイルを統合し、スタイル付きHTMLを生成する
+GM用総合ルールブック PDF生成スクリプト（v4.0 時代のビルド。ルール部分は archive/ を参照する）
+全世界観・ルールファイルを統合し、スタイル付きHTMLを生成する。
+v5.0 の書籍版は docs/_build/book/ を使うこと
 """
 import markdown
 import os
@@ -33,11 +34,11 @@ sections = [
 
     # Part II: ゲームルール
     ("PART II　ゲームルール", None),
-    ("統合ルールブック v4.0", os.path.join(RULES_DIR, 'rules_unified.md')),
+    ("統合ルールブック v4.0", os.path.join(RULES_DIR, 'archive', 'rulebook_v4.md')),
 
     # Part III: 戦闘詳細
     ("PART III　戦闘詳細ルール", None),
-    ("戦闘ルール補遺 v4.0", os.path.join(RULES_DIR, 'combat_hp.md')),
+    ("戦闘ルール補遺 v4.0", os.path.join(RULES_DIR, 'archive', 'combat_hp_v4.md')),
 
     # Part IV: 装備・サイバネティクス
     ("PART IV　装備・サイバネティクス", None),
@@ -53,7 +54,7 @@ sections = [
 
     # Part VI: 追加データブック
     ("PART VI　追加データブック《禁域解放》", None),
-    ("追加データブック《禁域解放》 v1.0", os.path.join(RULES_DIR, 'expansion.md')),
+    ("追加データブック《禁域解放》 v1.0", os.path.join(RULES_DIR, 'archive', 'expansion_v1.md')),
 
     # Appendix: 用語集
     ("APPENDIX　用語集", None),

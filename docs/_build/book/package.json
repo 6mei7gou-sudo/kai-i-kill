@@ -2,7 +2,7 @@
   "name": "kai-i-kill-rulebook-build",
   "private": true,
   "type": "module",
-  "description": "KAI-I//KILL TRPG コアルールブック（docs/rules/core_design.md）を組版して PDF を生成する",
+  "description": "KAI-I//KILL TRPG コアルールブック（docs/rules/rules_unified.md）を組版して PDF を生成する",
   "scripts": {
     "build": "node build.mjs"
   },

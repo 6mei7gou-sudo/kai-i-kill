@@ -6,17 +6,17 @@ import Link from 'next/link';
 import {
     ABILITIES, RANKS, RANK_COLOR,
     AFFILIATIONS, AFFILIATION_INFO, BACKGROUNDS, ASSIGNMENTS, AWAKENINGS, GIFTS, LANGUAGES,
-    GAME_DATA_STEPS, RP_SHEET_STEPS, SKILL_SLOTS_BY_LEVEL, STAGE_PLUS_MAX, BASE_CP_BUDGET,
+    GAME_DATA_STEPS, RP_SHEET_STEPS, STAGE_PLUS_MAX, BASE_CP_BUDGET,
     abilityName, assignmentLabel,
 } from '@/data/characterBuildData';
 import { computeRanks } from '@/lib/characterBuild';
-import { getBackgroundSkill } from '@/data/skillData';
+import { STYLES as RULE_STYLES, STYLE_GRADE_UNLOCK, STYLE_SLOT_LABEL, GRADE_LABEL } from '@/data/rulesData';
 import { COMBAT_STYLE_NAMES, COMBAT_STYLE_STATS, EQUIPMENT_FORM_NAMES, EQUIPMENT_FORM_STATS, ORIGIN_NAMES, ORIGIN_TIER } from '@/data/weaponData';
 import { MISSION_CP, ADV_CP, DISPATCH_CP } from '@/lib/cpService';
 
 export const metadata = {
     title: 'クイックスタート — 電脳怪異譚 KAI-I//KILL',
-    description: '最低限の世界設定、RPシートの作り方、ゲームデータ（七つの能力値・ランク・スキル・装備）の読み方と作り方、Webゲーム（討伐シミュレーション・怪異譚アドベンチャー・派遣クエスト）の遊び方。',
+    description: '最低限の世界設定、RPシートの作り方、ゲームデータ（七つの能力値・ランク・スタイル・装備）の読み方と作り方、Webゲーム（討伐シミュレーション・怪異譚アドベンチャー・派遣クエスト）の遊び方。',
 };
 
 // ===== 世界設定の最小セット（正本：docs/player/world_bible.md。秘匿情報は含めない） =====
@@ -137,7 +137,7 @@ function GameCard({ href, en, title, tagline, children }) {
     );
 }
 
-const slotTable = [1, 2, 3, 4, 5].map(lv => [`Lv${lv}`, `${SKILL_SLOTS_BY_LEVEL[lv]}`, lv % 5 === 0 ? '+1' : '—']);
+const styleUnlockTable = STYLE_GRADE_UNLOCK.filter(u => u.lv <= 5).map(u => [`Lv${u.lv}`, `${STYLE_SLOT_LABEL[u.slot]}スタイル 段位${GRADE_LABEL[u.grade]}`, u.lv % 5 === 0 ? 'ステータスポイント+1' : '—']);
 const gameSteps = GAME_DATA_STEPS.filter(s => s.key !== 'cybernetics');
 
 export default function QuickstartPage() {
@@ -318,17 +318,14 @@ export default function QuickstartPage() {
             <div style={{ marginBottom: 'var(--space-2xl)' }}>
                 <p className="section__desc" style={{ marginBottom: 'var(--space-lg)' }}>
                     作成フォームの「ゲームデータを付ける」をオンにすると、以下のステップが順に並ぶ。
-                    必須は<span className="text-gold">{gameSteps.filter(s => s.required).map(s => `${s.title}`).join('・')}</span>の3つ。残りは任意で、あとから編集で足せる。
+                    必須は<span className="text-gold">{gameSteps.filter(s => s.required).map(s => `${s.title}`).join('・')}</span>の{gameSteps.filter(s => s.required).length}つ。残りは任意で、あとから編集で足せる。
                 </p>
                 <Table head={['STEP', '項目', 'この選択で決まること']} widths={['70px', '140px']}
                     rows={gameSteps.map(s => [<span key="n" style={monoGold}>{s.no}{s.required ? ' *' : ''}</span>, s.title, s.key === 'languages' ? '得意と苦手を同じ数だけ選ぶ（0〜3個ずつ）。RPシートに表示される' : s.effect])} />
 
-                <StepCard no={1} en="BACKGROUND" title="背景を選ぶ" desc="2つの能力値がCに昇格し、背景スキルを自動取得する。ミッションでは背景ごとのボーナス（例：鋼の肉体はHP+2・初回攻撃+1）も自動で乗る。">
-                    <Table head={['背景', 'C昇格', '背景スキル（自動取得）', 'ミッションでのボーナス']}
-                        rows={BACKGROUNDS.map(b => {
-                            const sk = getBackgroundSkill(b.id);
-                            return [b.id, <span key="u" style={{ whiteSpace: 'nowrap' }}>{b.upgrades.map(abilityName).join('・')}</span>, sk ? `《${sk.id}》${sk.effect}` : '—', BACKGROUND_IN_GAME[b.id] || '—'];
-                        })} />
+                <StepCard no={1} en="BACKGROUND" title="背景を選ぶ" desc="2つの能力値がCに昇格し、背景ごとの初期効果を得る。ミッションでは背景ごとのボーナス（例：鋼の肉体はHP+2・初回攻撃+1）も自動で乗る。">
+                    <Table head={['背景', 'C昇格', '初期効果', 'ミッションでのボーナス']}
+                        rows={BACKGROUNDS.map(b => [b.id, <span key="u" style={{ whiteSpace: 'nowrap' }}>{b.upgrades.map(abilityName).join('・')}</span>, b.desc, BACKGROUND_IN_GAME[b.id] || '—'])} />
                 </StepCard>
 
                 <StepCard no={2} en="ASSIGNMENT" title="配属を選ぶ" desc="所属の中での役割。1つの能力値がBに昇格し、配属スキルが解放される。所属はRPシートで選んだものがそのまま使われる（祓部→配属班／傭兵→専門／無所属→流儀）。">
@@ -349,18 +346,20 @@ export default function QuickstartPage() {
                     </Callout>
                 </StepCard>
 
-                <StepCard no={4} en="SKILLS" title="スキルを選ぶ" desc="共通・所属・配属・覚醒・武器技能の5軸のうち、自分の選択で解放された軸から選ぶ。背景スキルは自動取得済みなのでスロット不要。ミッションではメインスキルは1回、サブスキルは2回まで使え、パッシブは常時効く。">
-                    <div className="two-col" style={{ marginBottom: 'var(--space-md)' }}>
+                <StepCard no={4} en="STYLES" title="スタイルを選ぶ" desc="スタイルは所属・背景と独立した「戦い方」で、9種類から主スタイルを1つ選ぶ。副スタイルはLv3、第三スタイルはLv13で解禁され、段位（I〜III）はレベルで上がって使える技が増える。技はレベルに応じて自動で解放されるので、取り直しは不要。">
+                    <Table head={['スタイル', '判定', '役割', '共鳴']} widths={['120px', '80px']}
+                        rows={RULE_STYLES.map(st => [`${st.name}（${st.en}）`, st.abilities, st.role, st.meter])} />
+                    <div className="two-col" style={{ marginTop: 'var(--space-md)' }}>
                         <div>
-                            <div style={stepLabel}>スキルスロット（Lv1〜{PL_MAX_LEVEL}）</div>
-                            <Table head={['レベル', 'スロット', 'ステータスポイント']} widths={['80px', '90px']} rows={slotTable} />
+                            <div style={stepLabel}>解禁（Lv1〜{PL_MAX_LEVEL}）</div>
+                            <Table head={['レベル', '解禁', 'ほか']} widths={['70px', '170px']} rows={styleUnlockTable} />
                         </div>
-                        <Callout label="スキルの種類：">
-                            <span style={{ color: '#ff8844' }}>メイン</span>（自分のターンに使用・1回）・
-                            <span style={{ color: '#44aaff' }}>サブ</span>（自分のターンに追加で使用・2回）・
-                            <span style={{ color: '#aa44ff' }}>リアクション</span>（敵の攻撃に反応）・
+                        <Callout label="技の種類：">
+                            <span style={{ color: '#ff8844' }}>メイン</span>（自分の手番の主行動）・
+                            <span style={{ color: '#44aaff' }}>サブ</span>（手番に追加で使う）・
+                            <span style={{ color: '#aa44ff' }}>リアクション</span>（手番外に割り込む）・
                             <span style={{ color: '#44cc88' }}>パッシブ</span>（常時発動）の4種類。
-                            スキルにはレベル要件があり、レベルアップで枠と選択肢が増える。取り直したくなったら詳細ページの「スキルをリセット」から。
+                            Webゲーム（討伐シミュレーション）への技の反映は準備中で、それまでは v4.0 のスキルで動く。
                         </Callout>
                     </div>
                 </StepCard>

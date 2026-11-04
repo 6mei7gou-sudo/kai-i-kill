@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { S } from '@/components/FormFields';
 import { findOption, getWeaponSpec } from '@/data/weaponData';
 import { GAME_DATA_STEPS, INNATE_AWAKENING, DEFAULT_INNATE_CHOICE, RANK_VALUE, BASE_BELIEF_POINTS } from '@/data/characterBuildData';
-import { computeRanks, getGameDataStatus, validateCharacterForm, buildCharacterPayload, hasGameData } from '@/lib/characterBuild';
+import { computeRanks, getGameDataStatus, validateCharacterForm, buildCharacterPayload, hasGameData, normalizeStyles } from '@/lib/characterBuild';
 import RpSections from './RpSections';
 import GameDataSections, { calcUsedCp } from './GameDataSections';
 import StatusSummary from './StatusSummary';
@@ -28,6 +28,7 @@ const INITIAL = {
     rank_shiya: 'D', rank_jutsu: 'D', rank_kon: 'D',
     stage_plus: [],
     skills: [],
+    styles: { main: null, sub: null, third: null },
     proficient_languages: [], weak_languages: [],
     equipment_type: '武装型', equipment_name: '', custom_equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     linked_gear_id: '',
@@ -59,6 +60,7 @@ function normalizeRecord(data) {
     ['skills', 'stage_plus', 'proficient_languages', 'weak_languages', 'equipment_options', 'hidden_abilities'].forEach(k => {
         if (!Array.isArray(f[k])) f[k] = [];
     });
+    f.styles = normalizeStyles(f.styles);
     if (!Array.isArray(f.image_urls) || f.image_urls.length < 3) f.image_urls = [...(Array.isArray(f.image_urls) ? f.image_urls : []), '', '', ''].slice(0, 3);
     let cyber = Array.isArray(f.cybernetics) ? f.cybernetics : [];
     while (cyber.length < 3) cyber = [...cyber, { name: '', part: '' }];

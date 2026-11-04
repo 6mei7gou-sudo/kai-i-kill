@@ -1,0 +1,129 @@
+{
+  "grades": [
+    {
+      "grade": "五級",
+      "layers": "なし",
+      "layerHp": "—",
+      "layerDef": "—",
+      "coreHp": "12",
+      "coreDef": "0",
+      "threat": "3",
+      "limitRounds": "3",
+      "decode": "不要",
+      "expectedRounds": "1"
+    },
+    {
+      "grade": "四級",
+      "layers": "1",
+      "layerHp": "12",
+      "layerDef": "1",
+      "coreHp": "18",
+      "coreDef": "1",
+      "threat": "4",
+      "limitRounds": "3",
+      "decode": "不要",
+      "expectedRounds": "2"
+    },
+    {
+      "grade": "三級",
+      "layers": "2",
+      "layerHp": "14",
+      "layerDef": "1",
+      "coreHp": "24",
+      "coreDef": "2",
+      "threat": "6",
+      "limitRounds": "4",
+      "decode": "推奨",
+      "expectedRounds": "3"
+    },
+    {
+      "grade": "二級",
+      "layers": "2",
+      "layerHp": "18",
+      "layerDef": "2",
+      "coreHp": "34",
+      "coreDef": "4",
+      "threat": "8",
+      "limitRounds": "5",
+      "decode": "必須",
+      "expectedRounds": "4"
+    },
+    {
+      "grade": "一級",
+      "layers": "3",
+      "layerHp": "20",
+      "layerDef": "2",
+      "coreHp": "42",
+      "coreDef": "6",
+      "threat": "10",
+      "limitRounds": "6",
+      "decode": "必須",
+      "expectedRounds": "5"
+    },
+    {
+      "grade": "特級",
+      "layers": "3＋ギミック",
+      "layerHp": "特殊",
+      "layerDef": "2",
+      "coreHp": "封印ゲージ30",
+      "coreDef": "—",
+      "threat": "12",
+      "limitRounds": "特殊",
+      "decode": "必須",
+      "expectedRounds": "討伐不可"
+    }
+  ],
+  "layerTraits": [
+    {
+      "name": "鏡面",
+      "effect": "この層へのダメージの半分（切捨）が攻撃者に跳ね返る",
+      "use": "力押しを咎める"
+    },
+    {
+      "name": "再生",
+      "effect": "ラウンド開始時に層HP +5",
+      "use": "集中攻撃を促す。解明鍵①で止められる設定にするとよい"
+    },
+    {
+      "name": "重圧",
+      "effect": "この層が健在な間、全PCの判定にダイス −1個",
+      "use": "早く剥がしたい層"
+    },
+    {
+      "name": "感染",
+      "effect": "この層にダメージを与えたPCは恐怖 +1",
+      "use": "怒りと恐怖を同時に積ませる"
+    },
+    {
+      "name": "静寂",
+      "effect": "この層が健在な間、魔法・異能が使えない",
+      "use": "術式・異能スタイルへの圧"
+    },
+    {
+      "name": "執着",
+      "effect": "この層は特定の1人しか攻撃できない（解明鍵②で判明）",
+      "use": "予兆カードと絡める"
+    },
+    {
+      "name": "崩落",
+      "effect": "剥離時、全PCに脅威度のダメージ",
+      "use": "剥がす前に構えを取らせる"
+    },
+    {
+      "name": "虚飾",
+      "effect": "解明前は層HPが実際の2倍に見える",
+      "use": "観測・解明の価値を上げる"
+    },
+    {
+      "name": "標的",
+      "effect": "怪異の手番は必ず「貫通」になる",
+      "use": "支援・庇いの出番"
+    },
+    {
+      "name": "共鳴",
+      "effect": "この層が健在な間、怪異の手番の既定が「侵蝕」になる",
+      "use": "共鳴主体のシナリオ"
+    }
+  ],
+  "unresolvedPenalty": "未解明の二級以上：核へのダメージは0として扱う"
+}

@@ -11,6 +11,7 @@ import {
     STAGE_PLUS_MAX, BASE_BELIEF_POINTS, BASE_CP_BUDGET,
     SKILL_SLOTS_BY_LEVEL, CYBER_GRADE_MIN_LEVEL,
 } from '@/data/characterBuildData';
+import { STYLE_BY_ID, STYLE_SLOTS, STYLE_SLOT_LABEL, GRADE_LABEL, TIMING_LABEL, styleGradesAtLevel, techniquesOf } from '@/data/rulesData';
 
 const higher = (a, b) => (RANK_VALUE[a] >= RANK_VALUE[b] ? a : b);
 
@@ -96,6 +97,31 @@ export function getSkillSlots(level) {
     return SKILL_SLOTS_BY_LEVEL[Math.min(lv, SKILL_SLOTS_BY_LEVEL.length - 1)] || 1;
 }
 
+/** レベル別のスタイル段位 { main, sub, third, kiwami }（0 = その枠は未解禁） */
+export function getStyleGrades(level) {
+    return styleGradesAtLevel(level);
+}
+
+/** styles 列（JSONB）を { main, sub, third } に正規化する。不明なIDは null */
+export function normalizeStyles(raw) {
+    const src = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+    const out = {};
+    STYLE_SLOTS.forEach(k => { out[k] = STYLE_BY_ID[src[k]] ? src[k] : null; });
+    return out;
+}
+
+/**
+ * キャラクターがいま使える技の一覧（枠の段位でゲート）。
+ * @returns {Array<object & { slot: 'main'|'sub'|'third' }>}
+ */
+export function getCharacterTechniques(form, { isOfficial = false } = {}) {
+    const st = normalizeStyles(form?.styles);
+    const g = styleGradesAtLevel(form?.level);
+    return STYLE_SLOTS.flatMap(slot => st[slot]
+        ? techniquesOf(st[slot], isOfficial ? 3 : g[slot]).map(t => ({ ...t, slot }))
+        : []);
+}
+
 /** サイバネティクス等級のレベル要件を満たしているか */
 export function cyberGradeAllowed(grade, level) {
     if (!grade || grade === 'none') return true;
@@ -112,6 +138,7 @@ export function hasGameData(record) {
     const stagePlus = Array.isArray(r.stage_plus) ? r.stage_plus : [];
     return !!(
         r.background ||
+        normalizeStyles(r.styles).main ||
         r.weapon_type ||
         r.gift ||
         skills.length > 0 ||
@@ -132,6 +159,7 @@ export function getGameDataStatus(form) {
     if (!f.background) missing.push('背景');
     if (!f.sub_affiliation) missing.push('配属');
     if (!f.weapon_type) missing.push('戦闘流派');
+    if (!normalizeStyles(f.styles).main) missing.push('スタイル');
     const started = hasGameData(f) || !!f.sub_affiliation;
     return { started, complete: missing.length === 0, missing };
 }
@@ -162,6 +190,10 @@ export function validateCharacterForm(form, { gameEnabled, isOfficial = false })
     if (profLen !== weakLen) return `得意言語と苦手言語の数を揃えてください（得意${profLen} / 苦手${weakLen}）`;
 
     if (!isOfficial && (f.stage_plus || []).length > STAGE_PLUS_MAX) return `+段階は${STAGE_PLUS_MAX}つまでです`;
+
+    const st = normalizeStyles(f.styles);
+    const chosen = STYLE_SLOTS.filter(k => st[k]).map(k => st[k]);
+    if (new Set(chosen).size !== chosen.length) return '主・副・第三スタイルにはそれぞれ別のスタイルを選んでください';
     return null;
 }
 
@@ -169,6 +201,7 @@ export function validateCharacterForm(form, { gameEnabled, isOfficial = false })
 export const GAME_DATA_DEFAULTS = {
     background: null, weapon_type: null, gift: null,
     skills: [], stage_plus: [],
+    styles: { main: null, sub: null, third: null },
     proficient_languages: [], weak_languages: [],
     equipment_type: null, equipment_name: '', custom_equipment_name: '', equipment_maker: '', equipment_detail: '', equipment_options: [],
     linked_gear_id: null,
@@ -202,6 +235,7 @@ export function buildCharacterPayload(form, { gameEnabled, isEdit = false, isOff
     });
     ABILITIES.forEach(a => { payload[a.key] = ranks[a.key].rank; });
 
+    payload.styles = normalizeStyles(payload.styles);
     payload.belief_points = gameEnabled ? calcBeliefPoints(payload.awakening) : BASE_BELIEF_POINTS;
     payload.class = null; // 後方互換列
 
@@ -255,8 +289,23 @@ export function buildPlainText(form, { gameEnabled = true, innateChoice } = {}) 
             const src = ranks[a.key].sources.filter(s => s.type !== '段階').map(s => `${s.type}:${s.label}`).join('・');
             L.push(`  ${a.name}：${ranks[a.key].display}（${ranks[a.key].dice}）${src ? `　← ${src}` : ''}`);
         });
+        const st = normalizeStyles(f.styles);
+        if (st.main) {
+            const g = getStyleGrades(f.level);
+            L.push('', '【スタイル】');
+            STYLE_SLOTS.forEach(k => {
+                if (!st[k]) return;
+                const grade = f.is_official ? 3 : g[k];
+                L.push(`  ${STYLE_SLOT_LABEL[k]}：${STYLE_BY_ID[st[k]].name}${grade > 0 ? `（段位${GRADE_LABEL[grade]}）` : '（未解禁）'}`);
+            });
+            const techs = getCharacterTechniques(f, { isOfficial: !!f.is_official });
+            if (techs.length) {
+                L.push('【技】');
+                techs.forEach(t => L.push(`  • ${t.name}（${TIMING_LABEL[t.timing]}）：${t.text}`));
+            }
+        }
         if (Array.isArray(f.skills) && f.skills.length > 0) {
-            L.push('', '【スキル】');
+            L.push('', '【旧スキル（v4.0）】');
             f.skills.forEach(s => L.push(`  • ${s}`));
         }
         if (f.gift) L.push('', `【ギフト】${f.gift}`);

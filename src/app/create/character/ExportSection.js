@@ -67,7 +67,7 @@ export default function ExportSection({ form, gameEnabled, ranks, innateChoice }
             belief_points: calcBeliefPoints(form.awakening),
             created_at: new Date().toISOString(),
             // ゲームデータOFFなら戦闘系の列をシートから外す
-            ...(gameEnabled ? {} : { background: '', weapon_type: '', gift: '', skills: [], stage_plus: [], proficient_languages: [], weak_languages: [] }),
+            ...(gameEnabled ? {} : { background: '', weapon_type: '', gift: '', skills: [], styles: { main: null, sub: null, third: null }, stage_plus: [], proficient_languages: [], weak_languages: [] }),
         };
     }, [form, ranks, gameEnabled]);
 

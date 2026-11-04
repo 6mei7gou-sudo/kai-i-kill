@@ -1,4 +1,4 @@
-// キャラクターシート詳細 — v4.0 6軸スキル対応
+// キャラクターシート詳細 — v5.0 スタイル対応（v4.0 の旧スキルは参照表示のみ）
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -16,7 +16,8 @@ import RpCharacterSheet from '@/components/RpCharacterSheet';
 import { exportAsImage } from '@/lib/exportImage';
 import { calcWeaponStats, calcExpectedDamage, getAttackAbility } from '@/lib/weaponCalc';
 import WeaponStatsPanel from '@/components/WeaponStatsPanel';
-import { hasGameData } from '@/lib/characterBuild';
+import { hasGameData, normalizeStyles, getStyleGrades, getCharacterTechniques } from '@/lib/characterBuild';
+import { STYLE_BY_ID, STYLE_SLOTS, STYLE_SLOT_LABEL, GRADE_LABEL, TIMING_LABEL } from '@/data/rulesData';
 
 const ADMIN_IDS = (process.env.NEXT_PUBLIC_ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
@@ -179,6 +180,9 @@ export default function CharacterDetail({ id }) {
     const stagePlus = e.stage_plus || [];
     const skills = e.skills || [];
     const bgSkill = getBackgroundSkill(e.background);
+    const charStyles = normalizeStyles(e.styles);
+    const styleGrades = getStyleGrades(e.level);
+    const techniques = getCharacterTechniques(e, { isOfficial: !!e.is_official });
     // ゲームデータ（ステータス・戦闘用データ）を持つシートか。RPシートのみなら戦闘系セクションは出さない
     const gameData = hasGameData(e);
 
@@ -524,11 +528,50 @@ export default function CharacterDetail({ id }) {
             </div>
             )}
 
-            {/* ===== スキル ===== */}
+            {/* ===== スタイル・技 ===== */}
+            {gameData && (
+            <div style={SS.section}>
+                <div style={SS.sTitle}>STYLES</div>
+                <h2 style={SS.sHead}>スタイルと技</h2>
+                {charStyles.main ? (
+                    <>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', marginBottom: 'var(--space-md)' }}>
+                            {STYLE_SLOTS.filter(k => charStyles[k]).map(k => {
+                                const st = STYLE_BY_ID[charStyles[k]];
+                                const grade = e.is_official ? 3 : styleGrades[k];
+                                return (
+                                    <div key={k} style={{ padding: '10px 14px', background: 'rgba(212,175,55,0.06)', border: '1px solid var(--accent-gold-border)' }}>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.1em' }}>{STYLE_SLOT_LABEL[k]}スタイル ／ {st.en}</div>
+                                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-lg)', color: 'var(--accent-gold)' }}>{st.name} <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-secondary)' }}>{grade > 0 ? `段位 ${GRADE_LABEL[grade]}` : '未解禁'}</span></div>
+                                        <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{st.abilities}判定 ／ 共鳴：{st.meter} ／ {st.role}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div style={{ display: 'grid', gap: '6px' }}>
+                            {techniques.map(t => (
+                                <div key={t.id} style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.2)', border: 'var(--border-subtle)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 'var(--font-size-sm)' }}>{STYLE_SLOT_LABEL[t.slot]}・段位{GRADE_LABEL[t.grade]}　{t.name}</span>
+                                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-muted)' }}>{TIMING_LABEL[t.timing]}</span>
+                                    </div>
+                                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>{t.text}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>スタイル未選択。編集画面のSTEP 4で主スタイルを選ぶと、レベルに応じた技がここに並ぶ。</div>
+                )}
+            </div>
+            )}
+
+            {/* ===== 旧スキル（v4.0・参照表示） ===== */}
             {gameData && (skills.length > 0 || bgSkill) && (
                 <div style={SS.section}>
-                    <div style={SS.sTitle}>SKILLS</div>
-                    <h2 style={SS.sHead}>取得スキル</h2>
+                    <div style={SS.sTitle}>LEGACY SKILLS</div>
+                    <h2 style={SS.sHead}>旧スキル（v4.0）</h2>
+                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>v5.0 ではスタイルに置き換わった。Webゲームの移行が終わるまで参照用に残している。</div>
 
                     {/* 背景スキル */}
                     {bgSkill && (

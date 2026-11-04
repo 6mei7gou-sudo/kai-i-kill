@@ -3,13 +3,16 @@
 'use client';
 
 import { ABILITIES, STAGE_PLUS_MAX } from '@/data/characterBuildData';
-import { calcBeliefPoints, calcCpBudget, getSkillSlots } from '@/lib/characterBuild';
+import { calcBeliefPoints, calcCpBudget, getStyleGrades, normalizeStyles } from '@/lib/characterBuild';
+import { STYLE_SLOTS } from '@/data/rulesData';
 import { rankBadgeStyle, SourceChip } from './formStyles';
 
 export default function StatusSummary({ form, ranks, status, usedCp = 0, onJump, compact = false }) {
     const stagePlusCount = (form.stage_plus || []).length;
-    const skillSlots = getSkillSlots(form.level);
-    const skillCount = (form.skills || []).length;
+    const styleGrades = getStyleGrades(form.level);
+    const charStyles = normalizeStyles(form.styles);
+    const styleSlotsOpen = STYLE_SLOTS.filter(k => styleGrades[k] > 0).length;
+    const styleCount = STYLE_SLOTS.filter(k => charStyles[k]).length;
     const belief = calcBeliefPoints(form.awakening);
     const cpBudget = calcCpBudget(form.background, form.equipment_type);
     const cpRemaining = cpBudget - usedCp;
@@ -50,7 +53,7 @@ export default function StatusSummary({ form, ranks, status, usedCp = 0, onJump,
             {/* リソース行 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '6px', marginTop: '10px' }}>
                 <Stat label="+段階" value={`${stagePlusCount}/${STAGE_PLUS_MAX}`} warn={stagePlusCount > STAGE_PLUS_MAX} onClick={onJump && (() => onJump('abilities'))} />
-                <Stat label="スキル" value={`${skillCount}/${skillSlots}`} warn={skillCount > skillSlots} onClick={onJump && (() => onJump('skills'))} />
+                <Stat label="スタイル" value={`${styleCount}/${styleSlotsOpen}`} warn={styleCount === 0} onClick={onJump && (() => onJump('styles'))} />
                 <Stat label="信念" value={belief} />
                 <Stat label="装備CP 使用/予算" value={usedCp > 0 ? `${usedCp}/${cpBudget}` : `0/${cpBudget}`} warn={cpRemaining < 0} onClick={onJump && (() => onJump('armament'))} />
             </div>

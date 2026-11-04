@@ -22,9 +22,10 @@
 
 ## 進行中・持ち越しタスク（2026-07-08時点：Phase 3期間）
 
-- [ ] **TRPGシステム v5.0 再設計**：設計書 `docs/rules/core_design.md`（draft-2・全文完成・書籍版PDFあり）のレビュー → `docs/rules/data/*.json` 新設 → `rules_unified.md` 全面改訂 → `system_data.json`・`chapters/` 再編 → Web実装（`gameEngine.js`・`characterBuildData.js`）反映 → 投稿キャラのスタイル移行
-- [ ] Claude側スキルの改訂：`rules-sync` 新設（ルール正本⇔`chapters/`⇔`system_data.json`⇔Web実装の整合チェック。2026-09-08のスキル枠齟齬の再発防止）、`verify-site` のルート導出化とキャラシ生成器・Webゲームのスモーク追加
+- [ ] **TRPGシステム v5.0 再設計**：~~設計書レビュー（Codex・PR #1 マージ済み）~~ → ~~`docs/rules/data/*.json` 新設・表の生成化・rules-sync~~ → ~~`rules_unified.md` の v5.0 置換・旧資料の archive 化・`chapters/` 廃止~~ → ~~Web実装(a) データ駆動化・(b) スタイル選択UI・DB列・移行SQL~~ → ~~Web実装(c) v5 エンジン `battleEngine.js`＋`BattleV5.js` 新設・v5 ミッション2本（ミッション単位切替）~~ → Web実装(d) 既存 v4 ミッション（ソロ3・協力2）の v5 化と協力戦対応、`gameEngine.js`・`skillData.js` の廃止 → 投稿キャラのスタイル移行
+- [ ] Claude側スキルの改訂：~~`rules-sync` 新設~~（済）、`verify-site` のルート導出化とキャラシ生成器・Webゲームのスモーク追加
 - [ ] Phase 3本体：PBWセッションルーム、IC投稿、状態パネル、リソース変換
+- [ ] **本番DB：`supabase/migration_characters_v7_styles.sql` を v5.0 フォームのデプロイ前に適用**（`styles` 列。手順は `docs/CONTEXT.md`）
 - [ ] Supabase CLIマイグレーション正式化（Phase 1持ち越し）。RLS強化は `supabase/migration_security_hardening.sql` で実装済み → **本番適用待ち**（手順は `docs/CONTEXT.md` セキュリティ運用）
 - [ ] セキュリティレビュー残件（運用）：Storage `uploads` バケットの RLS 確認、main ブランチ保護、`docs/gm/`・`docs/rules/` の公開リポジトリ上の扱い
 - [ ] ミッション／ADVの勝敗をサーバーで検証する（サーバー側ゲームエンジン化）
